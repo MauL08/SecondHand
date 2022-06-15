@@ -8,11 +8,13 @@
     "start": "react-native start",
     "test": "jest",
     "lint": "eslint .",
-    "prepare": "husky install"
+    "prepare": "husky install",
+    "codepush": "appcenter codepush release-react -a akbarma2002-gmail.com/SecondHand -d Staging"
   },
   "dependencies": {
     "react": "17.0.2",
-    "react-native": "0.68.2"
+    "react-native": "0.68.2",
+    "react-native-code-push": "^7.0.4"
   },
   "devDependencies": {
     "@babel/core": "^7.18.5",
