@@ -1,7 +1,7 @@
-import React from 'react';
+import React, { useEffect } from 'react';
 import RootNavigator from './core/router';
 import { Provider } from 'react-redux';
-// import SplashScreen from 'react-native-splash-screen';
+import SplashScreen from 'react-native-splash-screen';
 import CodePush from 'react-native-code-push';
 
 import { persistor, store } from './data/store';
@@ -12,11 +12,11 @@ const codePushOptions = {
 };
 
 const App = () => {
-  // useEffect(() => {
-  //   setTimeout(() => {
-  //     SplashScreen.hide();
-  //   }, 2000);
-  // }, []);
+  useEffect(() => {
+    setTimeout(() => {
+      SplashScreen.hide();
+    }, 2000);
+  }, []);
 
   return (
     <Provider store={store}>
