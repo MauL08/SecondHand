@@ -3,6 +3,7 @@ package com.secondhand;
 import android.app.Application;
 import android.content.Context;
 import org.devio.rn.splashscreen.SplashScreenReactPackage;
+import com.dieam.reactnativepushnotification.ReactNativePushNotificationPackage;
 import com.facebook.react.PackageList;
 import com.facebook.react.ReactApplication;
 import com.imagepicker.ImagePickerPackage;
