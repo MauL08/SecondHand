@@ -9,8 +9,6 @@ import {
   ProfileScreen,
 } from '../../screens';
 
-// import { styles, tabBarStyle } from '../../widgets/bottom_navigator/styles';
-
 const Tab = createBottomTabNavigator();
 
 const MainTabs = () => {
