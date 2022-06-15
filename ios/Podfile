@@ -21,6 +21,8 @@ target 'secondhand' do
 
   pod 'TouchID', :path => '../node_modules/react-native-touch-id'
 
+  pod 'react-native-image-picker', :path => '../node_modules/react-native-image-picker'
+
   target 'secondhandTests' do
     inherit! :complete
     # Pods for testing
