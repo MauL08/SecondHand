@@ -7,10 +7,10 @@ import {
   TextInput,
 } from 'react-native';
 import React from 'react';
-import {COLORS} from '../../assets/colors';
-import {Icons} from '../../assets/icons';
+import { COLORS } from '../../assets/colors';
+import { Icons } from '../../assets/icons';
 import * as yup from 'yup';
-import {Formik} from 'formik';
+import { Formik } from 'formik';
 
 const Register = () => {
   const RegisterValidationSchema = yup.object().shape({
@@ -21,13 +21,13 @@ const Register = () => {
       .required('Email dibutuhkan'),
     password: yup
       .string()
-      .min(6, ({min}) => `Password setidaknya ${min} karakter`)
+      .min(6, ({ min }) => `Password setidaknya ${min} karakter`)
       .required('Password dibutuhkan'),
   });
 
   return (
     <Formik
-      initialValues={{name: '', email: '', password: ''}}
+      initialValues={{ name: '', email: '', password: '' }}
       validateOnMount={true}
       validationSchema={RegisterValidationSchema}>
       {({
