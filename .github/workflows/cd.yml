@@ -1,22 +1,22 @@
-name: Go CD Project Process
-on: [push, pull_request]
-jobs:
-  build:
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v2
+# name: Go CD Project Process
+# on: [push, pull_request]
+# jobs:
+#   build:
+#     runs-on: ubuntu-latest
+#     steps:
+#       - uses: actions/checkout@v2
 
-      - name: Install Dependencies
-        run: yarn install
+#       - name: Install Dependencies
+#         run: yarn install
 
-      - name: Execute Gradle
-        run: cd android && chmod +x ./gradlew
+#       - name: Execute Gradle
+#         run: cd android && chmod +x ./gradlew
 
-      - name: Build Android Release
-        run: cd android && ./gradlew assembleRelease
+#       - name: Build Android Release
+#         run: cd android && ./gradlew assembleRelease
 
-      - name: Upload Artifact
-        uses: actions/upload-artifact@v1
-        with:
-          name: release
-          path: android/app/build/outputs/apk/release/app-release.apk
+#       - name: Upload Artifact
+#         uses: actions/upload-artifact@v1
+#         with:
+#           name: release
+#           path: android/app/build/outputs/apk/release/app-release.apk
