@@ -2,6 +2,12 @@
 
 ## RN 1 - Team 4
 
+### Facilitator
+
+- Audy Wisuda / [@audywp](https://github.com/audywp)
+
+### Team
+
 - Akbar Maulana Alfatih / [@MauL08](https://github.com/MauL08)
 - Akdeas Oktanae Widodo / [@akdeaso](https://github.com/akdeaso)
 - Yuli Anti Mitcselina Rumahorbo / [@yulimahorbo](https://github.com/yulirumahorbo)
