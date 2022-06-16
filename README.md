@@ -22,4 +22,4 @@ Preview :
 
 `yarn install`
 
-> ### This app is under development. We hope this application can be released as soon as possible.
+> ### This app is under development. We hope this application can be released as soon as possible
