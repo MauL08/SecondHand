@@ -15,5 +15,5 @@ export {
   JualScreen,
   DaftarJualScreen,
   ProfileScreen,
-  LengkapiAkun
+  LengkapiAkun,
 };
