@@ -5,6 +5,7 @@ import NotifikasiScreen from './notifikasi_screen';
 import JualScreen from './jual_screen';
 import DaftarJualScreen from './daftar_jual_screen';
 import ProfileScreen from './profile_screen';
+import LengkapiAkun from './lengkapi_info_akun_screen';
 
 export {
   LoginScreen,
@@ -14,4 +15,5 @@ export {
   JualScreen,
   DaftarJualScreen,
   ProfileScreen,
+  LengkapiAkun,
 };
