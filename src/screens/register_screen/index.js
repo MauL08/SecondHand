@@ -6,13 +6,17 @@ import {
   TouchableOpacity,
   TextInput,
 } from 'react-native';
-import React from 'react';
+import React, { useState } from 'react';
 import { COLORS } from '../../assets/colors';
 import { Icons } from '../../assets/icons';
 import * as yup from 'yup';
 import { Formik } from 'formik';
+import { ms } from 'react-native-size-matters';
+import { useNavigation } from '@react-navigation/native';
 
 const Register = () => {
+  const [showPassword, setShowPassword] = useState(true);
+  const navigation = useNavigation();
   const RegisterValidationSchema = yup.object().shape({
     name: yup.string().required('Nama dibutuhkan'),
     email: yup
@@ -69,14 +73,25 @@ const Register = () => {
               <Text style={styles.errors}>{errors.email}</Text>
             )}
             <Text style={styles.label}>Buat Password</Text>
-            <TextInput
-              style={styles.input}
-              placeholder="Buat Password"
-              secureTextEntry={true}
-              onChangeText={handleChange('password')}
-              onBlur={handleBlur('password')}
-              value={values.password}
-            />
+            <View style={styles.inputFrame}>
+              <TextInput
+                style={styles.input}
+                placeholder="Buat Password"
+                secureTextEntry={showPassword}
+                onChangeText={handleChange('password')}
+                onBlur={handleBlur('password')}
+                value={values.password}
+              />
+              <TouchableOpacity
+                onPress={() => {
+                  setShowPassword(val => !val);
+                }}>
+                <Image
+                  source={showPassword ? Icons.Eye : Icons.EyeOff}
+                  style={styles.eye}
+                />
+              </TouchableOpacity>
+            </View>
             {errors.password && touched.password && (
               <Text style={styles.errors}>{errors.password}</Text>
             )}
@@ -96,7 +111,7 @@ const Register = () => {
           </TouchableOpacity>
           <View style={styles.bottom}>
             <Text style={styles.bot1}>Sudah punya akun? </Text>
-            <TouchableOpacity>
+            <TouchableOpacity onPress={() => navigation.navigate('Login')}>
               <Text style={styles.bot2}>Masuk di sini</Text>
             </TouchableOpacity>
           </View>
@@ -173,5 +188,14 @@ const styles = StyleSheet.create({
     fontSize: 12,
     color: COLORS.alertDanger,
     fontFamily: 'Poppins-Medium',
+  },
+  eye: {
+    width: ms(24),
+    height: ms(24),
+    marginRight: ms(16),
+    tintColor: COLORS.neutral3,
+    flexGrow: 0,
+    marginTop: ms(-38),
+    marginLeft: ms(308),
   },
 });
