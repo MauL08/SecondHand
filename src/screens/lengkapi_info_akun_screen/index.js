@@ -79,11 +79,7 @@ const LengkapiInfoAkunScreen = () => {
               setItems={setItems}
               listMode="SCROLLVIEW"
               style={styles.input}
-              textStyle={{
-                fontFamily: 'Poppins-Regular',
-                fontSize: 14,
-                color: COLORS.neutral3,
-              }}
+              textStyle={styles.dropdownText}
               placeholder="Pilih Kota"
             />
             <Text style={styles.label}>Alamat*</Text>
@@ -203,5 +199,10 @@ const styles = StyleSheet.create({
     color: COLORS.neutral1,
     textAlign: 'center',
     marginVertical: 14,
+  },
+  dropdownText: {
+    fontFamily: 'Poppins-Regular',
+    fontSize: 14,
+    color: COLORS.neutral3,
   },
 });
