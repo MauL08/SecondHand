@@ -7,19 +7,30 @@ import {
   TouchableOpacity,
   View,
 } from 'react-native';
-import React from 'react';
+import React, { useState } from 'react';
 import { COLORS } from '../../assets/colors';
 import { Icons } from '../../assets/icons';
 import * as yup from 'yup';
 import { Formik } from 'formik';
+import DropDownPicker from 'react-native-dropdown-picker';
+import { useNavigation } from '@react-navigation/native';
+import { ms } from 'react-native-size-matters';
 
-const LengkapiAkun = () => {
+const LengkapiInfoAkunScreen = () => {
+  const navigation = useNavigation();
+  const [open, setOpen] = useState(false);
+  const [value, setValue] = useState(null);
+  const [items, setItems] = useState([
+    { label: 'Surabaya', value: 'surabaya' },
+    { label: 'Jakarta', value: 'jakarta' },
+  ]);
   const FormValidationSchema = yup.object().shape({
     name: yup.string().required('Nama dibutuhkan'),
     kota: yup.string().required('Kota dibutuhkan'),
     alamat: yup.string().required('Alamat dibutuhkan'),
     nomor: yup.string().required('Nomor dibutuhkan'),
   });
+
   return (
     <Formik
       initialValues={{ name: '', kota: '', alamat: '', nomor: '' }}
@@ -38,7 +49,7 @@ const LengkapiAkun = () => {
           showsVerticalScrollIndicator={false}
           style={styles.container}>
           <View style={styles.top}>
-            <TouchableOpacity>
+            <TouchableOpacity onPress={() => navigation.goBack()}>
               <Image source={Icons.ArrowLeft} style={styles.iconBack} />
             </TouchableOpacity>
             <Text style={styles.title}>Lengkapi Info Akun</Text>
@@ -59,16 +70,18 @@ const LengkapiAkun = () => {
               <Text style={styles.errors}>{errors.name}</Text>
             )}
             <Text style={styles.label}>Kota*</Text>
-            <TextInput
+            <DropDownPicker
+              open={open}
+              value={value}
+              items={items}
+              setOpen={setOpen}
+              setValue={setValue}
+              setItems={setItems}
+              listMode="SCROLLVIEW"
               style={styles.input}
+              textStyle={styles.dropdownText}
               placeholder="Pilih Kota"
-              onChangeText={handleChange('kota')}
-              onBlur={handleBlur('kota')}
-              value={values.kota}
             />
-            {errors.kota && touched.kota && (
-              <Text style={styles.errors}>{errors.kota}</Text>
-            )}
             <Text style={styles.label}>Alamat*</Text>
             <TextInput
               style={styles.inputBig}
@@ -111,20 +124,20 @@ const LengkapiAkun = () => {
   );
 };
 
-export default LengkapiAkun;
+export default LengkapiInfoAkunScreen;
 
 const styles = StyleSheet.create({
   container: {
-    marginHorizontal: 16,
+    marginHorizontal: ms(16),
   },
   iconBack: {
-    height: 24,
-    width: 24,
+    height: ms(24),
+    width: ms(24),
     tintColor: COLORS.neutral5,
   },
   top: {
     flexDirection: 'row',
-    marginTop: 25,
+    marginTop: ms(25),
   },
   title: {
     flex: 1,
@@ -132,59 +145,64 @@ const styles = StyleSheet.create({
     fontSize: 14,
     color: COLORS.neutral5,
     textAlign: 'center',
-    marginRight: 24,
+    marginRight: ms(24),
   },
   iconCamera: {
     tintColor: COLORS.primaryPurple4,
-    height: 24,
-    width: 24,
-    marginVertical: 39,
-    marginHorizontal: 37,
+    height: ms(24),
+    width: ms(24),
+    marginVertical: ms(39),
+    marginHorizontal: ms(37),
   },
   cameraBG: {
     backgroundColor: COLORS.primaryPurple1,
     justifyContent: 'center',
     alignSelf: 'center',
-    borderRadius: 12,
-    marginTop: 40,
+    borderRadius: ms(12),
+    marginTop: ms(40),
   },
   input: {
     borderWidth: 1,
-    borderRadius: 16,
+    borderRadius: ms(16),
     borderColor: COLORS.neutral2,
-    paddingHorizontal: 16,
+    paddingHorizontal: ms(16),
     fontFamily: 'Poppins-Regular',
   },
   inputBig: {
     borderWidth: 1,
-    borderRadius: 16,
+    borderRadius: ms(16),
     borderColor: COLORS.neutral2,
-    paddingHorizontal: 16,
+    paddingHorizontal: ms(16),
     fontFamily: 'Poppins-Regular',
-    height: 80,
+    height: ms(80),
   },
   label: {
     fontFamily: 'Poppins-Regular',
-    fontSize: 12,
+    fontSize: ms(12),
     color: COLORS.neutral5,
-    marginBottom: 4,
-    marginTop: 16,
+    marginBottom: ms(4),
+    marginTop: ms(16),
   },
   errors: {
-    fontSize: 12,
+    fontSize: ms(12),
     color: COLORS.alertDanger,
     fontFamily: 'Poppins-Medium',
   },
   button: {
     backgroundColor: COLORS.primaryPurple4,
-    borderRadius: 16,
-    marginTop: 24,
-    marginBottom: 24,
+    borderRadius: ms(16),
+    marginTop: ms(24),
+    marginBottom: ms(24),
   },
   txtButton: {
     fontFamily: 'Poppins-Medium',
     color: COLORS.neutral1,
     textAlign: 'center',
     marginVertical: 14,
+  },
+  dropdownText: {
+    fontFamily: 'Poppins-Regular',
+    fontSize: 14,
+    color: COLORS.neutral3,
   },
 });
