@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState } from 'react';
 import {
   StyleSheet,
   View,
@@ -12,6 +12,7 @@ import { Formik } from 'formik';
 import * as yup from 'yup';
 import { COLORS } from '../../assets/colors';
 import { useNavigation } from '@react-navigation/native';
+import { Icons } from '../../assets/icons';
 
 const styles = StyleSheet.create({
   container: {
@@ -25,12 +26,11 @@ const styles = StyleSheet.create({
     marginVertical: moderateScale(14),
   },
   title: {
+    fontFamily: 'Poppins-Bold',
+    color: COLORS.neutral5,
     fontSize: moderateScale(24),
-    color: COLORS.black,
-    fontWeight: '700',
     lineHeight: moderateScale(36),
     paddingVertical: moderateScale(24),
-    fontFamily: 'Poppins-Bold',
   },
   label: {
     fontSize: moderateScale(12),
@@ -39,12 +39,32 @@ const styles = StyleSheet.create({
     lineHeight: moderateScale(18),
     fontFamily: 'Poppins-Regular',
   },
-  inputFrame: {
+  input1: {
     paddingLeft: moderateScale(16),
     marginTop: moderateScale(4),
+    borderWidth: 1,
+    borderColor: COLORS.neutral2,
+    borderRadius: moderateScale(16),
+    fontSize: moderateScale(14),
+    color: COLORS.neutral5,
+    fontWeight: '400',
+    lineHeight: moderateScale(20),
+    fontFamily: 'Poppins-Regular',
+  },
+  input2: {
+    paddingLeft: moderateScale(16),
+    fontSize: moderateScale(14),
+    color: COLORS.neutral5,
+    fontWeight: '400',
+    lineHeight: moderateScale(20),
+    fontFamily: 'Poppins-Regular',
+    width: '75%',
+  },
+  input2Container: {
+    marginTop: moderateScale(4),
     flexDirection: 'row',
-    justifyContent: 'space-between',
     alignItems: 'center',
+    justifyContent: 'space-between',
     borderWidth: 1,
     borderColor: COLORS.neutral2,
     borderRadius: moderateScale(16),
@@ -79,26 +99,24 @@ const styles = StyleSheet.create({
     fontFamily: 'Poppins-Regular',
   },
   errors: {
-    fontSize: 12,
+    fontSize: moderateScale(12),
     color: COLORS.alertDanger,
-    fontFamily: 'Poppins-Medium',
+    fontFamily: 'Poppins-Regular',
   },
   bottomText: {
     flexDirection: 'row',
-    alignItems: 'flex-start',
+    justifyContent: 'center',
     marginTop: moderateScale(202),
-    marginLeft: moderateScale(61),
   },
   bottomText1: {
-    fontSize: moderateScale(14),
+    fontFamily: 'Poppins-Bold',
+    fontSize: 14,
     color: COLORS.primaryPurple4,
-    fontWeight: '700',
-    lineHeight: moderateScale(20),
-    fontFamily: 'Poppins-Regular',
   },
 });
 
 function LoginScreen() {
+  const [showPassword, setShowPassword] = useState(true);
   const navigation = useNavigation();
   const LoginValidationSchema = yup.object().shape({
     email: yup
@@ -135,18 +153,16 @@ function LoginScreen() {
 
           <Text style={styles.title}>Masuk</Text>
           <Text style={styles.label}>Email</Text>
-          <View style={styles.inputFrame}>
-            <TextInput
-              style={styles.inputText}
-              placeholder="Contoh: johndee@gmail.com"
-              autoCapitalize="none"
-              autoCorrect={false}
-              keyboardType="email-address"
-              value={values.email}
-              onChangeText={handleChange('email')}
-              onBlur={handleBlur('email')}
-            />
-          </View>
+          <TextInput
+            style={styles.input1}
+            placeholder="Contoh: johndee@gmail.com"
+            autoCapitalize="none"
+            autoCorrect={false}
+            keyboardType="email-address"
+            value={values.email}
+            onChangeText={handleChange('email')}
+            onBlur={handleBlur('email')}
+          />
           {errors.email && touched.email && (
             <Text style={styles.errors}>{errors.email}</Text>
           )}
@@ -154,21 +170,26 @@ function LoginScreen() {
           <Text style={[styles.label, { marginTop: moderateScale(12) }]}>
             Password
           </Text>
-          <View style={styles.inputFrame}>
+          <View style={styles.input2Container}>
             <TextInput
-              style={styles.inputText}
+              style={styles.input2}
               placeholder="Masukkan password"
               autoCapitalize="none"
               autoCorrect={false}
               value={values.password}
               onChangeText={handleChange('password')}
               onBlur={handleBlur('password')}
-              secureTextEntry
+              secureTextEntry={showPassword}
             />
-            <Image
-              style={styles.iconEye}
-              source={require('../../assets/icons/icon_eye.png')}
-            />
+            <TouchableOpacity
+              onPress={() => {
+                setShowPassword(val => !val);
+              }}>
+              <Image
+                source={showPassword ? Icons.Eye : Icons.EyeOff}
+                style={styles.iconEye}
+              />
+            </TouchableOpacity>
           </View>
           {errors.password && touched.password && (
             <Text style={styles.errors}>{errors.password}</Text>
