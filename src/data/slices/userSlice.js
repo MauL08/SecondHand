@@ -56,17 +56,14 @@ export const postLogin = createAsyncThunk(
 
 export const getUser = createAsyncThunk(
   'user/getUser',
-  async (credentials, { rejectWithValue, dispatch }) => {
+  async (token, { rejectWithValue, dispatch }) => {
     try {
       dispatch(setLoading(true));
-      const response = await axios.get(
-        `${BASE_URL}/auth/user/${credentials.id}`,
-        {
-          headers: {
-            Authorization: `Bearer ${credentials.token}`,
-          },
+      const response = await axios.get(`${BASE_URL}/auth/user`, {
+        headers: {
+          Authorization: `Bearer ${token}`,
         },
-      );
+      });
       return response.data;
     } catch (error) {
       return rejectWithValue(error.response.data);
@@ -82,7 +79,8 @@ export const updateUser = createAsyncThunk(
     try {
       dispatch(setLoading(true));
       const response = await axios.put(
-        `${BASE_URL}/auth/user/${credentials.id}`,
+        `${BASE_URL}/auth/user`,
+        credentials.data,
         {
           headers: {
             Authorization: `Bearer ${credentials.token}`,
