@@ -1,8 +1,8 @@
-import { StyleSheet, Text, View, Image } from 'react-native';
+import { StyleSheet, Text, View, Image, TouchableOpacity } from 'react-native';
 import React from 'react';
 import { moderateScale } from 'react-native-size-matters';
 import { COLORS } from '../../assets/colors';
-import { TouchableOpacity } from 'react-native-gesture-handler';
+import { useNavigation } from '@react-navigation/native';
 
 const styles = StyleSheet.create({
   container: {
@@ -12,10 +12,10 @@ const styles = StyleSheet.create({
   },
   title: {
     fontSize: moderateScale(24),
-    color: COLORS.black,
-    fontWeight: '700',
     lineHeight: moderateScale(36),
     paddingVertical: moderateScale(16),
+    fontFamily: 'Poppins-Bold',
+    color: COLORS.neutral5,
   },
   imageProfileContainer: {
     marginVertical: moderateScale(8),
@@ -46,21 +46,25 @@ const styles = StyleSheet.create({
     fontWeight: '500',
     lineHeight: moderateScale(20),
     marginLeft: moderateScale(16),
+    fontFamily: 'Poppins-Regular',
   },
 });
 
 function ProfileScreen() {
+  const navigation = useNavigation();
   return (
     <View style={styles.container}>
       <Text style={styles.title}>Akun Saya</Text>
-      <View style={styles.imageProfileContainer}>
+      <TouchableOpacity style={styles.imageProfileContainer}>
         <Image
-          style={styles.icon}
+          style={[styles.icon, { tintColor: COLORS.primaryPurple4 }]}
           source={require('../../assets/icons/icon_camera.png')}
         />
-      </View>
+      </TouchableOpacity>
 
-      <TouchableOpacity style={styles.menuContainer}>
+      <TouchableOpacity
+        style={styles.menuContainer}
+        onPress={() => navigation.navigate('LengkapiAkun')}>
         <Image
           style={styles.icon}
           source={require('../../assets/icons/icon_edit-3.png')}
