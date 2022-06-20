@@ -9,10 +9,14 @@ axios.defaults.validateStatus = status => {
   return status < 500;
 };
 
-export const test = createAsyncThunk();
+export const getAllNotification = createAsyncThunk();
+
+export const getNotificationByID = createAsyncThunk();
+
+export const updateNotification = createAsyncThunk();
 
 const initialState = {
-  data: {},
+  data: [],
 };
 
 const notificationSlice = createSlice({

@@ -1,6 +1,6 @@
 import { Alert } from 'react-native';
 import axios from 'axios';
-import { baseURL } from '../baseAPI';
+import { BASE_URL } from '../baseAPI';
 import { createSlice, createAsyncThunk } from '@reduxjs/toolkit';
 import { navigate } from '../../core/router/navigator';
 import { setLoading } from './globalSlice';
@@ -14,7 +14,7 @@ export const postRegister = createAsyncThunk(
   async (data, { rejectWithValue, dispatch }) => {
     try {
       dispatch(setLoading(true));
-      const response = await axios.post(`${baseURL}/auth/register`, data);
+      const response = await axios.post(`${BASE_URL}/auth/register`, data);
       if (response.status <= 201) {
         dispatch(setLoading(false));
         navigate('Login');
@@ -36,7 +36,7 @@ export const postLogin = createAsyncThunk(
   async (data, { rejectWithValue, dispatch }) => {
     try {
       dispatch(setLoading(true));
-      const response = await axios.post(`${baseURL}/auth/login`, data);
+      const response = await axios.post(`${BASE_URL}/auth/login`, data);
       if (response.status <= 201) {
         dispatch(setLoading(false));
         navigate('Main');
@@ -60,7 +60,7 @@ export const getUser = createAsyncThunk(
     try {
       dispatch(setLoading(true));
       const response = await axios.get(
-        `${baseURL}/auth/user/${credentials.id}`,
+        `${BASE_URL}/auth/user/${credentials.id}`,
         {
           headers: {
             Authorization: `Bearer ${credentials.token}`,
@@ -82,7 +82,7 @@ export const updateUser = createAsyncThunk(
     try {
       dispatch(setLoading(true));
       const response = await axios.put(
-        `${baseURL}/auth/user/${credentials.id}`,
+        `${BASE_URL}/auth/user/${credentials.id}`,
         {
           headers: {
             Authorization: `Bearer ${credentials.token}`,
