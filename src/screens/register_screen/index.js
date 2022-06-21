@@ -13,10 +13,14 @@ import * as yup from 'yup';
 import { Formik } from 'formik';
 import { ms } from 'react-native-size-matters';
 import { useNavigation } from '@react-navigation/native';
+import { useDispatch } from 'react-redux';
+import { postRegister } from '../../data/slices/userSlice';
 
 const Register = () => {
   const [showPassword, setShowPassword] = useState(true);
   const navigation = useNavigation();
+  const dispatch = useDispatch();
+
   const RegisterValidationSchema = yup.object().shape({
     name: yup.string().required('Nama dibutuhkan'),
     email: yup
@@ -29,20 +33,21 @@ const Register = () => {
       .required('Password dibutuhkan'),
   });
 
+  const onRegister = (name, email, password) => {
+    const data = {
+      name,
+      email,
+      password,
+    };
+    dispatch(postRegister(data));
+  };
+
   return (
     <Formik
       initialValues={{ name: '', email: '', password: '' }}
       validateOnMount={true}
       validationSchema={RegisterValidationSchema}>
-      {({
-        handleChange,
-        handleBlur,
-        handleSubmit,
-        values,
-        touched,
-        errors,
-        isValid,
-      }) => (
+      {({ handleChange, handleBlur, values, touched, errors, isValid }) => (
         <View style={styles.container}>
           <TouchableOpacity>
             <Image source={Icons.ArrowLeft} style={styles.iconBack} />
@@ -106,7 +111,9 @@ const Register = () => {
               },
             ]}
             disabled={!isValid}
-            onPress={handleSubmit}>
+            onPress={() =>
+              onRegister(values.name, values.email, values.password)
+            }>
             <Text style={styles.txtButton}>Daftar</Text>
           </TouchableOpacity>
           <View style={styles.bottom}>

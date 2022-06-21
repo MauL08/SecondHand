@@ -13,6 +13,8 @@ import * as yup from 'yup';
 import { COLORS } from '../../assets/colors';
 import { useNavigation } from '@react-navigation/native';
 import { Icons } from '../../assets/icons';
+import { useDispatch } from 'react-redux';
+import { postLogin } from '../../data/slices/userSlice';
 
 const styles = StyleSheet.create({
   container: {
@@ -118,6 +120,8 @@ const styles = StyleSheet.create({
 function LoginScreen() {
   const [showPassword, setShowPassword] = useState(true);
   const navigation = useNavigation();
+  const dispatch = useDispatch();
+
   const LoginValidationSchema = yup.object().shape({
     email: yup
       .string()
@@ -129,20 +133,20 @@ function LoginScreen() {
       .required('Password dibutuhkan'),
   });
 
+  const onLogin = (email, password) => {
+    const data = {
+      email,
+      password,
+    };
+    dispatch(postLogin(data));
+  };
+
   return (
     <Formik
       initialValues={{ email: '', password: '' }}
       validateOnMount={true}
       validationSchema={LoginValidationSchema}>
-      {({
-        values,
-        handleChange,
-        handleBlur,
-        handleSubmit,
-        touched,
-        errors,
-        isValid,
-      }) => (
+      {({ values, handleChange, handleBlur, touched, errors, isValid }) => (
         <View style={styles.container}>
           <TouchableOpacity>
             <Image
@@ -204,7 +208,7 @@ function LoginScreen() {
               },
             ]}
             disabled={!isValid}
-            onPress={handleSubmit}>
+            onPress={() => onLogin(values.email, values.password)}>
             <Text style={styles.buttonText}>Masuk</Text>
           </TouchableOpacity>
 
