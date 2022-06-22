@@ -14,7 +14,11 @@ export const postRegister = createAsyncThunk(
   async (data, { rejectWithValue, dispatch }) => {
     try {
       dispatch(setLoading(true));
-      const response = await axios.post(`${BASE_URL}/auth/register`, data);
+      const response = await axios.post(`${BASE_URL}/auth/register`, data, {
+        headers: {
+          'Content-Type': 'multipart/form-data',
+        },
+      });
       if (response.status <= 201) {
         dispatch(setLoading(false));
         navigate('Login');

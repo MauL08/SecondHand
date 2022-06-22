@@ -35,9 +35,13 @@ const Register = () => {
 
   const onRegister = (name, email, password) => {
     const data = {
-      name,
+      full_name: name,
       email,
       password,
+      phone_number: 1,
+      address: 'unknown',
+      image: 'unknown',
+      city: 'unknown',
     };
     dispatch(postRegister(data));
   };
