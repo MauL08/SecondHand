@@ -25,10 +25,10 @@ const LengkapiInfoAkunScreen = () => {
     { label: 'Jakarta', value: 'jakarta' },
   ]);
   const FormValidationSchema = yup.object().shape({
-    name: yup.string().required('Nama dibutuhkan'),
-    kota: yup.string().required('Kota dibutuhkan'),
-    alamat: yup.string().required('Alamat dibutuhkan'),
-    nomor: yup.string().required('Nomor dibutuhkan'),
+    name: yup.string().required('Masukkan Nama'),
+    kota: yup.string().required('Masukkan Kota'),
+    alamat: yup.string().required('Masukkan Alamat'),
+    nomor: yup.string().required('Masukkan Nomor'),
   });
 
   return (
@@ -57,7 +57,7 @@ const LengkapiInfoAkunScreen = () => {
           <TouchableOpacity style={styles.cameraBG}>
             <Image source={Icons.Camera} style={styles.iconCamera} />
           </TouchableOpacity>
-          <View>
+          <View style={styles.inputContainer}>
             <Text style={styles.label}>Nama*</Text>
             <TextInput
               style={styles.input}
@@ -128,7 +128,7 @@ export default LengkapiInfoAkunScreen;
 
 const styles = StyleSheet.create({
   container: {
-    marginHorizontal: ms(16),
+    backgroundColor: COLORS.neutral1,
   },
   iconBack: {
     height: ms(24),
@@ -138,6 +138,7 @@ const styles = StyleSheet.create({
   top: {
     flexDirection: 'row',
     marginTop: ms(25),
+    marginHorizontal: ms(16),
   },
   title: {
     flex: 1,
@@ -191,8 +192,8 @@ const styles = StyleSheet.create({
   button: {
     backgroundColor: COLORS.primaryPurple4,
     borderRadius: ms(16),
-    marginTop: ms(24),
-    marginBottom: ms(24),
+    marginVertical: ms(24),
+    marginHorizontal: ms(16),
   },
   txtButton: {
     fontFamily: 'Poppins-Medium',
@@ -204,5 +205,8 @@ const styles = StyleSheet.create({
     fontFamily: 'Poppins-Regular',
     fontSize: 14,
     color: COLORS.neutral3,
+  },
+  inputContainer: {
+    marginHorizontal: ms(16),
   },
 });
