@@ -21,7 +21,7 @@ import { getUser, updateUser } from '../../data/slices/userSlice';
 const LengkapiInfoAkunScreen = () => {
   const navigation = useNavigation();
   const dispatch = useDispatch();
-  const { access_token } = useSelector(state => state.user);
+  const { access_token, userInfo } = useSelector(state => state.user);
   // const { isLoading } = useSelector(state => state.global);
 
   useEffect(() => {
@@ -29,7 +29,9 @@ const LengkapiInfoAkunScreen = () => {
   }, [access_token, dispatch]);
 
   const [open, setOpen] = useState(false);
-  const [value, setValue] = useState(null);
+  const [value, setValue] = useState(
+    userInfo.city === 'unknown' ? null : userInfo.city,
+  );
   const [items, setItems] = useState([
     { label: 'Surabaya', value: 'surabaya' },
     { label: 'Jakarta', value: 'jakarta' },
@@ -58,7 +60,11 @@ const LengkapiInfoAkunScreen = () => {
 
   return (
     <Formik
-      initialValues={{ name: '', alamat: '', nomor: '' }}
+      initialValues={{
+        name: userInfo.full_name,
+        alamat: userInfo.address === 'unknown' ? '' : userInfo.address,
+        nomor: userInfo.phone_number === 1 ? '' : userInfo.phone_number,
+      }}
       validateOnMount={true}
       validationSchema={FormValidationSchema}>
       {({ handleChange, handleBlur, values, touched, errors, isValid }) => (
@@ -113,7 +119,7 @@ const LengkapiInfoAkunScreen = () => {
             <Text style={styles.label}>No Handphone*</Text>
             <TextInput
               style={styles.input}
-              placeholder="contoh: +628123456789"
+              placeholder="contoh: +62 8123456789"
               onChangeText={handleChange('nomor')}
               onBlur={handleBlur('nomor')}
               value={values.nomor}
