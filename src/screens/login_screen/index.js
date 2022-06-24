@@ -6,6 +6,7 @@ import {
   Text,
   Image,
   TouchableOpacity,
+  ActivityIndicator,
 } from 'react-native';
 import { moderateScale } from 'react-native-size-matters';
 import { Formik } from 'formik';
@@ -13,7 +14,7 @@ import * as yup from 'yup';
 import { COLORS } from '../../assets/colors';
 import { useNavigation } from '@react-navigation/native';
 import { Icons } from '../../assets/icons';
-import { useDispatch } from 'react-redux';
+import { useDispatch, useSelector } from 'react-redux';
 import { postLogin } from '../../data/slices/userSlice';
 
 const styles = StyleSheet.create({
@@ -121,6 +122,7 @@ function LoginScreen() {
   const [showPassword, setShowPassword] = useState(true);
   const navigation = useNavigation();
   const dispatch = useDispatch();
+  const { isLoading } = useSelector(state => state.global);
 
   const LoginValidationSchema = yup.object().shape({
     email: yup
@@ -134,11 +136,12 @@ function LoginScreen() {
   });
 
   const onLogin = (email, password) => {
-    const data = {
-      email,
-      password,
-    };
-    dispatch(postLogin(data));
+    dispatch(
+      postLogin({
+        email,
+        password,
+      }),
+    );
   };
 
   return (
@@ -209,7 +212,11 @@ function LoginScreen() {
             ]}
             disabled={!isValid}
             onPress={() => onLogin(values.email, values.password)}>
-            <Text style={styles.buttonText}>Masuk</Text>
+            {isLoading ? (
+              <ActivityIndicator color="white" />
+            ) : (
+              <Text style={styles.buttonText}>Masuk</Text>
+            )}
           </TouchableOpacity>
 
           <View style={styles.bottomText}>

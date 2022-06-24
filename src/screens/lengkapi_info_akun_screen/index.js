@@ -6,6 +6,7 @@ import {
   TextInput,
   TouchableOpacity,
   View,
+  ActivityIndicator,
 } from 'react-native';
 import React, { useState, useEffect } from 'react';
 import { COLORS } from '../../assets/colors';
@@ -21,20 +22,18 @@ import { getUser, updateUser } from '../../data/slices/userSlice';
 const LengkapiInfoAkunScreen = () => {
   const navigation = useNavigation();
   const dispatch = useDispatch();
-  const { access_token, userInfo } = useSelector(state => state.user);
-  // const { isLoading } = useSelector(state => state.global);
+  const { access_token, getUserDetail } = useSelector(state => state.user);
+  const { isLoading } = useSelector(state => state.global);
 
   useEffect(() => {
     dispatch(getUser(access_token));
   }, [access_token, dispatch]);
 
   const [open, setOpen] = useState(false);
-  const [value, setValue] = useState(
-    userInfo.city === 'unknown' ? null : userInfo.city,
-  );
+  const [value, setValue] = useState(null);
   const [items, setItems] = useState([
-    { label: 'Surabaya', value: 'surabaya' },
-    { label: 'Jakarta', value: 'jakarta' },
+    { label: 'Surabaya', value: 'Surabaya' },
+    { label: 'Jakarta', value: 'Jakarta' },
   ]);
   const FormValidationSchema = yup.object().shape({
     name: yup.string().required('Masukkan Nama'),
@@ -58,105 +57,115 @@ const LengkapiInfoAkunScreen = () => {
     );
   };
 
-  return (
-    <Formik
-      initialValues={{
-        name: userInfo.full_name,
-        alamat: userInfo.address === 'unknown' ? '' : userInfo.address,
-        nomor: userInfo.phone_number === 1 ? '' : userInfo.phone_number,
-      }}
-      validateOnMount={true}
-      validationSchema={FormValidationSchema}>
-      {({
-        handleChange,
-        handleBlur,
-        setFieldValue,
-        values,
-        touched,
-        errors,
-        isValid,
-      }) => (
-        <ScrollView
-          showsVerticalScrollIndicator={false}
-          style={styles.container}>
-          <View style={styles.top}>
-            <TouchableOpacity onPress={() => navigation.goBack()}>
-              <Image source={Icons.ArrowLeft} style={styles.iconBack} />
+  if (isLoading) {
+    return (
+      <View style={styles.loadingContainer}>
+        <ActivityIndicator color={COLORS.primaryPurple4} />
+      </View>
+    );
+  } else {
+    return (
+      <Formik
+        initialValues={{
+          name: getUserDetail.full_name,
+          alamat:
+            getUserDetail.address === 'unknown' ? '' : getUserDetail.address,
+          nomor:
+            getUserDetail.phone_number === 1 ? '' : getUserDetail.phone_number,
+        }}
+        validateOnMount={true}
+        validationSchema={FormValidationSchema}>
+        {({
+          handleChange,
+          handleBlur,
+          setFieldValue,
+          values,
+          touched,
+          errors,
+          isValid,
+        }) => (
+          <ScrollView
+            showsVerticalScrollIndicator={false}
+            style={styles.container}>
+            <View style={styles.top}>
+              <TouchableOpacity onPress={() => navigation.goBack()}>
+                <Image source={Icons.ArrowLeft} style={styles.iconBack} />
+              </TouchableOpacity>
+              <Text style={styles.title}>Lengkapi Info Akun</Text>
+            </View>
+            <TouchableOpacity style={styles.cameraBG}>
+              <Image source={Icons.Camera} style={styles.iconCamera} />
             </TouchableOpacity>
-            <Text style={styles.title}>Lengkapi Info Akun</Text>
-          </View>
-          <TouchableOpacity style={styles.cameraBG}>
-            <Image source={Icons.Camera} style={styles.iconCamera} />
-          </TouchableOpacity>
-          <View style={styles.inputContainer}>
-            <Text style={styles.label}>Nama*</Text>
-            <TextInput
-              style={styles.input}
-              placeholder="Nama"
-              onChangeText={handleChange('name')}
-              onBlur={handleBlur('name')}
-              value={values.name}
-            />
-            {errors.name && touched.name && (
-              <Text style={styles.errors}>{errors.name}</Text>
-            )}
-            <Text style={styles.label}>Kota*</Text>
-            <DropDownPicker
-              open={open}
-              value={value}
-              items={items}
-              setOpen={setOpen}
-              setValue={setValue}
-              setItems={setItems}
-              listMode="SCROLLVIEW"
-              style={styles.input}
-              textStyle={styles.dropdownText}
-              placeholder="Pilih Kota"
-              onChangeValue={itemValue => setFieldValue('kota', itemValue)}
-              placeholderStyle={styles.placeholderDropdown}
-            />
-            <Text style={styles.label}>Alamat*</Text>
-            <TextInput
-              style={styles.inputBig}
-              placeholder="Alamat"
-              onChangeText={handleChange('alamat')}
-              onBlur={handleBlur('alamat')}
-              value={values.alamat}
-            />
-            {errors.alamat && touched.alamat && (
-              <Text style={styles.errors}>{errors.alamat}</Text>
-            )}
-            <Text style={styles.label}>No Handphone*</Text>
-            <TextInput
-              style={styles.input}
-              placeholder="contoh: +62 8123456789"
-              onChangeText={handleChange('nomor')}
-              onBlur={handleBlur('nomor')}
-              value={values.nomor}
-            />
-            {errors.nomor && touched.nomor && (
-              <Text style={styles.errors}>{errors.nomor}</Text>
-            )}
-          </View>
-          <TouchableOpacity
-            style={[
-              styles.button,
-              {
-                backgroundColor: isValid
-                  ? COLORS.primaryPurple4
-                  : COLORS.neutral2,
-              },
-            ]}
-            disabled={isValid}
-            onPress={() =>
-              onUpdateProfile(values.name, value, values.alamat, values.nomor)
-            }>
-            <Text style={styles.txtButton}>Simpan</Text>
-          </TouchableOpacity>
-        </ScrollView>
-      )}
-    </Formik>
-  );
+            <View style={styles.inputContainer}>
+              <Text style={styles.label}>Nama*</Text>
+              <TextInput
+                style={styles.input}
+                placeholder="Nama"
+                onChangeText={handleChange('name')}
+                onBlur={handleBlur('name')}
+                value={values.name}
+              />
+              {errors.name && touched.name && (
+                <Text style={styles.errors}>{errors.name}</Text>
+              )}
+              <Text style={styles.label}>Kota*</Text>
+              <DropDownPicker
+                open={open}
+                value={value}
+                items={items}
+                setOpen={setOpen}
+                setValue={setValue}
+                setItems={setItems}
+                listMode="SCROLLVIEW"
+                style={styles.input}
+                textStyle={styles.dropdownText}
+                placeholder="Pilih Kota"
+                onChangeValue={itemValue => setFieldValue('kota', itemValue)}
+                placeholderStyle={styles.placeholderDropdown}
+              />
+              <Text style={styles.label}>Alamat*</Text>
+              <TextInput
+                style={styles.inputBig}
+                placeholder="Alamat"
+                onChangeText={handleChange('alamat')}
+                onBlur={handleBlur('alamat')}
+                value={values.alamat}
+              />
+              {errors.alamat && touched.alamat && (
+                <Text style={styles.errors}>{errors.alamat}</Text>
+              )}
+              <Text style={styles.label}>No Handphone*</Text>
+              <TextInput
+                style={styles.input}
+                placeholder="contoh: +62 8123456789"
+                onChangeText={handleChange('nomor')}
+                onBlur={handleBlur('nomor')}
+                value={values.nomor}
+              />
+              {errors.nomor && touched.nomor && (
+                <Text style={styles.errors}>{errors.nomor}</Text>
+              )}
+            </View>
+            <TouchableOpacity
+              style={[
+                styles.button,
+                {
+                  backgroundColor: isValid
+                    ? COLORS.primaryPurple4
+                    : COLORS.neutral2,
+                },
+              ]}
+              disabled={!isValid}
+              onPress={() =>
+                onUpdateProfile(values.name, value, values.alamat, values.nomor)
+              }>
+              <Text style={styles.txtButton}>Simpan</Text>
+            </TouchableOpacity>
+          </ScrollView>
+        )}
+      </Formik>
+    );
+  }
 };
 
 export default LengkapiInfoAkunScreen;
@@ -248,5 +257,11 @@ const styles = StyleSheet.create({
     fontFamily: 'Poppins-Regular',
     fontSize: 14,
     color: COLORS.neutral3,
+  },
+  loadingContainer: {
+    flex: 1,
+    backgroundColor: COLORS.neutral1,
+    justifyContent: 'center',
+    alignItems: 'center',
   },
 });

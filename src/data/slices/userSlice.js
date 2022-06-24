@@ -44,7 +44,6 @@ export const postLogin = createAsyncThunk(
       if (response.status <= 201) {
         dispatch(setLoading(false));
         navigate('Main');
-        dispatch(setLoading(true));
       }
       if (response.status === 401) {
         const logErr = response.data.message;
@@ -68,11 +67,12 @@ export const getUser = createAsyncThunk(
           access_token: token,
         },
       });
-      return response.data;
+      if (response.status <= 201) {
+        dispatch(setLoading(false));
+        return response.data;
+      }
     } catch (error) {
       return rejectWithValue(error.response.data);
-    } finally {
-      dispatch(setLoading(false));
     }
   },
 );
@@ -111,6 +111,7 @@ export const updateUser = createAsyncThunk(
 const initialState = {
   access_token: '',
   userInfo: {},
+  getUserDetail: {},
 };
 
 const userSlice = createSlice({
@@ -141,12 +142,13 @@ const userSlice = createSlice({
     [getUser.fulfilled]: (state, action) => {
       return {
         ...state,
-        userInfo: action.payload,
+        getUserDetail: action.payload,
       };
     },
-    [updateUser.fulfilled]: state => {
+    [updateUser.fulfilled]: (state, action) => {
       return {
         ...state,
+        getUserDetail: action.payload,
       };
     },
   },

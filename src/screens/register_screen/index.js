@@ -5,21 +5,23 @@ import {
   Image,
   TouchableOpacity,
   TextInput,
+  ActivityIndicator,
 } from 'react-native';
 import React, { useState } from 'react';
 import { COLORS } from '../../assets/colors';
 import { Icons } from '../../assets/icons';
 import * as yup from 'yup';
 import { Formik } from 'formik';
-import { ms } from 'react-native-size-matters';
+import { moderateScale, ms } from 'react-native-size-matters';
 import { useNavigation } from '@react-navigation/native';
-import { useDispatch } from 'react-redux';
+import { useDispatch, useSelector } from 'react-redux';
 import { postRegister } from '../../data/slices/userSlice';
 
 const Register = () => {
   const [showPassword, setShowPassword] = useState(true);
   const navigation = useNavigation();
   const dispatch = useDispatch();
+  const { isLoading } = useSelector(state => state.global);
 
   const RegisterValidationSchema = yup.object().shape({
     name: yup.string().required('Nama dibutuhkan'),
@@ -34,16 +36,17 @@ const Register = () => {
   });
 
   const onRegister = (name, email, password) => {
-    const data = {
-      full_name: name,
-      email,
-      password,
-      phone_number: 1,
-      address: 'unknown',
-      image: 'unknown',
-      city: 'unknown',
-    };
-    dispatch(postRegister(data));
+    dispatch(
+      postRegister({
+        full_name: name,
+        email,
+        password,
+        phone_number: 1,
+        address: 'unknown',
+        image: 'unknown',
+        city: 'unknown',
+      }),
+    );
   };
 
   return (
@@ -118,7 +121,11 @@ const Register = () => {
             onPress={() =>
               onRegister(values.name, values.email, values.password)
             }>
-            <Text style={styles.txtButton}>Daftar</Text>
+            {isLoading ? (
+              <ActivityIndicator color="white" />
+            ) : (
+              <Text style={styles.txtButton}>Daftar</Text>
+            )}
           </TouchableOpacity>
           <View style={styles.bottom}>
             <Text style={styles.bot1}>Sudah punya akun? </Text>
@@ -166,16 +173,20 @@ const styles = StyleSheet.create({
     marginTop: 16,
   },
   button: {
+    borderRadius: moderateScale(16),
+    marginTop: moderateScale(20),
     backgroundColor: COLORS.primaryPurple4,
-    borderRadius: 16,
-    marginTop: 24,
-    marginBottom: 116,
+    height: moderateScale(48),
+    justifyContent: 'center',
+    alignItems: 'center',
   },
   txtButton: {
-    fontFamily: 'Poppins-Medium',
+    fontSize: moderateScale(14),
+    lineHeight: moderateScale(20),
+    fontFamily: 'Poppins-Regular',
     color: COLORS.neutral1,
+    fontWeight: '500',
     textAlign: 'center',
-    marginVertical: 14,
   },
   bottom: {
     flexDirection: 'row',
