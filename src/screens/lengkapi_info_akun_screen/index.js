@@ -26,7 +26,7 @@ const LengkapiInfoAkunScreen = () => {
   ]);
   const FormValidationSchema = yup.object().shape({
     name: yup.string().required('Masukkan Nama'),
-    kota: yup.string().required('Masukkan Kota'),
+    kota: yup.string().required('Pilih Kota'),
     alamat: yup.string().required('Masukkan Alamat'),
     nomor: yup.string().required('Masukkan Nomor'),
   });
@@ -40,6 +40,7 @@ const LengkapiInfoAkunScreen = () => {
         handleChange,
         handleBlur,
         handleSubmit,
+        setFieldValue,
         values,
         touched,
         errors,
@@ -81,6 +82,8 @@ const LengkapiInfoAkunScreen = () => {
               style={styles.input}
               textStyle={styles.dropdownText}
               placeholder="Pilih Kota"
+              onChangeValue={itemValue => setFieldValue('kota', itemValue)}
+              placeholderStyle={styles.placeholderDropdown}
             />
             <Text style={styles.label}>Alamat*</Text>
             <TextInput
@@ -204,9 +207,14 @@ const styles = StyleSheet.create({
   dropdownText: {
     fontFamily: 'Poppins-Regular',
     fontSize: 14,
-    color: COLORS.neutral3,
+    color: COLORS.neutral5,
   },
   inputContainer: {
     marginHorizontal: ms(16),
+  },
+  placeholderDropdown: {
+    fontFamily: 'Poppins-Regular',
+    fontSize: 14,
+    color: COLORS.neutral3,
   },
 });
