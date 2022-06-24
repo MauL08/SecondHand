@@ -7,7 +7,7 @@ import {
   TouchableOpacity,
   View,
 } from 'react-native';
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { COLORS } from '../../assets/colors';
 import { Icons } from '../../assets/icons';
 import * as yup from 'yup';
@@ -15,9 +15,19 @@ import { Formik } from 'formik';
 import DropDownPicker from 'react-native-dropdown-picker';
 import { useNavigation } from '@react-navigation/native';
 import { ms } from 'react-native-size-matters';
+import { useDispatch, useSelector } from 'react-redux';
+import { getUser, updateUser } from '../../data/slices/userSlice';
 
 const LengkapiInfoAkunScreen = () => {
   const navigation = useNavigation();
+  const dispatch = useDispatch();
+  const { access_token } = useSelector(state => state.user);
+  // const { isLoading } = useSelector(state => state.global);
+
+  useEffect(() => {
+    dispatch(getUser(access_token));
+  }, [access_token, dispatch]);
+
   const [open, setOpen] = useState(false);
   const [value, setValue] = useState(null);
   const [items, setItems] = useState([
@@ -31,20 +41,27 @@ const LengkapiInfoAkunScreen = () => {
     nomor: yup.string().required('Nomor dibutuhkan'),
   });
 
+  const onUpdateProfile = (name, city, address, phone) => {
+    dispatch(
+      updateUser({
+        token: access_token,
+        data: {
+          full_name: name,
+          phone_number: phone,
+          address,
+          image_url: '',
+          city,
+        },
+      }),
+    );
+  };
+
   return (
     <Formik
-      initialValues={{ name: '', kota: '', alamat: '', nomor: '' }}
+      initialValues={{ name: '', alamat: '', nomor: '' }}
       validateOnMount={true}
       validationSchema={FormValidationSchema}>
-      {({
-        handleChange,
-        handleBlur,
-        handleSubmit,
-        values,
-        touched,
-        errors,
-        isValid,
-      }) => (
+      {({ handleChange, handleBlur, values, touched, errors, isValid }) => (
         <ScrollView
           showsVerticalScrollIndicator={false}
           style={styles.container}>
@@ -114,8 +131,10 @@ const LengkapiInfoAkunScreen = () => {
                   : COLORS.neutral2,
               },
             ]}
-            disabled={!isValid}
-            onPress={handleSubmit}>
+            disabled={isValid}
+            onPress={() =>
+              onUpdateProfile(values.name, value, values.alamat, values.nomor)
+            }>
             <Text style={styles.txtButton}>Simpan</Text>
           </TouchableOpacity>
         </ScrollView>

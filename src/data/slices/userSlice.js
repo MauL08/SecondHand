@@ -65,7 +65,7 @@ export const getUser = createAsyncThunk(
       dispatch(setLoading(true));
       const response = await axios.get(`${BASE_URL}/auth/user`, {
         headers: {
-          Authorization: `Bearer ${token}`,
+          access_token: token,
         },
       });
       return response.data;
@@ -87,10 +87,12 @@ export const updateUser = createAsyncThunk(
         credentials.data,
         {
           headers: {
-            Authorization: `Bearer ${credentials.token}`,
+            access_token: credentials.token,
+            'Content-Type': 'multipart/form-data',
           },
         },
       );
+      console.log(response);
       if (response.status <= 201) {
         dispatch(setLoading(false));
         Alert.alert('Success', 'User Updated!');
@@ -118,7 +120,7 @@ const userSlice = createSlice({
     setLogout: state => {
       return {
         ...state,
-        id: '',
+        access_token: '',
         userInfo: {},
       };
     },
@@ -142,10 +144,9 @@ const userSlice = createSlice({
         userInfo: action.payload,
       };
     },
-    [updateUser.fulfilled]: (state, action) => {
+    [updateUser.fulfilled]: state => {
       return {
         ...state,
-        userInfo: action.payload,
       };
     },
   },

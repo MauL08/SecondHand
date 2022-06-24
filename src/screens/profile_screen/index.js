@@ -3,6 +3,8 @@ import React from 'react';
 import { moderateScale } from 'react-native-size-matters';
 import { COLORS } from '../../assets/colors';
 import { useNavigation } from '@react-navigation/native';
+import { useDispatch } from 'react-redux';
+import { setLogout } from '../../data/slices/userSlice';
 
 const styles = StyleSheet.create({
   container: {
@@ -52,6 +54,8 @@ const styles = StyleSheet.create({
 
 function ProfileScreen() {
   const navigation = useNavigation();
+  const dispatch = useDispatch();
+
   return (
     <View style={styles.container}>
       <Text style={styles.title}>Akun Saya</Text>
@@ -80,7 +84,12 @@ function ProfileScreen() {
         <Text style={styles.regularText}>Pengaturan Akun</Text>
       </TouchableOpacity>
 
-      <TouchableOpacity style={styles.menuContainer}>
+      <TouchableOpacity
+        style={styles.menuContainer}
+        onPress={() => {
+          dispatch(setLogout());
+          navigation.navigate('Login');
+        }}>
         <Image
           style={styles.icon}
           source={require('../../assets/icons/icon_log-out.png')}
