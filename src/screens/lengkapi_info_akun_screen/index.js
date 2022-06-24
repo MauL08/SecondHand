@@ -8,7 +8,7 @@ import {
   View,
   ActivityIndicator,
 } from 'react-native';
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import { COLORS } from '../../assets/colors';
 import { Icons } from '../../assets/icons';
 import * as yup from 'yup';
@@ -17,17 +17,13 @@ import DropDownPicker from 'react-native-dropdown-picker';
 import { useNavigation } from '@react-navigation/native';
 import { ms } from 'react-native-size-matters';
 import { useDispatch, useSelector } from 'react-redux';
-import { getUser, updateUser } from '../../data/slices/userSlice';
+import { updateUser } from '../../data/slices/userSlice';
 
 const LengkapiInfoAkunScreen = () => {
   const navigation = useNavigation();
   const dispatch = useDispatch();
   const { access_token, getUserDetail } = useSelector(state => state.user);
   const { isLoading } = useSelector(state => state.global);
-
-  useEffect(() => {
-    dispatch(getUser(access_token));
-  }, [access_token, dispatch]);
 
   const [open, setOpen] = useState(false);
   const [value, setValue] = useState(null);
