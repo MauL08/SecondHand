@@ -128,6 +128,7 @@ const LengkapiInfoAkunScreen = () => {
       };
       launchCamera(options, response => {
         if (response.assets) {
+          setUserImage(null);
           setFile(response.assets[0]);
         } else {
           setFile(currState => currState);
