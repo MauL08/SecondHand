@@ -1,5 +1,5 @@
 import { StyleSheet, Text, View, Image, TouchableOpacity } from 'react-native';
-import React from 'react';
+import React, { useEffect } from 'react';
 import { moderateScale } from 'react-native-size-matters';
 import { COLORS } from '../../assets/colors';
 import { useNavigation } from '@react-navigation/native';
@@ -20,19 +20,31 @@ const styles = StyleSheet.create({
     color: COLORS.neutral5,
   },
   imageProfileContainer: {
-    marginVertical: moderateScale(8),
     padding: moderateScale(36),
     backgroundColor: COLORS.primaryPurple2,
     width: moderateScale(96),
     height: moderateScale(96),
     borderRadius: moderateScale(12),
-    borderColor: COLORS.primaryPurple1,
+    marginVertical: moderateScale(25),
+    justifyContent: 'center',
     alignSelf: 'center',
+  },
+  imageUserContainer: {
+    backgroundColor: COLORS.primaryPurple1,
+    justifyContent: 'center',
+    alignSelf: 'center',
+    borderRadius: moderateScale(12),
+    marginVertical: moderateScale(25),
   },
   icon: {
     width: moderateScale(24),
     height: moderateScale(24),
     flexGrow: 0,
+  },
+  image: {
+    height: moderateScale(120),
+    width: moderateScale(120),
+    borderRadius: moderateScale(10),
   },
   menuContainer: {
     height: moderateScale(41),
@@ -55,18 +67,27 @@ const styles = StyleSheet.create({
 function ProfileScreen() {
   const navigation = useNavigation();
   const dispatch = useDispatch();
-  const { access_token } = useSelector(state => state.user);
+  const { access_token, userDetail } = useSelector(state => state.user);
+
+  useEffect(() => {
+    dispatch(getUser(access_token));
+  }, [access_token, dispatch]);
 
   return (
     <View style={styles.container}>
       <Text style={styles.title}>Akun Saya</Text>
-      <TouchableOpacity style={styles.imageProfileContainer}>
-        <Image
-          style={[styles.icon, { tintColor: COLORS.primaryPurple4 }]}
-          source={require('../../assets/icons/icon_camera.png')}
-        />
-      </TouchableOpacity>
-
+      {userDetail.image_url === null ? (
+        <View style={styles.imageProfileContainer}>
+          <Image
+            style={[styles.icon, { tintColor: COLORS.primaryPurple4 }]}
+            source={require('../../assets/icons/icon_camera.png')}
+          />
+        </View>
+      ) : (
+        <View style={styles.imageUserContainer}>
+          <Image style={styles.image} source={{ uri: userDetail.image_url }} />
+        </View>
+      )}
       <TouchableOpacity
         style={styles.menuContainer}
         onPress={() => {

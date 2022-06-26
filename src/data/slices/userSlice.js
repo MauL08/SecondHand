@@ -92,10 +92,12 @@ export const updateUser = createAsyncThunk(
           },
         },
       );
-      console.log(response);
       if (response.status <= 201) {
         dispatch(setLoading(false));
-        Alert.alert('Success', 'User Updated!');
+        Alert.alert(
+          'User Diperbarui!',
+          'Refresh halaman ini untuk melihat perubahan',
+        );
       }
       if (response.status === 400) {
         Alert.alert('Error', response.data.message);
@@ -110,8 +112,7 @@ export const updateUser = createAsyncThunk(
 
 const initialState = {
   access_token: '',
-  userInfo: {},
-  getUserDetail: {},
+  userDetail: {},
 };
 
 const userSlice = createSlice({
@@ -122,7 +123,7 @@ const userSlice = createSlice({
       return {
         ...state,
         access_token: '',
-        userInfo: {},
+        userDetail: {},
       };
     },
   },
@@ -135,20 +136,19 @@ const userSlice = createSlice({
     [postLogin.fulfilled]: (state, action) => {
       return {
         ...state,
-        userInfo: action.payload,
         access_token: action.payload.access_token,
       };
     },
     [getUser.fulfilled]: (state, action) => {
       return {
         ...state,
-        getUserDetail: action.payload,
+        userDetail: action.payload,
       };
     },
     [updateUser.fulfilled]: (state, action) => {
       return {
         ...state,
-        getUserDetail: action.payload,
+        userDetail: action.payload,
       };
     },
   },
