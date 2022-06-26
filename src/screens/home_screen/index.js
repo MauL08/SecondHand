@@ -136,6 +136,7 @@ export default HomeScreen;
 const styles = StyleSheet.create({
   mainContainer: {
     flex: 1,
+    backgroundColor: COLORS.neutral1,
   },
   gradient: {
     position: 'absolute',
