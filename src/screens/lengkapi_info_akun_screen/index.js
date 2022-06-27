@@ -6,6 +6,10 @@ import {
   TextInput,
   TouchableOpacity,
   View,
+  ActivityIndicator,
+  Alert,
+  PermissionsAndroid,
+  RefreshControl,
 } from 'react-native';
 import React, { useState } from 'react';
 import { COLORS } from '../../assets/colors';
@@ -15,14 +19,30 @@ import { Formik } from 'formik';
 import DropDownPicker from 'react-native-dropdown-picker';
 import { useNavigation } from '@react-navigation/native';
 import { ms } from 'react-native-size-matters';
+import { useDispatch, useSelector } from 'react-redux';
+import { getUser, updateUser } from '../../data/slices/userSlice';
+import { launchCamera, launchImageLibrary } from 'react-native-image-picker';
 
 const LengkapiInfoAkunScreen = () => {
   const navigation = useNavigation();
+  const dispatch = useDispatch();
+  const { access_token, userDetail } = useSelector(state => state.user);
+  const { isLoading } = useSelector(state => state.global);
+
+  const [cameraPermission, setCameraPermission] = useState(true);
+  const [file, setFile] = useState('');
+  const [userImage, setUserImage] = useState(userDetail.image_url);
+
+  const onRefresh = () => {
+    setFile('');
+    dispatch(getUser(access_token));
+  };
+
   const [open, setOpen] = useState(false);
   const [value, setValue] = useState(null);
   const [items, setItems] = useState([
-    { label: 'Surabaya', value: 'surabaya' },
-    { label: 'Jakarta', value: 'jakarta' },
+    { label: 'Surabaya', value: 'Surabaya' },
+    { label: 'Jakarta', value: 'Jakarta' },
   ]);
   const FormValidationSchema = yup.object().shape({
     name: yup.string().required('Masukkan Nama'),
@@ -31,100 +51,248 @@ const LengkapiInfoAkunScreen = () => {
     nomor: yup.string().required('Masukkan Nomor'),
   });
 
-  return (
-    <Formik
-      initialValues={{ name: '', kota: '', alamat: '', nomor: '' }}
-      validateOnMount={true}
-      validationSchema={FormValidationSchema}>
-      {({
-        handleChange,
-        handleBlur,
-        handleSubmit,
-        setFieldValue,
-        values,
-        touched,
-        errors,
-        isValid,
-      }) => (
-        <ScrollView
-          showsVerticalScrollIndicator={false}
-          style={styles.container}>
-          <View style={styles.top}>
-            <TouchableOpacity onPress={() => navigation.goBack()}>
-              <Image source={Icons.ArrowLeft} style={styles.iconBack} />
+  const requestCameraPermission = async () => {
+    try {
+      const granted = await PermissionsAndroid.request(
+        PermissionsAndroid.PERMISSIONS.CAMERA,
+        {
+          title: 'App Camera Permission',
+          message: 'App needs access to your camera ',
+          buttonNeutral: 'Ask Me Later',
+          buttonNegative: 'Cancel',
+          buttonPositive: 'OK',
+        },
+      );
+      if (granted === PermissionsAndroid.RESULTS.GRANTED) {
+        setCameraPermission(granted);
+      } else {
+        setCameraPermission(false);
+      }
+    } catch (err) {
+      console.warn(err);
+    }
+  };
+
+  const onUpdateProfile = (imageFile, name, city, address, phone) => {
+    const formData = new FormData();
+
+    formData.append('full_name', name);
+    formData.append('phone_number', phone);
+    formData.append('address', address);
+    formData.append('image', {
+      uri: imageFile.uri,
+      name: imageFile.fileName,
+      type: imageFile.type,
+    });
+    formData.append('city', city);
+
+    dispatch(
+      updateUser({
+        token: access_token,
+        data: formData,
+      }),
+    );
+
+    setUserImage(imageFile.uri);
+  };
+
+  const onUploadImage = () => {
+    Alert.alert('Choose your Option', '', [
+      {
+        text: 'Cancel',
+        style: 'cancel',
+      },
+      {
+        text: 'Go To Gallery',
+        onPress: () => {
+          openStorage();
+        },
+      },
+      {
+        text: 'Open Camera',
+        onPress: () => {
+          openCamera();
+        },
+      },
+    ]);
+  };
+
+  const openCamera = async () => {
+    if (!cameraPermission) {
+      requestCameraPermission();
+    } else {
+      const options = {
+        title: 'Open Camera',
+        mediaType: 'photo',
+        path: 'images',
+      };
+      launchCamera(options, response => {
+        if (response.assets) {
+          setUserImage(null);
+          setFile(response.assets[0]);
+        } else {
+          setFile(currState => currState);
+        }
+      });
+    }
+  };
+
+  const openStorage = async () => {
+    if (!cameraPermission) {
+      requestCameraPermission();
+    } else {
+      const options = {
+        title: 'Open Gallery',
+        mediaType: 'photo',
+        path: 'images',
+      };
+      launchImageLibrary(options, response => {
+        if (response.assets) {
+          setUserImage(null);
+          setFile(response.assets[0]);
+        } else {
+          setFile(currState => currState);
+        }
+      });
+    }
+  };
+
+  if (isLoading) {
+    return (
+      <View style={styles.loadingContainer}>
+        <ActivityIndicator color={COLORS.primaryPurple4} />
+      </View>
+    );
+  } else {
+    return (
+      <Formik
+        initialValues={{
+          name: userDetail.full_name,
+          alamat: userDetail.address === 'unknown' ? '' : userDetail.address,
+          nomor: userDetail.phone_number === 1 ? '' : userDetail.phone_number,
+        }}
+        validateOnMount={true}
+        validationSchema={FormValidationSchema}>
+        {({
+          handleChange,
+          handleBlur,
+          setFieldValue,
+          values,
+          touched,
+          errors,
+          isValid,
+        }) => (
+          <ScrollView
+            showsVerticalScrollIndicator={false}
+            refreshControl={<RefreshControl onRefresh={onRefresh} />}
+            style={styles.container}>
+            <View style={styles.top}>
+              <TouchableOpacity onPress={() => navigation.goBack()}>
+                <Image source={Icons.ArrowLeft} style={styles.iconBack} />
+              </TouchableOpacity>
+              <Text style={styles.title}>Lengkapi Info Akun</Text>
+            </View>
+            {userImage === null ? (
+              file.uri === '' ? (
+                <TouchableOpacity
+                  style={styles.cameraBG}
+                  onPress={() => onUploadImage()}>
+                  <Image source={Icons.Camera} style={styles.iconCamera} />
+                </TouchableOpacity>
+              ) : (
+                <TouchableOpacity
+                  style={styles.cameraBG}
+                  onPress={() => onUploadImage()}>
+                  <Image
+                    source={{ uri: file.uri }}
+                    style={styles.imageCamera}
+                  />
+                </TouchableOpacity>
+              )
+            ) : (
+              <TouchableOpacity
+                style={styles.cameraBG}
+                onPress={() => onUploadImage()}>
+                <Image source={{ uri: userImage }} style={styles.imageCamera} />
+              </TouchableOpacity>
+            )}
+            <View style={styles.inputContainer}>
+              <Text style={styles.label}>Nama*</Text>
+              <TextInput
+                style={styles.input}
+                placeholder="Nama"
+                onChangeText={handleChange('name')}
+                onBlur={handleBlur('name')}
+                value={values.name}
+              />
+              {errors.name && touched.name && (
+                <Text style={styles.errors}>{errors.name}</Text>
+              )}
+              <Text style={styles.label}>Kota*</Text>
+              <DropDownPicker
+                open={open}
+                value={value}
+                items={items}
+                setOpen={setOpen}
+                setValue={setValue}
+                setItems={setItems}
+                listMode="SCROLLVIEW"
+                style={styles.input}
+                textStyle={styles.dropdownText}
+                placeholder="Pilih Kota"
+                onChangeValue={itemValue => setFieldValue('kota', itemValue)}
+                placeholderStyle={styles.placeholderDropdown}
+              />
+              <Text style={styles.label}>Alamat*</Text>
+              <TextInput
+                style={styles.inputBig}
+                placeholder="Alamat"
+                onChangeText={handleChange('alamat')}
+                onBlur={handleBlur('alamat')}
+                value={values.alamat}
+              />
+              {errors.alamat && touched.alamat && (
+                <Text style={styles.errors}>{errors.alamat}</Text>
+              )}
+              <Text style={styles.label}>No Handphone*</Text>
+              <TextInput
+                style={styles.input}
+                placeholder="contoh: +62 8123456789"
+                onChangeText={handleChange('nomor')}
+                onBlur={handleBlur('nomor')}
+                value={values.nomor}
+              />
+              {errors.nomor && touched.nomor && (
+                <Text style={styles.errors}>{errors.nomor}</Text>
+              )}
+            </View>
+            <TouchableOpacity
+              style={[
+                styles.button,
+                {
+                  backgroundColor: isValid
+                    ? COLORS.primaryPurple4
+                    : COLORS.neutral2,
+                },
+              ]}
+              disabled={!isValid}
+              onPress={() => {
+                onUpdateProfile(
+                  file,
+                  values.name,
+                  value,
+                  values.alamat,
+                  values.nomor,
+                );
+                setFile('');
+              }}>
+              <Text style={styles.txtButton}>Simpan</Text>
             </TouchableOpacity>
-            <Text style={styles.title}>Lengkapi Info Akun</Text>
-          </View>
-          <TouchableOpacity style={styles.cameraBG}>
-            <Image source={Icons.Camera} style={styles.iconCamera} />
-          </TouchableOpacity>
-          <View style={styles.inputContainer}>
-            <Text style={styles.label}>Nama*</Text>
-            <TextInput
-              style={styles.input}
-              placeholder="Nama"
-              onChangeText={handleChange('name')}
-              onBlur={handleBlur('name')}
-              value={values.name}
-            />
-            {errors.name && touched.name && (
-              <Text style={styles.errors}>{errors.name}</Text>
-            )}
-            <Text style={styles.label}>Kota*</Text>
-            <DropDownPicker
-              open={open}
-              value={value}
-              items={items}
-              setOpen={setOpen}
-              setValue={setValue}
-              setItems={setItems}
-              listMode="SCROLLVIEW"
-              style={styles.input}
-              textStyle={styles.dropdownText}
-              placeholder="Pilih Kota"
-              onChangeValue={itemValue => setFieldValue('kota', itemValue)}
-              placeholderStyle={styles.placeholderDropdown}
-            />
-            <Text style={styles.label}>Alamat*</Text>
-            <TextInput
-              style={styles.inputBig}
-              placeholder="Alamat"
-              onChangeText={handleChange('alamat')}
-              onBlur={handleBlur('alamat')}
-              value={values.alamat}
-            />
-            {errors.alamat && touched.alamat && (
-              <Text style={styles.errors}>{errors.alamat}</Text>
-            )}
-            <Text style={styles.label}>No Handphone*</Text>
-            <TextInput
-              style={styles.input}
-              placeholder="contoh: +628123456789"
-              onChangeText={handleChange('nomor')}
-              onBlur={handleBlur('nomor')}
-              value={values.nomor}
-            />
-            {errors.nomor && touched.nomor && (
-              <Text style={styles.errors}>{errors.nomor}</Text>
-            )}
-          </View>
-          <TouchableOpacity
-            style={[
-              styles.button,
-              {
-                backgroundColor: isValid
-                  ? COLORS.primaryPurple4
-                  : COLORS.neutral2,
-              },
-            ]}
-            disabled={!isValid}
-            onPress={handleSubmit}>
-            <Text style={styles.txtButton}>Simpan</Text>
-          </TouchableOpacity>
-        </ScrollView>
-      )}
-    </Formik>
-  );
+          </ScrollView>
+        )}
+      </Formik>
+    );
+  }
 };
 
 export default LengkapiInfoAkunScreen;
@@ -157,6 +325,11 @@ const styles = StyleSheet.create({
     width: ms(24),
     marginVertical: ms(39),
     marginHorizontal: ms(37),
+  },
+  imageCamera: {
+    height: ms(120),
+    width: ms(120),
+    borderRadius: ms(10),
   },
   cameraBG: {
     backgroundColor: COLORS.primaryPurple1,
@@ -216,5 +389,11 @@ const styles = StyleSheet.create({
     fontFamily: 'Poppins-Regular',
     fontSize: 14,
     color: COLORS.neutral3,
+  },
+  loadingContainer: {
+    flex: 1,
+    backgroundColor: COLORS.neutral1,
+    justifyContent: 'center',
+    alignItems: 'center',
   },
 });
