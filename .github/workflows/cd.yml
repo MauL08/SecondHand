@@ -3,7 +3,7 @@ on:
   push:
     branches: [master]
 jobs:
-  build-and-send-to-telegram:
+  build-app:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v2
