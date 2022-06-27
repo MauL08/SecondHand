@@ -1,0 +1,26 @@
+name: CI Process
+on:
+  push:
+    branches: [master]
+jobs:
+  check-linter:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+
+      - name: Install Dependencies
+        run: yarn install
+
+      - name: Test Linter
+        run: yarn lint
+
+  run-test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+
+      - name: Install dependencies
+        run: yarn install
+
+      - name: Testing Component
+        run: yarn test
