@@ -1,7 +1,6 @@
 import { createSlice } from '@reduxjs/toolkit';
 
 const initialState = {
-  pagination: 1,
   isLoading: false,
 };
 
@@ -9,11 +8,11 @@ const globalSlice = createSlice({
   name: 'global',
   initialState,
   reducers: {
-    setLoading(state, action) {
-      state.isLoading = action.payload;
-    },
-    setLastSeen(state, action) {
-      state.pagination = action.payload;
+    setLoading: (state, action) => {
+      return {
+        ...state,
+        isLoading: action.payload,
+      };
     },
   },
 });

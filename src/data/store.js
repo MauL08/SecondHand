@@ -14,10 +14,18 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 
 import userSlice from './slices/userSlice';
 import globalSlice from './slices/globalSlice';
+import buyerSlice from './slices/buyerSlice';
+import sellerSlice from './slices/sellerSlice';
+import historySlice from './slices/historySlice';
+import notificationSlice from './slices/notificationSlice';
 
 const reducers = combineReducers({
-  user: userSlice,
   global: globalSlice,
+  user: userSlice,
+  buyer: buyerSlice,
+  seller: sellerSlice,
+  history: historySlice,
+  notification: notificationSlice,
 });
 
 const persistConfig = {
