@@ -132,7 +132,7 @@ const DetailProductScreen = () => {
             pagingEnabled={true}
             horizontal={true}
             style={styles.wrap}>
-            {imageList.map((item, index) => (
+            {imageList.map(item => (
               <Image
                 key={item.id}
                 resizeMode="stretch"
