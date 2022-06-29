@@ -18,6 +18,7 @@ import BottomSheet, {
   BottomSheetBackdrop,
   BottomSheetView,
 } from '@gorhom/bottom-sheet';
+import { GestureHandlerRootView } from 'react-native-gesture-handler';
 const WIDTH = Dimensions.get('window').width;
 
 const DetailProductScreen = () => {
@@ -32,7 +33,7 @@ const DetailProductScreen = () => {
       const slide = Math.floor(
         nativeEvent.contentOffset.x / nativeEvent.layoutMeasurement.width,
       );
-      if (slide != imgActive) {
+      if (slide !== imgActive) {
         setImgActive(slide);
       }
     }
@@ -118,7 +119,7 @@ const DetailProductScreen = () => {
   ];
 
   return (
-    <>
+    <GestureHandlerRootView style={styles.container}>
       <SafeAreaView style={styles.container}>
         <View style={styles.wrap}>
           <TouchableOpacity
@@ -145,7 +146,7 @@ const DetailProductScreen = () => {
             {imageList.map((item, index) => (
               <Text
                 key={item.id}
-                style={imgActive == index ? styles.dotActive : styles.dot}>
+                style={imgActive === index ? styles.dotActive : styles.dot}>
                 ●
               </Text>
             ))}
@@ -211,7 +212,7 @@ const DetailProductScreen = () => {
           <RenderBsView />
         </BottomSheet>
       ) : null}
-    </>
+    </GestureHandlerRootView>
   );
 };
 
