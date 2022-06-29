@@ -2,6 +2,7 @@ import React from 'react';
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
 
 import {
+  DetailProductScreen,
   FilterScreen,
   LengkapiInfoAkunScreen,
   LoginScreen,
@@ -25,6 +26,7 @@ const Router = () => {
       <Stack.Screen name="Main" component={MainTabs} />
       <Stack.Screen name="LengkapiAkun" component={LengkapiInfoAkunScreen} />
       <Stack.Screen name="Filter" component={FilterScreen} />
+      <Stack.Screen name="DetailProduct" component={DetailProductScreen} />
     </Stack.Navigator>
   );
 };
