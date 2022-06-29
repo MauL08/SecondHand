@@ -7,6 +7,7 @@ import DaftarJualScreen from './daftar_jual_screen';
 import ProfileScreen from './profile_screen';
 import LengkapiInfoAkunScreen from './lengkapi_info_akun_screen';
 import FilterScreen from './filter_screen';
+import DetailProductScreen from './detail_product_screen';
 
 export {
   LoginScreen,
@@ -18,4 +19,5 @@ export {
   ProfileScreen,
   LengkapiInfoAkunScreen,
   FilterScreen,
+  DetailProductScreen,
 };
