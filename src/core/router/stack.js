@@ -7,6 +7,7 @@ import {
   LengkapiInfoAkunScreen,
   LoginScreen,
   RegisterScreen,
+  InfoPenawarScreen,
 } from '../../screens';
 import MainTabs from './bottom_navigator';
 import { COLORS } from '../../assets/colors';
@@ -27,6 +28,7 @@ const Router = () => {
       <Stack.Screen name="LengkapiAkun" component={LengkapiInfoAkunScreen} />
       <Stack.Screen name="Filter" component={FilterScreen} />
       <Stack.Screen name="DetailProduct" component={DetailProductScreen} />
+      <Stack.Screen name="InfoPenawar" component={InfoPenawarScreen} />
     </Stack.Navigator>
   );
 };
