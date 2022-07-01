@@ -8,6 +8,7 @@ import ProfileScreen from './profile_screen';
 import LengkapiInfoAkunScreen from './lengkapi_info_akun_screen';
 import FilterScreen from './filter_screen';
 import DetailProductScreen from './detail_product_screen';
+import InfoPenawarScreen from './info_penawar_screen';
 
 export {
   LoginScreen,
@@ -20,4 +21,5 @@ export {
   LengkapiInfoAkunScreen,
   FilterScreen,
   DetailProductScreen,
+  InfoPenawarScreen,
 };
