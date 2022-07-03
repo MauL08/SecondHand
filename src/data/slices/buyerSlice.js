@@ -50,7 +50,7 @@ export const getAllBuyerOrder = createAsyncThunk(
       dispatch(setLoading(true));
       const response = await axios.get(`${BASE_URL}/buyer/order`, {
         headers: {
-          Authorization: `Bearer ${token}`,
+          access_token: token,
         },
       });
       return response.data;
@@ -71,7 +71,7 @@ export const getBuyerOrderByID = createAsyncThunk(
         `${BASE_URL}/buyer/order/${credentials.id}`,
         {
           headers: {
-            Authorization: `Bearer ${credentials.token}`,
+            access_token: credentials.token,
           },
         },
       );
@@ -94,7 +94,7 @@ export const createBuyerOrder = createAsyncThunk(
         credentials.data,
         {
           headers: {
-            Authorization: `Bearer ${credentials.token}`,
+            access_token: credentials.token,
           },
         },
       );
@@ -117,7 +117,7 @@ export const updateBuyerOrder = createAsyncThunk(
         credentials.data,
         {
           headers: {
-            Authorization: `Bearer ${credentials.token}`,
+            access_token: credentials.token,
           },
         },
       );
@@ -139,7 +139,7 @@ export const deleteBuyerOrder = createAsyncThunk(
         `${BASE_URL}/buyer/order/${credentials.id}`,
         {
           headers: {
-            Authorization: `Bearer ${credentials.token}`,
+            access_token: credentials.token,
           },
         },
       );
@@ -153,7 +153,10 @@ export const deleteBuyerOrder = createAsyncThunk(
 );
 
 const initialState = {
-  data: [],
+  product: [],
+  detailProduct: {},
+  order: [],
+  detailOrder: {},
 };
 
 const buyerSlice = createSlice({
@@ -163,25 +166,25 @@ const buyerSlice = createSlice({
     [getAllBuyerProduct.fulfilled]: (state, action) => {
       return {
         ...state,
-        data: action.payload,
+        product: action.payload,
       };
     },
     [getBuyerProductByID.fulfilled]: (state, action) => {
       return {
         ...state,
-        data: action.payload,
+        detailProduct: action.payload,
       };
     },
     [getAllBuyerOrder.fulfilled]: (state, action) => {
       return {
         ...state,
-        data: action.payload,
+        order: action.payload,
       };
     },
     [getBuyerOrderByID.fulfilled]: (state, action) => {
       return {
         ...state,
-        data: action.payload,
+        detailOrder: action.payload,
       };
     },
     [createBuyerOrder.fulfilled]: state => {
