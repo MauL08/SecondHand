@@ -44,10 +44,11 @@ const JualScreen = () => {
       {({
         handleChange,
         handleBlur,
-        handleSubmit,
+        setFieldValue,
         values,
         touched,
         errors,
+        isValid,
       }) => (
         <ScrollView
           showsVerticalScrollIndicator={false}
@@ -95,6 +96,7 @@ const JualScreen = () => {
               listMode="SCROLLVIEW"
               style={styles.input}
               textStyle={styles.dropdownText}
+              onChangeValue={itemValue => setFieldValue('kategori', itemValue)}
               placeholder="Pilih Kategori"
             />
 
@@ -120,12 +122,34 @@ const JualScreen = () => {
           </View>
 
           <View style={styles.buttonContainer}>
-            <TouchableOpacity style={styles.buttonPreview}>
-              <Text style={[styles.txtButton, { color: COLORS.black }]}>
+            <TouchableOpacity
+              style={[
+                styles.buttonPreview,
+                {
+                  borderColor: isValid
+                    ? COLORS.primaryPurple4
+                    : COLORS.neutral2,
+                },
+              ]}
+              disabled={!isValid}>
+              <Text
+                style={[
+                  styles.txtButton,
+                  { color: isValid ? COLORS.black : COLORS.neutral2 },
+                ]}>
                 Preview
               </Text>
             </TouchableOpacity>
-            <TouchableOpacity style={styles.button} onPress={handleSubmit}>
+            <TouchableOpacity
+              style={[
+                styles.button,
+                {
+                  backgroundColor: isValid
+                    ? COLORS.primaryPurple4
+                    : COLORS.neutral2,
+                },
+              ]}
+              disabled={!isValid}>
               <Text style={styles.txtButton}>Terbitkan</Text>
             </TouchableOpacity>
           </View>
@@ -209,28 +233,31 @@ const styles = StyleSheet.create({
     color: COLORS.alertDanger,
     fontFamily: 'Poppins-Regular',
   },
-  buttonContainer: { flexDirection: 'row', justifyContent: 'space-between' },
-  button: {
-    backgroundColor: COLORS.primaryPurple4,
-    borderRadius: ms(16),
+  buttonContainer: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
     marginTop: ms(24),
     marginBottom: ms(24),
+  },
+  button: {
+    borderRadius: ms(16),
     width: '48%',
+    height: ms(48),
+    justifyContent: 'center',
+    alignItems: 'center',
   },
   buttonPreview: {
     backgroundColor: COLORS.neutral1,
     borderRadius: ms(16),
     borderWidth: ms(1),
-    borderColor: COLORS.primaryPurple4,
-    marginTop: ms(24),
-    marginBottom: ms(24),
     width: '48%',
+    height: ms(48),
+    justifyContent: 'center',
+    alignItems: 'center',
   },
   txtButton: {
     fontFamily: 'Poppins-Regular',
     color: COLORS.neutral1,
-    textAlign: 'center',
-    marginVertical: 14,
     fontSize: ms(14),
     fontWeight: '400',
   },
