@@ -1,4 +1,3 @@
-// import { Alert } from 'react-native';
 import axios from 'axios';
 import { BASE_URL } from '../baseAPI';
 import { createSlice, createAsyncThunk } from '@reduxjs/toolkit';
@@ -124,11 +123,7 @@ export const getSellerCategory = createAsyncThunk(
   async (credentials, { rejectWithValue, dispatch }) => {
     try {
       dispatch(setLoading(true));
-      const response = await axios.get(`${BASE_URL}/seller/category`, {
-        // headers: {
-        //   Authorization: `Bearer ${credentials.token}`,
-        // },
-      });
+      const response = await axios.get(`${BASE_URL}/seller/category`);
       return response.data;
     } catch (error) {
       return rejectWithValue(error.response.data);
@@ -140,17 +135,10 @@ export const getSellerCategory = createAsyncThunk(
 
 export const getSellerCategoryByID = createAsyncThunk(
   'seller/getSellerCategoryByID',
-  async (credentials, { rejectWithValue, dispatch }) => {
+  async (id, { rejectWithValue, dispatch }) => {
     try {
       dispatch(setLoading(true));
-      const response = await axios.get(
-        `${BASE_URL}/seller/category/${credentials.id}`,
-        {
-          // headers: {
-          //   Authorization: `Bearer ${credentials.token}`,
-          // },
-        },
-      );
+      const response = await axios.get(`${BASE_URL}/seller/category/${id}`);
       return response.data;
     } catch (error) {
       return rejectWithValue(error.response.data);
@@ -384,6 +372,8 @@ export const getSellerOrderProduct = createAsyncThunk(
 );
 
 const initialState = {
+  category: [],
+  detailCategory: {},
   data: [],
 };
 
@@ -416,13 +406,13 @@ const sellerSlice = createSlice({
     [getSellerCategory.fulfilled]: (state, action) => {
       return {
         ...state,
-        data: action.payload,
+        category: action.payload,
       };
     },
     [getSellerCategoryByID.fulfilled]: (state, action) => {
       return {
         ...state,
-        data: action.payload,
+        detailCategory: action.payload,
       };
     },
     [createSellerCategory.fulfilled]: state => {

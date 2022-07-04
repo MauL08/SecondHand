@@ -7,57 +7,44 @@ import {
   TextInput,
   TouchableOpacity,
   View,
+  ActivityIndicator,
 } from 'react-native';
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import { ms } from 'react-native-size-matters';
 import { COLORS } from '../../assets/colors';
 import { Icons } from '../../assets/icons';
+import { useDispatch, useSelector } from 'react-redux';
+import { getAllBuyerProduct } from '../../data/slices/buyerSlice';
+import { getSellerCategory } from '../../data/slices/sellerSlice';
+import { useNavigation } from '@react-navigation/native';
+import NumberFormat from 'react-number-format';
 
 const HomeScreen = () => {
-  const filterName = [
-    {
-      id: 1,
-      name: 'Search',
-    },
-    {
-      id: 2,
-      name: 'Hobi',
-    },
-    {
-      id: 3,
-      name: 'Kendaraan',
-    },
-  ];
+  const dispatch = useDispatch();
+  const navigation = useNavigation();
+  const { product } = useSelector(state => state.buyer);
+  const { category } = useSelector(state => state.seller);
+  const { isLoading } = useSelector(state => state.global);
 
-  const productList = [
-    {
-      id: 1,
-      name: 'Jam Tangan Casio',
-      category: 'Aksesoris',
-      harga: 'Rp 250.000',
-      image_url:
-        'https://www.utileincasa.it/wp-content/uploads/2021/10/6oM-lgd-olia-nayda-dB3pkARCxHI-unsplash-scaled-e1629735546986.jpg',
-    },
-    {
-      id: 2,
-      name: 'Smartwatch Samsung',
-      category: 'Aksesoris',
-      harga: 'Rp 3.550.000',
-      image_url:
-        'https://assets.website-files.com/5b749aeb30c2321291cb4485/5e543b78c56f7a4b3e961205_Screen%20Shot%202020-02-24%20at%2012.32.24%20PM.png',
-    },
-    {
-      id: 3,
-      name: 'Jam Tangan Casio',
-      category: 'Aksesoris',
-      harga: 'Rp 250.000',
-      image_url:
-        'https://www.utileincasa.it/wp-content/uploads/2021/10/6oM-lgd-olia-nayda-dB3pkARCxHI-unsplash-scaled-e1629735546986.jpg',
-    },
-  ];
+  const [currCategory, setCurrCategory] = useState('');
+  const [searchText, setSearchText] = useState('');
+  // const [allCategory, setAllCategory] = useState(category);
 
-  const FilterRender = ({ name }) => (
-    <TouchableOpacity style={styles.btnFilter}>
+  useEffect(() => {
+    dispatch(
+      getAllBuyerProduct({
+        status: '',
+        category_id: currCategory,
+        search: '',
+      }),
+    );
+    dispatch(getSellerCategory());
+  }, [currCategory, dispatch]);
+
+  const FilterRender = ({ id, name }) => (
+    <TouchableOpacity
+      style={styles.btnFilter}
+      onPress={() => setCurrCategory(id)}>
       <Image source={Icons.Search} style={styles.searchFilter} />
       <Text style={styles.txtFilter}>{name}</Text>
     </TouchableOpacity>
@@ -65,12 +52,25 @@ const HomeScreen = () => {
 
   const ProductRender = ({ name, category, harga, image_url }) => (
     <TouchableOpacity style={styles.btnProduct}>
-      <Image source={{ uri: image_url }} style={styles.productImg} />
+      {image_url === null || image_url === '' ? (
+        <Image
+          source={require('../../assets/images/img_no_image.png')}
+          style={styles.productImg}
+        />
+      ) : (
+        <Image source={{ uri: image_url }} style={styles.productImg} />
+      )}
       <Text numberOfLines={1} style={styles.txtProduct1}>
         {name}
       </Text>
       <Text style={styles.txtProduct2}>{category}</Text>
-      <Text style={styles.txtProduct1}>{harga}</Text>
+      <NumberFormat
+        value={harga}
+        displayType={'text'}
+        thousandSeparator={true}
+        prefix={'Rp'}
+        renderText={value => <Text style={styles.txtProduct1}>{value}</Text>}
+      />
     </TouchableOpacity>
   );
 
@@ -81,10 +81,26 @@ const HomeScreen = () => {
         source={require('../../assets/images/img_gradient_home.png')}
       />
       <View style={styles.topContainer}>
-        <TextInput style={styles.input} placeholder="Cari di Second Chance" />
-        <TouchableOpacity>
-          <Image source={Icons.Search} style={styles.search} />
-        </TouchableOpacity>
+        <View style={styles.searchBarContainer}>
+          <TextInput
+            style={styles.input}
+            placeholder="Cari di Second Hand"
+            onChangeText={text => setSearchText(text)}
+          />
+          <TouchableOpacity
+            onPress={() => {
+              navigation.navigate('Filter');
+              dispatch(
+                getAllBuyerProduct({
+                  status: '',
+                  category_id: '',
+                  search: searchText,
+                }),
+              );
+            }}>
+            <Image source={Icons.Search} style={styles.search} />
+          </TouchableOpacity>
+        </View>
         <View style={styles.bannerWrapper}>
           <View>
             <Text style={styles.txtTop1}>
@@ -102,31 +118,43 @@ const HomeScreen = () => {
       <Text style={styles.midTitle}>Telusuri Kategori</Text>
       <View style={styles.filterContainer}>
         <FlatList
-          data={filterName}
-          renderItem={({ item }) => <FilterRender name={item.name} />}
+          data={category}
+          renderItem={({ item }) => (
+            <FilterRender name={item.name} id={item.id} />
+          )}
           keyExtractor={item => item.id}
           horizontal={true}
           showsHorizontalScrollIndicator={false}
         />
       </View>
-      <View style={styles.productContainer}>
-        <FlatList
-          data={productList}
-          key={2}
-          numColumns={2}
-          columnWrapperStyle={styles.columnWrapperStyle}
-          renderItem={({ item }) => (
-            <ProductRender
-              name={item.name}
-              category={item.category}
-              harga={item.harga}
-              image_url={item.image_url}
-            />
-          )}
-          keyExtractor={item => item.id}
-          showsVerticalScrollIndicator={false}
-        />
-      </View>
+      {isLoading ? (
+        <View style={styles.loadingContainer}>
+          <ActivityIndicator color={COLORS.primaryPurple4} size="large" />
+        </View>
+      ) : product.length === 0 ? (
+        <View style={styles.dumpText}>
+          <Text>Tidak ada produk yang tersedia</Text>
+        </View>
+      ) : (
+        <View style={styles.productContainer}>
+          <FlatList
+            data={product}
+            key={2}
+            numColumns={2}
+            columnWrapperStyle={styles.columnWrapperStyle}
+            renderItem={({ item }) => (
+              <ProductRender
+                name={item.name}
+                category={item?.Categories[0]?.name}
+                harga={item.base_price}
+                image_url={item.image_url}
+              />
+            )}
+            keyExtractor={item => item.id}
+            showsVerticalScrollIndicator={false}
+          />
+        </View>
+      )}
     </SafeAreaView>
   );
 };
@@ -149,7 +177,11 @@ const styles = StyleSheet.create({
     marginHorizontal: ms(16),
     marginTop: ms(16),
   },
-  input: {
+
+  searchBarContainer: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
     borderWidth: 1,
     borderRadius: ms(16),
     borderColor: COLORS.neutral2,
@@ -158,14 +190,16 @@ const styles = StyleSheet.create({
     backgroundColor: COLORS.neutral1,
     fontSize: ms(14),
   },
+  input: {
+    fontFamily: 'Poppins-Regular',
+    backgroundColor: COLORS.neutral1,
+    fontSize: ms(14),
+    width: ms(270),
+  },
   search: {
     width: ms(24),
     height: ms(24),
-    marginRight: ms(16),
     tintColor: COLORS.neutral3,
-    flexGrow: 0,
-    marginTop: ms(-38),
-    marginLeft: ms(308),
   },
   bannerWrapper: {
     flexDirection: 'row',
@@ -211,11 +245,24 @@ const styles = StyleSheet.create({
     borderRadius: ms(12),
     marginRight: ms(16),
   },
+  allBtnFilter: {
+    backgroundColor: COLORS.primaryPurple4,
+    flexDirection: 'row',
+    borderRadius: ms(12),
+    marginRight: ms(16),
+  },
   searchFilter: {
     width: ms(20),
     height: ms(20),
     marginVertical: ms(12),
     marginLeft: ms(16),
+  },
+  allSearchFilter: {
+    width: ms(20),
+    height: ms(20),
+    marginVertical: ms(12),
+    marginLeft: ms(16),
+    tintColor: COLORS.neutral2,
   },
   txtFilter: {
     fontFamily: 'Poppins-Regular',
@@ -223,6 +270,14 @@ const styles = StyleSheet.create({
     marginVertical: ms(12),
     marginRight: ms(16),
     marginLeft: ms(8),
+  },
+  allTxtFilter: {
+    fontFamily: 'Poppins-Regular',
+    fontSize: ms(14),
+    marginVertical: ms(12),
+    marginRight: ms(16),
+    marginLeft: ms(8),
+    color: COLORS.neutral2,
   },
   productContainer: {
     flex: 1,
@@ -260,5 +315,15 @@ const styles = StyleSheet.create({
   columnWrapperStyle: {
     flex: 1,
     justifyContent: 'space-between',
+  },
+  dumpText: {
+    marginTop: ms(80),
+    color: COLORS.primaryPurple4,
+    flexDirection: 'column',
+    alignItems: 'center',
+    fontSize: ms(18),
+  },
+  loadingContainer: {
+    marginTop: ms(80),
   },
 });

@@ -40,6 +40,7 @@
     "react-native-splash-screen": "^3.3.0",
     "react-native-toast-message": "^2.1.5",
     "react-native-touch-id": "^4.4.1",
+    "react-number-format": "^4.9.3",
     "react-redux": "^8.0.2",
     "redux": "^4.2.0",
     "redux-persist": "^6.0.0",
