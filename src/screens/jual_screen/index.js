@@ -136,7 +136,8 @@ const JualScreen = () => {
                 style={[
                   styles.txtButton,
                   { color: isValid ? COLORS.black : COLORS.neutral2 },
-                ]}>
+                ]}
+                onPress={() => navigation.navigate('Terbitkan')}>
                 Preview
               </Text>
             </TouchableOpacity>

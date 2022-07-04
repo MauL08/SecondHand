@@ -8,6 +8,7 @@ import {
   LoginScreen,
   RegisterScreen,
   InfoPenawarScreen,
+  TerbitkanScreen,
 } from '../../screens';
 import MainTabs from './bottom_navigator';
 import { COLORS } from '../../assets/colors';
@@ -17,7 +18,7 @@ const Stack = createNativeStackNavigator();
 const Router = () => {
   return (
     <Stack.Navigator
-      initialRouteName="Login"
+      initialRouteName="Main"
       screenOptions={{
         headerShown: false,
         cardStyle: { backgroundColor: COLORS.neutral1 },
@@ -29,6 +30,7 @@ const Router = () => {
       <Stack.Screen name="Filter" component={FilterScreen} />
       <Stack.Screen name="DetailProduct" component={DetailProductScreen} />
       <Stack.Screen name="InfoPenawar" component={InfoPenawarScreen} />
+      <Stack.Screen name="Terbitkan" component={TerbitkanScreen} />
     </Stack.Navigator>
   );
 };
