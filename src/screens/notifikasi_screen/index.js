@@ -28,8 +28,10 @@ const NotifikasiScreen = () => {
   }, [access_token, dispatch]);
 
   const dateConvert = date => {
+    if (!date) {
+      return '-';
+    }
     const theDate = date.split('T')[0].split('-');
-
     return `${theDate[2]}-${theDate[1]}-${theDate[0]}`;
   };
 

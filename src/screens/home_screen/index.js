@@ -27,9 +27,9 @@ const HomeScreen = () => {
 
   const [currCategory, setCurrCategory] = useState('');
   const [searchText, setSearchText] = useState('');
-  // const [allCategory, setAllCategory] = useState(category);
-  // const [allProduct, setAllProduct] = useState([]);
-  // const [allProductBackup, setAllProductBackup] = useState([]);
+  const [allCategory, setAllCategory] = useState([]);
+
+  const [allProduct, setAllProduct] = useState([]);
 
   useEffect(() => {
     dispatch(
@@ -39,19 +39,39 @@ const HomeScreen = () => {
         search: '',
       }),
     );
+    setAllCategory([
+      {
+        id: '',
+        name: 'Semua',
+      },
+      ...category,
+    ]);
     dispatch(getSellerCategory());
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [currCategory, dispatch]);
 
-  // const searchProduct = value => {
-  //   setAllProduct(allProductBackup.filter(item item.name.match(value)));
-  // };
+  useEffect(() => {
+    searchProduct(searchText);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [product]);
+
+  const searchProduct = value => {
+    setAllProduct(
+      product.filter(item =>
+        item?.name?.toLowerCase().match(value?.toLowerCase()),
+      ),
+    );
+  };
 
   const FilterRender = ({ id, name }) => (
     <TouchableOpacity
-      style={styles.btnFilter}
+      style={styles.btnFilter(currCategory, id)}
       onPress={() => setCurrCategory(id)}>
-      <Image source={Icons.Search} style={styles.searchFilter} />
-      <Text style={styles.txtFilter}>{name}</Text>
+      <Image
+        source={Icons.Search}
+        style={styles.searchFilter(currCategory, id)}
+      />
+      <Text style={styles.txtFilter(currCategory, id)}>{name}</Text>
     </TouchableOpacity>
   );
 
@@ -90,18 +110,12 @@ const HomeScreen = () => {
           <TextInput
             style={styles.input}
             placeholder="Cari di Second Hand"
-            onChangeText={text => setSearchText(text.toLowerCase())}
+            onChangeText={text => {
+              setSearchText(text);
+              searchProduct(text);
+            }}
           />
-          <TouchableOpacity
-            onPress={() =>
-              dispatch(
-                getAllBuyerProduct({
-                  status: '',
-                  category_id: '',
-                  search: searchText,
-                }),
-              )
-            }>
+          <TouchableOpacity onPress={() => searchProduct(searchText)}>
             <Image source={Icons.Search} style={styles.search} />
           </TouchableOpacity>
         </View>
@@ -122,7 +136,7 @@ const HomeScreen = () => {
       <Text style={styles.midTitle}>Telusuri Kategori</Text>
       <View style={styles.filterContainer}>
         <FlatList
-          data={category}
+          data={allCategory}
           renderItem={({ item }) => (
             <FilterRender name={item.name} id={item.id} />
           )}
@@ -135,14 +149,14 @@ const HomeScreen = () => {
         <View style={styles.loadingContainer}>
           <ActivityIndicator color={COLORS.primaryPurple4} size="large" />
         </View>
-      ) : product.length === 0 ? (
+      ) : allProduct.length === 0 ? (
         <View style={styles.dumpText}>
           <Text>Tidak ada produk yang tersedia</Text>
         </View>
       ) : (
         <View style={styles.productContainer}>
           <FlatList
-            data={product}
+            data={allProduct}
             key={2}
             numColumns={2}
             columnWrapperStyle={styles.columnWrapperStyle}
@@ -181,7 +195,6 @@ const styles = StyleSheet.create({
     marginHorizontal: ms(16),
     marginTop: ms(16),
   },
-
   searchBarContainer: {
     flexDirection: 'row',
     justifyContent: 'space-between',
@@ -243,24 +256,26 @@ const styles = StyleSheet.create({
     marginTop: ms(16),
     marginLeft: ms(16),
   },
-  btnFilter: {
-    backgroundColor: COLORS.primaryPurple1,
+  btnFilter: (currCat, id) => ({
+    backgroundColor:
+      currCat === id ? COLORS.primaryPurple4 : COLORS.primaryPurple1,
     flexDirection: 'row',
     borderRadius: ms(12),
     marginRight: ms(16),
-  },
+  }),
   allBtnFilter: {
     backgroundColor: COLORS.primaryPurple4,
     flexDirection: 'row',
     borderRadius: ms(12),
     marginRight: ms(16),
   },
-  searchFilter: {
+  searchFilter: (currCat, id) => ({
     width: ms(20),
     height: ms(20),
     marginVertical: ms(12),
     marginLeft: ms(16),
-  },
+    tintColor: currCat === id ? 'white' : 'black',
+  }),
   allSearchFilter: {
     width: ms(20),
     height: ms(20),
@@ -268,13 +283,14 @@ const styles = StyleSheet.create({
     marginLeft: ms(16),
     tintColor: COLORS.neutral2,
   },
-  txtFilter: {
+  txtFilter: (currCat, id) => ({
     fontFamily: 'Poppins-Regular',
     fontSize: ms(14),
     marginVertical: ms(12),
     marginRight: ms(16),
     marginLeft: ms(8),
-  },
+    color: currCat === id ? 'white' : 'black',
+  }),
   allTxtFilter: {
     fontFamily: 'Poppins-Regular',
     fontSize: ms(14),
