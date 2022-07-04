@@ -8,7 +8,7 @@ import {
   View,
   ActivityIndicator,
 } from 'react-native';
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Icons } from '../../assets/icons';
 import { COLORS } from '../../assets/colors';
 import { ms } from 'react-native-size-matters';
@@ -17,17 +17,28 @@ import { useDispatch, useSelector } from 'react-redux';
 import { getAllBuyerProduct } from '../../data/slices/buyerSlice';
 import NumberFormat from 'react-number-format';
 
-const FilterScreen = () => {
+const FilterScreen = ({ route }) => {
   const navigation = useNavigation();
   const dispatch = useDispatch();
 
   const { product } = useSelector(state => state.buyer);
   const { isLoading } = useSelector(state => state.global);
   const [searchText, setSearchText] = useState('');
-  // const [allProduct, setAllProduct] = useState(product);
+
+  const [allProduct, setAllProduct] = useState(product);
+
+  useEffect(() => {
+    dispatch(
+      getAllBuyerProduct({
+        status: '',
+        category_id: '',
+        search: route.params.filterText,
+      }),
+    );
+  }, [dispatch, route.params.filterText]);
 
   const ProductRender = ({ name, category, harga, image_url }) => (
-    <TouchableOpacity style={styles.btnParoduct}>
+    <TouchableOpacity style={styles.btnProduct}>
       {image_url === null || image_url === '' ? (
         <Image
           source={require('../../assets/images/img_no_image.png')}
@@ -73,15 +84,13 @@ const FilterScreen = () => {
             onChangeText={text => setSearchText(text)}
           />
           <TouchableOpacity
-            onPress={() =>
-              dispatch(
-                getAllBuyerProduct({
-                  status: '',
-                  category_id: '',
-                  search: searchText,
-                }),
-              )
-            }>
+            onPress={() => {
+              setAllProduct(
+                product.filter(item =>
+                  item?.name?.toLowerCase().match(searchText.toLowerCase()),
+                ),
+              );
+            }}>
             <Image source={Icons.Search} style={styles.search} />
           </TouchableOpacity>
         </View>
@@ -94,7 +103,7 @@ const FilterScreen = () => {
         <View style={styles.mainContainer}>
           <View style={styles.productContainer}>
             <FlatList
-              data={product}
+              data={allProduct}
               key={2}
               numColumns={2}
               columnWrapperStyle={styles.columnWrapperStyle}

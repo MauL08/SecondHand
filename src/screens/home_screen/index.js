@@ -16,12 +16,11 @@ import { Icons } from '../../assets/icons';
 import { useDispatch, useSelector } from 'react-redux';
 import { getAllBuyerProduct } from '../../data/slices/buyerSlice';
 import { getSellerCategory } from '../../data/slices/sellerSlice';
-import { useNavigation } from '@react-navigation/native';
 import NumberFormat from 'react-number-format';
 
 const HomeScreen = () => {
   const dispatch = useDispatch();
-  const navigation = useNavigation();
+
   const { product } = useSelector(state => state.buyer);
   const { category } = useSelector(state => state.seller);
   const { isLoading } = useSelector(state => state.global);
@@ -29,6 +28,8 @@ const HomeScreen = () => {
   const [currCategory, setCurrCategory] = useState('');
   const [searchText, setSearchText] = useState('');
   // const [allCategory, setAllCategory] = useState(category);
+  // const [allProduct, setAllProduct] = useState([]);
+  // const [allProductBackup, setAllProductBackup] = useState([]);
 
   useEffect(() => {
     dispatch(
@@ -40,6 +41,10 @@ const HomeScreen = () => {
     );
     dispatch(getSellerCategory());
   }, [currCategory, dispatch]);
+
+  // const searchProduct = value => {
+  //   setAllProduct(allProductBackup.filter(item item.name.match(value)));
+  // };
 
   const FilterRender = ({ id, name }) => (
     <TouchableOpacity
@@ -85,19 +90,18 @@ const HomeScreen = () => {
           <TextInput
             style={styles.input}
             placeholder="Cari di Second Hand"
-            onChangeText={text => setSearchText(text)}
+            onChangeText={text => setSearchText(text.toLowerCase())}
           />
           <TouchableOpacity
-            onPress={() => {
-              navigation.navigate('Filter');
+            onPress={() =>
               dispatch(
                 getAllBuyerProduct({
                   status: '',
                   category_id: '',
                   search: searchText,
                 }),
-              );
-            }}>
+              )
+            }>
             <Image source={Icons.Search} style={styles.search} />
           </TouchableOpacity>
         </View>
