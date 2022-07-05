@@ -14,12 +14,17 @@ import { ms } from 'react-native-size-matters';
 import { COLORS } from '../../assets/colors';
 import { Icons } from '../../assets/icons';
 import { useDispatch, useSelector } from 'react-redux';
-import { getAllBuyerProduct } from '../../data/slices/buyerSlice';
+import {
+  getAllBuyerProduct,
+  getBuyerProductByID,
+} from '../../data/slices/buyerSlice';
 import { getSellerCategory } from '../../data/slices/sellerSlice';
 import NumberFormat from 'react-number-format';
+import { useNavigation } from '@react-navigation/native';
 
 const HomeScreen = () => {
   const dispatch = useDispatch();
+  const navigation = useNavigation();
 
   const { product } = useSelector(state => state.buyer);
   const { category } = useSelector(state => state.seller);
@@ -75,8 +80,13 @@ const HomeScreen = () => {
     </TouchableOpacity>
   );
 
-  const ProductRender = ({ name, category, harga, image_url }) => (
-    <TouchableOpacity style={styles.btnProduct}>
+  const ProductRender = ({ index, name, category, harga, image_url }) => (
+    <TouchableOpacity
+      style={styles.btnProduct}
+      onPress={() => {
+        dispatch(getBuyerProductByID(index));
+        navigation.navigate('DetailProduct');
+      }}>
       {image_url === null || image_url === '' ? (
         <Image
           source={require('../../assets/images/img_no_image.png')}
@@ -162,6 +172,7 @@ const HomeScreen = () => {
             columnWrapperStyle={styles.columnWrapperStyle}
             renderItem={({ item }) => (
               <ProductRender
+                index={item.id}
                 name={item.name}
                 category={item?.Categories[0]?.name}
                 harga={item.base_price}

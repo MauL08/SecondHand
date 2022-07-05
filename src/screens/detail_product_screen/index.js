@@ -8,36 +8,38 @@ import {
   Image,
   TouchableOpacity,
   TextInput,
+  ActivityIndicator,
 } from 'react-native';
 import React, { useState, useCallback, useRef, useMemo } from 'react';
 import { ms } from 'react-native-size-matters';
 import { COLORS } from '../../assets/colors';
 import { Icons } from '../../assets/icons';
+import ScreenStatusBar from '../../widgets/screen_status_bar_widget';
 import { useNavigation } from '@react-navigation/native';
 import BottomSheet, {
   BottomSheetBackdrop,
   BottomSheetView,
 } from '@gorhom/bottom-sheet';
 import { GestureHandlerRootView } from 'react-native-gesture-handler';
+// import { useDispatch, useSelector } from 'react-redux';
+import { useSelector } from 'react-redux';
+
+import NumberFormat from 'react-number-format';
+// import { createBuyerOrder } from '../../data/slices/buyerSlice';
 const WIDTH = Dimensions.get('window').width;
 
 const DetailProductScreen = () => {
   const navigation = useNavigation();
-  const [imgActive, setImgActive] = useState(0);
   const sheetRef = useRef(null);
   const [isOpen, setIsOpen] = useState(false);
   const [btnActive, setBtnActive] = useState(true);
 
-  const onChange = nativeEvent => {
-    if (nativeEvent) {
-      const slide = Math.floor(
-        nativeEvent.contentOffset.x / nativeEvent.layoutMeasurement.width,
-      );
-      if (slide !== imgActive) {
-        setImgActive(slide);
-      }
-    }
-  };
+  // const dispatch = useDispatch();
+  // const { access_token } = useSelector(state => state.user);
+  const { detailProduct } = useSelector(state => state.buyer);
+  const { isLoading } = useSelector(state => state.global);
+
+  // const [bidPrice, setBidPrice] = useState(0);
 
   const snapPoints = useMemo(() => ['69%', '90%'], []);
 
@@ -68,6 +70,18 @@ const DetailProductScreen = () => {
     [],
   );
 
+  // const onBidProduct = () => {
+  //   dispatch(
+  //     createBuyerOrder({
+  //       data: {
+  //         product_id: detailProduct.id,
+  //         bid_price: bidPrice,
+  //       },
+  //       token: access_token,
+  //     }),
+  //   );
+  // };
+
   const RenderBsView = () => (
     <BottomSheetView style={styles.bsContainer}>
       <Text style={styles.cardName}>Masukkan Harga Tawarmu</Text>
@@ -79,12 +93,18 @@ const DetailProductScreen = () => {
         <Image
           style={styles.userImg}
           source={{
-            uri: 'https://www.utileincasa.it/wp-content/uploads/2021/10/6oM-lgd-olia-nayda-dB3pkARCxHI-unsplash-scaled-e1629735546986.jpg',
+            uri: detailProduct.image_url,
           }}
         />
         <View style={styles.bsProductText}>
-          <Text style={styles.cardName}>Nama Penjual</Text>
-          <Text style={styles.txtPrice}>Rp 250.000</Text>
+          <Text style={styles.cardName}>{detailProduct.name}</Text>
+          <NumberFormat
+            value={detailProduct.base_price}
+            displayType={'text'}
+            thousandSeparator={true}
+            prefix={'Rp'}
+            renderText={value => <Text style={styles.txtPrice}>{value}</Text>}
+          />
         </View>
       </View>
       <Text style={styles.label}>Harga Tawar</Text>
@@ -95,125 +115,104 @@ const DetailProductScreen = () => {
     </BottomSheetView>
   );
 
-  const imageList = [
-    {
-      id: 1,
-      image_url:
-        'https://www.utileincasa.it/wp-content/uploads/2021/10/6oM-lgd-olia-nayda-dB3pkARCxHI-unsplash-scaled-e1629735546986.jpg',
-    },
-    {
-      id: 2,
-      image_url:
-        'https://assets.website-files.com/5b749aeb30c2321291cb4485/5e543b78c56f7a4b3e961205_Screen%20Shot%202020-02-24%20at%2012.32.24%20PM.png',
-    },
-    {
-      id: 3,
-      image_url:
-        'https://www.utileincasa.it/wp-content/uploads/2021/10/6oM-lgd-olia-nayda-dB3pkARCxHI-unsplash-scaled-e1629735546986.jpg',
-    },
-    {
-      id: 4,
-      image_url:
-        'https://assets.website-files.com/5b749aeb30c2321291cb4485/5e543b78c56f7a4b3e961205_Screen%20Shot%202020-02-24%20at%2012.32.24%20PM.png',
-    },
-  ];
-
-  return (
-    <GestureHandlerRootView style={styles.container}>
-      <SafeAreaView style={styles.container}>
-        <View style={styles.wrap}>
-          <TouchableOpacity
-            onPress={() => navigation.goBack()}
-            style={styles.btnBack}>
-            <Image source={Icons.ArrowLeft} style={styles.iconBack} />
-          </TouchableOpacity>
-          <ScrollView
-            onScroll={({ nativeEvent }) => onChange(nativeEvent)}
-            showsHorizontalScrollIndicator={false}
-            pagingEnabled={true}
-            horizontal={true}
-            style={styles.wrap}>
-            {imageList.map(item => (
-              <Image
-                key={item.id}
-                resizeMode="stretch"
-                style={styles.wrap}
-                source={{ uri: item.image_url }}
-              />
-            ))}
-          </ScrollView>
-          <View style={styles.wrapDot}>
-            {imageList.map((item, index) => (
-              <Text
-                key={item.id}
-                style={imgActive === index ? styles.dotActive : styles.dot}>
-                ●
-              </Text>
-            ))}
-          </View>
-        </View>
-        <ScrollView
-          style={styles.scrollCointainer}
-          showsVerticalScrollIndicator={false}>
-          <View style={styles.productContainer}>
-            <Text style={styles.cardName}>Jam Tangan Casio</Text>
-            <Text style={styles.txtSecondary}>Aksesoris</Text>
-            <Text style={styles.txtPrice}>Rp 250.000</Text>
-          </View>
-          <View style={styles.cardUser}>
+  if (isLoading) {
+    return (
+      <View style={styles.loadingContainer}>
+        <ScreenStatusBar />
+        <ActivityIndicator
+          style={styles.loading}
+          color={COLORS.primaryPurple4}
+          size="large"
+        />
+      </View>
+    );
+  } else {
+    return (
+      <GestureHandlerRootView style={styles.container}>
+        <ScreenStatusBar />
+        <SafeAreaView style={styles.container}>
+          <View style={styles.wrap}>
+            <TouchableOpacity
+              onPress={() => navigation.goBack()}
+              style={styles.btnBack}>
+              <Image source={Icons.ArrowLeft} style={styles.iconBack} />
+            </TouchableOpacity>
             <Image
-              source={{ uri: 'https://randomuser.me/api/portraits/men/62.jpg' }}
-              style={styles.userImg}
+              key={detailProduct.id}
+              resizeMode="stretch"
+              style={styles.wrap}
+              source={{ uri: detailProduct.image_url }}
             />
-            <View style={styles.userContainer}>
-              <Text style={styles.cardName}>Nama Penjual</Text>
-              <Text style={styles.txtSecondary}>Kota</Text>
+          </View>
+          <ScrollView
+            style={styles.scrollCointainer}
+            showsVerticalScrollIndicator={false}>
+            <View style={styles.productContainer}>
+              <Text style={styles.cardName}>{detailProduct.name}</Text>
+              <Text style={styles.txtSecondary}>
+                {detailProduct.Categories[0].name}
+              </Text>
+              <NumberFormat
+                value={detailProduct.base_price}
+                displayType={'text'}
+                thousandSeparator={true}
+                prefix={'Rp'}
+                renderText={value => (
+                  <Text style={styles.txtPrice}>{value}</Text>
+                )}
+              />
             </View>
-          </View>
-          <View style={styles.cardDesc}>
-            <Text style={styles.cardName}>Deskripsi</Text>
-            <Text style={styles.txtDesc}>
-              Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do
-              eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut
-              enim ad minim veniam, quis nostrud exercitation ullamco laboris
-              nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in
-              reprehenderit in voluptate velit esse cillum dolore eu fugiat
-              nulla pariatur. Excepteur sint occaecat cupidatat non proident,
-              sunt in culpa qui officia deserunt mollit anim id est laborum.
+            <View style={styles.cardUser}>
+              <Image
+                source={{ uri: detailProduct.User.image_url }}
+                style={styles.userImg}
+              />
+              <View style={styles.userContainer}>
+                <Text style={styles.cardName}>
+                  {detailProduct.User.full_name}
+                </Text>
+                <Text style={styles.txtSecondary}>
+                  {detailProduct.location}
+                </Text>
+              </View>
+            </View>
+            <View style={styles.cardDesc}>
+              <Text style={styles.cardName}>Deskripsi</Text>
+              <Text style={styles.txtDesc}>{detailProduct.description}</Text>
+            </View>
+          </ScrollView>
+          <TouchableOpacity
+            style={[
+              styles.btnTerbitkan,
+              {
+                backgroundColor: btnActive
+                  ? COLORS.primaryPurple4
+                  : COLORS.neutral2,
+              },
+            ]}
+            onPress={btnActive ? () => handleSnapPress(0) : null}>
+            <Text style={styles.txtBtn}>
+              {btnActive
+                ? 'Saya Tertarik dan ingin Nego'
+                : 'Menunggu respon penjual'}
             </Text>
-          </View>
-        </ScrollView>
-        <TouchableOpacity
-          style={[
-            styles.btnTerbitkan,
-            {
-              backgroundColor: btnActive
-                ? COLORS.primaryPurple4
-                : COLORS.neutral2,
-            },
-          ]}
-          onPress={btnActive ? () => handleSnapPress(0) : null}>
-          <Text style={styles.txtBtn}>
-            {btnActive
-              ? 'Saya Tertarik dan ingin Nego'
-              : 'Menunggu respon penjual'}
-          </Text>
-        </TouchableOpacity>
-      </SafeAreaView>
-      {isOpen ? (
-        <BottomSheet
-          ref={sheetRef}
-          snapPoints={snapPoints}
-          handleIndicatorStyle={styles.handleIndicatorStyle}
-          enablePanDownToClose={true}
-          backdropComponent={renderBackdrop}
-          onChange={handleSheetChanges}
-          onClose={() => setIsOpen(false)}>
-          <RenderBsView />
-        </BottomSheet>
-      ) : null}
-    </GestureHandlerRootView>
-  );
+          </TouchableOpacity>
+        </SafeAreaView>
+        {isOpen ? (
+          <BottomSheet
+            ref={sheetRef}
+            snapPoints={snapPoints}
+            handleIndicatorStyle={styles.handleIndicatorStyle}
+            enablePanDownToClose={true}
+            backdropComponent={renderBackdrop}
+            onChange={handleSheetChanges}
+            onClose={() => setIsOpen(false)}>
+            <RenderBsView />
+          </BottomSheet>
+        ) : null}
+      </GestureHandlerRootView>
+    );
+  }
 };
 
 export default DetailProductScreen;
@@ -378,5 +377,10 @@ const styles = StyleSheet.create({
     width: ms(60),
     height: ms(6),
     marginTop: ms(8),
+  },
+  loadingContainer: {
+    flex: 1,
+    backgroundColor: COLORS.neutral1,
+    justifyContent: 'center',
   },
 });

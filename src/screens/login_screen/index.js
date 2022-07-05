@@ -16,6 +16,7 @@ import { useNavigation } from '@react-navigation/native';
 import { Icons } from '../../assets/icons';
 import { useDispatch, useSelector } from 'react-redux';
 import { postLogin } from '../../data/slices/userSlice';
+import { getSellerCategory } from '../../data/slices/sellerSlice';
 
 const styles = StyleSheet.create({
   container: {
@@ -136,6 +137,7 @@ function LoginScreen() {
   });
 
   const onLogin = (email, password) => {
+    dispatch(getSellerCategory());
     dispatch(
       postLogin({
         email,
