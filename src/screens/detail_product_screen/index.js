@@ -326,7 +326,7 @@ const styles = StyleSheet.create({
     backgroundColor: COLORS.primaryPurple4,
     alignSelf: 'center',
     borderRadius: ms(16),
-    marginTop: ms(540),
+    bottom: ms(24),
   },
   txtBtn: {
     color: COLORS.neutral1,
