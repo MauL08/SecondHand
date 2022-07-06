@@ -1,11 +1,4 @@
-import {
-  StyleSheet,
-  Text,
-  View,
-  Image,
-  TouchableOpacity,
-  ActivityIndicator,
-} from 'react-native';
+import { StyleSheet, Text, View, Image, TouchableOpacity } from 'react-native';
 import React, { useEffect } from 'react';
 import { moderateScale } from 'react-native-size-matters';
 import { COLORS } from '../../assets/colors';
@@ -13,6 +6,7 @@ import { useNavigation } from '@react-navigation/native';
 import { useDispatch, useSelector } from 'react-redux';
 import { getUser, setLogout } from '../../data/slices/userSlice';
 import ScreenStatusBar from '../../widgets/screen_status_bar_widget';
+import LoadingWidget from '../../widgets/loading_widget';
 
 const styles = StyleSheet.create({
   container: {
@@ -83,15 +77,11 @@ function ProfileScreen() {
   }, [access_token, dispatch]);
 
   if (isLoading) {
-    return (
-      <View style={styles.loadingContainer}>
-        <ScreenStatusBar />
-        <ActivityIndicator color={COLORS.primaryPurple4} size="large" />
-      </View>
-    );
+    return <LoadingWidget />;
   } else {
     return (
       <View style={styles.container}>
+        <ScreenStatusBar />
         <Text style={styles.title}>Akun Saya</Text>
         {userDetail?.image_url === null ? (
           <View style={styles.imageProfileContainer}>

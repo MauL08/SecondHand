@@ -7,7 +7,6 @@ import {
   TextInput,
   TouchableOpacity,
   View,
-  ActivityIndicator,
 } from 'react-native';
 import React, { useState, useEffect } from 'react';
 import { ms } from 'react-native-size-matters';
@@ -21,6 +20,7 @@ import {
 import { getSellerCategory } from '../../data/slices/sellerSlice';
 import NumberFormat from 'react-number-format';
 import { useNavigation } from '@react-navigation/native';
+import LoadingWidget from '../../widgets/loading_widget';
 
 const HomeScreen = () => {
   const dispatch = useDispatch();
@@ -160,9 +160,7 @@ const HomeScreen = () => {
         )}
       </View>
       {isLoading ? (
-        <View style={styles.loadingContainer}>
-          <ActivityIndicator color={COLORS.primaryPurple4} size="large" />
-        </View>
+        <LoadingWidget />
       ) : allProduct.length === 0 ? (
         <View style={styles.dumpText}>
           <Text>Tidak ada produk yang tersedia</Text>
@@ -357,8 +355,5 @@ const styles = StyleSheet.create({
     flexDirection: 'column',
     alignItems: 'center',
     fontSize: ms(18),
-  },
-  loadingContainer: {
-    marginTop: ms(80),
   },
 });

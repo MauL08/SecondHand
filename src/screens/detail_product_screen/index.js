@@ -8,7 +8,6 @@ import {
   Image,
   TouchableOpacity,
   TextInput,
-  ActivityIndicator,
 } from 'react-native';
 import React, { useState, useCallback, useRef, useMemo } from 'react';
 import { ms } from 'react-native-size-matters';
@@ -26,6 +25,7 @@ import NumberFormat from 'react-number-format';
 import { createBuyerOrder } from '../../data/slices/buyerSlice';
 import * as yup from 'yup';
 import { Formik } from 'formik';
+import LoadingWidget from '../../widgets/loading_widget';
 // import Toast from 'react-native-toast-message';
 const WIDTH = Dimensions.get('window').width;
 
@@ -170,12 +170,7 @@ const DetailProductScreen = () => {
   );
 
   if (isLoading) {
-    return (
-      <View style={styles.loadingContainer}>
-        <ScreenStatusBar />
-        <ActivityIndicator color={COLORS.primaryPurple4} size="large" />
-      </View>
-    );
+    return <LoadingWidget />;
   } else {
     return (
       <GestureHandlerRootView style={styles.container}>
