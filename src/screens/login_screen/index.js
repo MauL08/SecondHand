@@ -136,7 +136,7 @@ function LoginScreen() {
       .required('Password dibutuhkan'),
   });
 
-  const onLogin = (email, password) => {
+  const onLogin = async (email, password) => {
     dispatch(getSellerCategory());
     dispatch(
       postLogin({

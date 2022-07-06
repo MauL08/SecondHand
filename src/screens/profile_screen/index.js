@@ -1,10 +1,18 @@
-import { StyleSheet, Text, View, Image, TouchableOpacity } from 'react-native';
+import {
+  StyleSheet,
+  Text,
+  View,
+  Image,
+  TouchableOpacity,
+  ActivityIndicator,
+} from 'react-native';
 import React, { useEffect } from 'react';
 import { moderateScale } from 'react-native-size-matters';
 import { COLORS } from '../../assets/colors';
 import { useNavigation } from '@react-navigation/native';
 import { useDispatch, useSelector } from 'react-redux';
 import { getUser, setLogout } from '../../data/slices/userSlice';
+import ScreenStatusBar from '../../widgets/screen_status_bar_widget';
 
 const styles = StyleSheet.create({
   container: {
@@ -68,61 +76,74 @@ function ProfileScreen() {
   const navigation = useNavigation();
   const dispatch = useDispatch();
   const { access_token, userDetail } = useSelector(state => state.user);
+  const { isLoading } = useSelector(state => state.global);
 
   useEffect(() => {
     dispatch(getUser(access_token));
   }, [access_token, dispatch]);
 
-  return (
-    <View style={styles.container}>
-      <Text style={styles.title}>Akun Saya</Text>
-      {userDetail.image_url === null ? (
-        <View style={styles.imageProfileContainer}>
+  if (isLoading) {
+    return (
+      <View style={styles.loadingContainer}>
+        <ScreenStatusBar />
+        <ActivityIndicator color={COLORS.primaryPurple4} size="large" />
+      </View>
+    );
+  } else {
+    return (
+      <View style={styles.container}>
+        <Text style={styles.title}>Akun Saya</Text>
+        {userDetail?.image_url === null ? (
+          <View style={styles.imageProfileContainer}>
+            <Image
+              style={[styles.icon, { tintColor: COLORS.primaryPurple4 }]}
+              source={require('../../assets/icons/icon_camera.png')}
+            />
+          </View>
+        ) : (
+          <View style={styles.imageUserContainer}>
+            <Image
+              style={styles.image}
+              source={{ uri: userDetail?.image_url }}
+            />
+          </View>
+        )}
+        <TouchableOpacity
+          style={styles.menuContainer}
+          onPress={() => {
+            dispatch(getUser(access_token));
+            navigation.navigate('LengkapiAkun');
+          }}>
           <Image
-            style={[styles.icon, { tintColor: COLORS.primaryPurple4 }]}
-            source={require('../../assets/icons/icon_camera.png')}
+            style={styles.icon}
+            source={require('../../assets/icons/icon_edit-3.png')}
           />
-        </View>
-      ) : (
-        <View style={styles.imageUserContainer}>
-          <Image style={styles.image} source={{ uri: userDetail.image_url }} />
-        </View>
-      )}
-      <TouchableOpacity
-        style={styles.menuContainer}
-        onPress={() => {
-          dispatch(getUser(access_token));
-          navigation.navigate('LengkapiAkun');
-        }}>
-        <Image
-          style={styles.icon}
-          source={require('../../assets/icons/icon_edit-3.png')}
-        />
-        <Text style={styles.regularText}>Ubah Akun</Text>
-      </TouchableOpacity>
+          <Text style={styles.regularText}>Ubah Akun</Text>
+        </TouchableOpacity>
 
-      <TouchableOpacity style={styles.menuContainer}>
-        <Image
-          style={styles.icon}
-          source={require('../../assets/icons/icon_settings.png')}
-        />
-        <Text style={styles.regularText}>Pengaturan Akun</Text>
-      </TouchableOpacity>
+        <TouchableOpacity style={styles.menuContainer}>
+          <Image
+            style={styles.icon}
+            source={require('../../assets/icons/icon_settings.png')}
+          />
+          <Text style={styles.regularText}>Pengaturan Akun</Text>
+        </TouchableOpacity>
 
-      <TouchableOpacity
-        style={styles.menuContainer}
-        onPress={() => {
-          dispatch(setLogout());
-          navigation.navigate('Login');
-        }}>
-        <Image
-          style={styles.icon}
-          source={require('../../assets/icons/icon_log-out.png')}
-        />
-        <Text style={styles.regularText}>Keluar</Text>
-      </TouchableOpacity>
-    </View>
-  );
+        <TouchableOpacity
+          style={styles.menuContainer}
+          onPress={() => {
+            dispatch(setLogout());
+            navigation.navigate('Login');
+          }}>
+          <Image
+            style={styles.icon}
+            source={require('../../assets/icons/icon_log-out.png')}
+          />
+          <Text style={styles.regularText}>Keluar</Text>
+        </TouchableOpacity>
+      </View>
+    );
+  }
 }
 
 export default ProfileScreen;

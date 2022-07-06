@@ -37,6 +37,7 @@ const HomeScreen = () => {
   const [allProduct, setAllProduct] = useState([]);
 
   useEffect(() => {
+    dispatch(getSellerCategory());
     dispatch(
       getAllBuyerProduct({
         status: '',
@@ -51,7 +52,6 @@ const HomeScreen = () => {
       },
       ...category,
     ]);
-    dispatch(getSellerCategory());
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [currCategory, dispatch]);
 
@@ -145,15 +145,19 @@ const HomeScreen = () => {
       </View>
       <Text style={styles.midTitle}>Telusuri Kategori</Text>
       <View style={styles.filterContainer}>
-        <FlatList
-          data={allCategory}
-          renderItem={({ item }) => (
-            <FilterRender name={item.name} id={item.id} />
-          )}
-          keyExtractor={item => item.id}
-          horizontal={true}
-          showsHorizontalScrollIndicator={false}
-        />
+        {isLoading ? (
+          <View />
+        ) : (
+          <FlatList
+            data={allCategory}
+            renderItem={({ item }) => (
+              <FilterRender name={item.name} id={item.id} />
+            )}
+            keyExtractor={item => item.id}
+            horizontal={true}
+            showsHorizontalScrollIndicator={false}
+          />
+        )}
       </View>
       {isLoading ? (
         <View style={styles.loadingContainer}>

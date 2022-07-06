@@ -21,11 +21,12 @@ import BottomSheet, {
   BottomSheetView,
 } from '@gorhom/bottom-sheet';
 import { GestureHandlerRootView } from 'react-native-gesture-handler';
-// import { useDispatch, useSelector } from 'react-redux';
-import { useSelector } from 'react-redux';
-
+import { useDispatch, useSelector } from 'react-redux';
 import NumberFormat from 'react-number-format';
-// import { createBuyerOrder } from '../../data/slices/buyerSlice';
+import { createBuyerOrder } from '../../data/slices/buyerSlice';
+import * as yup from 'yup';
+import { Formik } from 'formik';
+// import Toast from 'react-native-toast-message';
 const WIDTH = Dimensions.get('window').width;
 
 const DetailProductScreen = () => {
@@ -34,14 +35,28 @@ const DetailProductScreen = () => {
   const [isOpen, setIsOpen] = useState(false);
   const [btnActive, setBtnActive] = useState(true);
 
-  // const dispatch = useDispatch();
-  // const { access_token } = useSelector(state => state.user);
+  const dispatch = useDispatch();
+  const { access_token } = useSelector(state => state.user);
   const { detailProduct } = useSelector(state => state.buyer);
   const { isLoading } = useSelector(state => state.global);
 
-  // const [bidPrice, setBidPrice] = useState(0);
-
   const snapPoints = useMemo(() => ['69%', '90%'], []);
+
+  // const showDoneToast = () => {
+  //   Toast.show({
+  //     type: 'success',
+  //     text1: 'Penawaran Sukses!',
+  //     text2: 'Harga tawarmu berhasil dikirim ke penjual',
+  //   });
+  // };
+
+  // const showFailedToast = () => {
+  //   Toast.show({
+  //     type: 'failed',
+  //     text1: 'Penawaran Gagal!',
+  //     text2: 'Produk gagal ditawar',
+  //   });
+  // };
 
   const handleSnapPress = useCallback(index => {
     sheetRef.current?.snapToIndex(index);
@@ -70,60 +85,95 @@ const DetailProductScreen = () => {
     [],
   );
 
-  // const onBidProduct = () => {
-  //   dispatch(
-  //     createBuyerOrder({
-  //       data: {
-  //         product_id: detailProduct.id,
-  //         bid_price: bidPrice,
-  //       },
-  //       token: access_token,
-  //     }),
-  //   );
-  // };
+  const onCheckCategories = cat => {
+    if (!cat) {
+      return '-';
+    }
+    return cat[0].name;
+  };
+
+  const validationSchema = yup.object().shape({
+    bid_price: yup.string().required('Masukkan harga yang ditawarkan'),
+  });
 
   const RenderBsView = () => (
-    <BottomSheetView style={styles.bsContainer}>
-      <Text style={styles.cardName}>Masukkan Harga Tawarmu</Text>
-      <Text style={styles.txtDesc}>
-        Harga tawaranmu akan diketahui penjual, jika penjual cocok kamu akan
-        segera dihubungi penjual.
-      </Text>
-      <View style={styles.bsProduct}>
-        <Image
-          style={styles.userImg}
-          source={{
-            uri: detailProduct.image_url,
-          }}
-        />
-        <View style={styles.bsProductText}>
-          <Text style={styles.cardName}>{detailProduct.name}</Text>
-          <NumberFormat
-            value={detailProduct.base_price}
-            displayType={'text'}
-            thousandSeparator={true}
-            prefix={'Rp'}
-            renderText={value => <Text style={styles.txtPrice}>{value}</Text>}
+    <Formik
+      initialValues={{ bid_price: '' }}
+      validateOnMount={true}
+      validationSchema={validationSchema}>
+      {({ handleChange, handleBlur, values, touched, errors, isValid }) => (
+        <BottomSheetView style={styles.bsContainer}>
+          <Text style={styles.cardName}>Masukkan Harga Tawarmu</Text>
+          <Text style={styles.txtDesc}>
+            Harga tawaranmu akan diketahui penjual, jika penjual cocok kamu akan
+            segera dihubungi penjual.
+          </Text>
+          <View style={styles.bsProduct}>
+            <Image
+              style={styles.userImg}
+              source={{
+                uri: detailProduct.image_url,
+              }}
+            />
+            <View style={styles.bsProductText}>
+              <Text style={styles.cardName}>{detailProduct.name}</Text>
+              <NumberFormat
+                value={detailProduct?.base_price}
+                displayType={'text'}
+                thousandSeparator={true}
+                prefix={'Rp'}
+                renderText={value => (
+                  <Text style={styles.txtPrice}>{value}</Text>
+                )}
+              />
+            </View>
+          </View>
+          <Text style={styles.label}>Harga Tawar</Text>
+          <TextInput
+            style={styles.input}
+            placeholder="Rp 0,00"
+            onChangeText={handleChange('bid_price')}
+            onBlur={handleBlur('bid_price')}
+            value={values.bid_price}
           />
-        </View>
-      </View>
-      <Text style={styles.label}>Harga Tawar</Text>
-      <TextInput style={styles.input} placeholder="Rp 0,00" />
-      <TouchableOpacity style={styles.btnKirim} onPress={() => handleClose(-1)}>
-        <Text style={styles.txtBtn}>Kirim</Text>
-      </TouchableOpacity>
-    </BottomSheetView>
+          {errors.bid_price && touched.bid_price && (
+            <Text style={styles.errors}>{errors.bid_price}</Text>
+          )}
+          <TouchableOpacity
+            style={[
+              styles.btnKirim,
+              {
+                backgroundColor: isValid
+                  ? COLORS.primaryPurple4
+                  : COLORS.neutral2,
+              },
+            ]}
+            disabled={!isValid}
+            onPress={() => {
+              // showDoneToast();
+              dispatch(
+                createBuyerOrder({
+                  data: {
+                    product_id: detailProduct.id,
+                    bid_price: Number(values.bid_price),
+                  },
+                  token: access_token,
+                }),
+              );
+              handleClose(-1);
+            }}>
+            <Text style={styles.txtBtn}>Kirim</Text>
+          </TouchableOpacity>
+        </BottomSheetView>
+      )}
+    </Formik>
   );
 
   if (isLoading) {
     return (
       <View style={styles.loadingContainer}>
         <ScreenStatusBar />
-        <ActivityIndicator
-          style={styles.loading}
-          color={COLORS.primaryPurple4}
-          size="large"
-        />
+        <ActivityIndicator color={COLORS.primaryPurple4} size="large" />
       </View>
     );
   } else {
@@ -138,22 +188,22 @@ const DetailProductScreen = () => {
               <Image source={Icons.ArrowLeft} style={styles.iconBack} />
             </TouchableOpacity>
             <Image
-              key={detailProduct.id}
+              key={detailProduct?.id}
               resizeMode="stretch"
               style={styles.wrap}
-              source={{ uri: detailProduct.image_url }}
+              source={{ uri: detailProduct?.image_url }}
             />
           </View>
           <ScrollView
             style={styles.scrollCointainer}
             showsVerticalScrollIndicator={false}>
             <View style={styles.productContainer}>
-              <Text style={styles.cardName}>{detailProduct.name}</Text>
+              <Text style={styles.cardName}>{detailProduct?.name}</Text>
               <Text style={styles.txtSecondary}>
-                {detailProduct.Categories[0].name}
+                {onCheckCategories(detailProduct.Categories)}
               </Text>
               <NumberFormat
-                value={detailProduct.base_price}
+                value={detailProduct?.base_price}
                 displayType={'text'}
                 thousandSeparator={true}
                 prefix={'Rp'}
@@ -164,21 +214,21 @@ const DetailProductScreen = () => {
             </View>
             <View style={styles.cardUser}>
               <Image
-                source={{ uri: detailProduct.User.image_url }}
+                source={{ uri: detailProduct?.User?.image_url }}
                 style={styles.userImg}
               />
               <View style={styles.userContainer}>
                 <Text style={styles.cardName}>
-                  {detailProduct.User.full_name}
+                  {detailProduct?.User?.full_name}
                 </Text>
                 <Text style={styles.txtSecondary}>
-                  {detailProduct.location}
+                  {detailProduct?.User?.city}
                 </Text>
               </View>
             </View>
             <View style={styles.cardDesc}>
               <Text style={styles.cardName}>Deskripsi</Text>
-              <Text style={styles.txtDesc}>{detailProduct.description}</Text>
+              <Text style={styles.txtDesc}>{detailProduct?.description}</Text>
             </View>
           </ScrollView>
           <TouchableOpacity
@@ -190,7 +240,18 @@ const DetailProductScreen = () => {
                   : COLORS.neutral2,
               },
             ]}
-            onPress={btnActive ? () => handleSnapPress(0) : null}>
+            onPress={
+              btnActive
+                ? () => {
+                    // if (access_token === '') {
+                    //   navigation.navigate('Login');
+                    // } else {
+                    //   handleSnapPress(0);
+                    // }
+                    handleSnapPress(0);
+                  }
+                : null
+            }>
             <Text style={styles.txtBtn}>
               {btnActive
                 ? 'Saya Tertarik dan ingin Nego'
@@ -382,5 +443,10 @@ const styles = StyleSheet.create({
     flex: 1,
     backgroundColor: COLORS.neutral1,
     justifyContent: 'center',
+  },
+  errors: {
+    fontSize: ms(12),
+    color: COLORS.alertDanger,
+    fontFamily: 'Poppins-Medium',
   },
 });
