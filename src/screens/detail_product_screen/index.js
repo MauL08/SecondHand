@@ -19,6 +19,8 @@ import BottomSheet, {
   BottomSheetView,
 } from '@gorhom/bottom-sheet';
 import { GestureHandlerRootView } from 'react-native-gesture-handler';
+import * as yup from 'yup';
+import { Formik } from 'formik';
 const WIDTH = Dimensions.get('window').width;
 
 const DetailProductScreen = () => {
@@ -68,31 +70,61 @@ const DetailProductScreen = () => {
     [],
   );
 
+  const validationSchema = yup.object().shape({
+    bid_price: yup.string().required('Masukkan harga yang ditawarkan'),
+  });
+
   const RenderBsView = () => (
-    <BottomSheetView style={styles.bsContainer}>
-      <Text style={styles.cardName}>Masukkan Harga Tawarmu</Text>
-      <Text style={styles.txtDesc}>
-        Harga tawaranmu akan diketahui penjual, jika penjual cocok kamu akan
-        segera dihubungi penjual.
-      </Text>
-      <View style={styles.bsProduct}>
-        <Image
-          style={styles.userImg}
-          source={{
-            uri: 'https://www.utileincasa.it/wp-content/uploads/2021/10/6oM-lgd-olia-nayda-dB3pkARCxHI-unsplash-scaled-e1629735546986.jpg',
-          }}
-        />
-        <View style={styles.bsProductText}>
-          <Text style={styles.cardName}>Nama Penjual</Text>
-          <Text style={styles.txtPrice}>Rp 250.000</Text>
-        </View>
-      </View>
-      <Text style={styles.label}>Harga Tawar</Text>
-      <TextInput style={styles.input} placeholder="Rp 0,00" />
-      <TouchableOpacity style={styles.btnKirim} onPress={() => handleClose(-1)}>
-        <Text style={styles.txtBtn}>Kirim</Text>
-      </TouchableOpacity>
-    </BottomSheetView>
+    <Formik
+      initialValues={{ bid_price: '' }}
+      validateOnMount={true}
+      validationSchema={validationSchema}>
+      {({ handleChange, handleBlur, values, touched, errors, isValid }) => (
+        <BottomSheetView style={styles.bsContainer}>
+          <Text style={styles.cardName}>Masukkan Harga Tawarmu</Text>
+          <Text style={styles.txtDesc}>
+            Harga tawaranmu akan diketahui penjual, jika penjual cocok kamu akan
+            segera dihubungi penjual.
+          </Text>
+          <View style={styles.bsProduct}>
+            <Image
+              style={styles.userImg}
+              source={{
+                uri: 'https://www.utileincasa.it/wp-content/uploads/2021/10/6oM-lgd-olia-nayda-dB3pkARCxHI-unsplash-scaled-e1629735546986.jpg',
+              }}
+            />
+            <View style={styles.bsProductText}>
+              <Text style={styles.cardName}>Nama Penjual</Text>
+              <Text style={styles.txtPrice}>Rp 250.000</Text>
+            </View>
+          </View>
+          <Text style={styles.label}>Harga Tawar</Text>
+          <TextInput
+            style={styles.input}
+            placeholder="Rp 0,00"
+            onChangeText={handleChange('bid_price')}
+            onBlur={handleBlur('bid_price')}
+            value={values.bid_price}
+          />
+          {errors.bid_price && touched.bid_price && (
+            <Text style={styles.errors}>{errors.bid_price}</Text>
+          )}
+          <TouchableOpacity
+            style={[
+              styles.btnKirim,
+              {
+                backgroundColor: isValid
+                  ? COLORS.primaryPurple4
+                  : COLORS.neutral2,
+              },
+            ]}
+            disabled={!isValid}
+            onPress={() => handleClose(-1)}>
+            <Text style={styles.txtBtn}>Kirim</Text>
+          </TouchableOpacity>
+        </BottomSheetView>
+      )}
+    </Formik>
   );
 
   const imageList = [
@@ -378,5 +410,10 @@ const styles = StyleSheet.create({
     width: ms(60),
     height: ms(6),
     marginTop: ms(8),
+  },
+  errors: {
+    fontSize: ms(12),
+    color: COLORS.alertDanger,
+    fontFamily: 'Poppins-Medium',
   },
 });
