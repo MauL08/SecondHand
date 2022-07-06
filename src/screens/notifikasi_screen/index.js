@@ -149,6 +149,7 @@ const NotifikasiScreen = () => {
           </View>
         ) : (
           <FlatList
+            inverted={true}
             data={allNotif}
             key={1}
             renderItem={({ item }) => (
