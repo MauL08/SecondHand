@@ -1,7 +1,7 @@
 import axios from 'axios';
 import { BASE_URL } from '../baseAPI';
 import { createSlice, createAsyncThunk } from '@reduxjs/toolkit';
-import { setLoading } from './globalSlice';
+import { setLoading, setSecondLoading } from './globalSlice';
 
 axios.defaults.validateStatus = status => {
   return status < 500;
@@ -122,13 +122,13 @@ export const getSellerCategory = createAsyncThunk(
   'seller/getSellerCategory',
   async (credentials, { rejectWithValue, dispatch }) => {
     try {
-      dispatch(setLoading(true));
+      dispatch(setSecondLoading(true));
       const response = await axios.get(`${BASE_URL}/seller/category`);
       return response.data;
     } catch (error) {
       return rejectWithValue(error.response.data);
     } finally {
-      dispatch(setLoading(false));
+      dispatch(setSecondLoading(false));
     }
   },
 );
