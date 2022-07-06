@@ -17,6 +17,7 @@ import { Icons } from '../../assets/icons';
 import { useDispatch, useSelector } from 'react-redux';
 import { postLogin } from '../../data/slices/userSlice';
 import { getSellerCategory } from '../../data/slices/sellerSlice';
+import ScreenStatusBar from '../../widgets/screen_status_bar_widget';
 
 const styles = StyleSheet.create({
   container: {
@@ -153,6 +154,7 @@ function LoginScreen() {
       validationSchema={LoginValidationSchema}>
       {({ values, handleChange, handleBlur, touched, errors, isValid }) => (
         <View style={styles.container}>
+          <ScreenStatusBar />
           <TouchableOpacity>
             <Image
               style={styles.icon}

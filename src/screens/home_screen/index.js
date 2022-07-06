@@ -21,6 +21,7 @@ import { getSellerCategory } from '../../data/slices/sellerSlice';
 import NumberFormat from 'react-number-format';
 import { useNavigation } from '@react-navigation/native';
 import LoadingWidget from '../../widgets/loading_widget';
+import ScreenStatusBar from '../../widgets/screen_status_bar_widget';
 
 const HomeScreen = () => {
   const dispatch = useDispatch();
@@ -111,6 +112,7 @@ const HomeScreen = () => {
 
   return (
     <SafeAreaView style={styles.mainContainer}>
+      <ScreenStatusBar />
       <Image
         style={styles.gradient}
         source={require('../../assets/images/img_gradient_home.png')}
