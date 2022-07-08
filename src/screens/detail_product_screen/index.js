@@ -26,7 +26,7 @@ import { createBuyerOrder } from '../../data/slices/buyerSlice';
 import * as yup from 'yup';
 import { Formik } from 'formik';
 import LoadingWidget from '../../widgets/loading_widget';
-// import Toast from 'react-native-toast-message';
+import Toast from 'react-native-toast-message';
 const WIDTH = Dimensions.get('window').width;
 
 const DetailProductScreen = () => {
@@ -37,26 +37,28 @@ const DetailProductScreen = () => {
 
   const dispatch = useDispatch();
   const { access_token } = useSelector(state => state.user);
-  const { detailProduct } = useSelector(state => state.buyer);
+  const { detailProduct, orderResponseStatus } = useSelector(
+    state => state.buyer,
+  );
   const { isLoading } = useSelector(state => state.global);
 
   const snapPoints = useMemo(() => ['69%', '90%'], []);
 
-  // const showDoneToast = () => {
-  //   Toast.show({
-  //     type: 'success',
-  //     text1: 'Penawaran Sukses!',
-  //     text2: 'Harga tawarmu berhasil dikirim ke penjual',
-  //   });
-  // };
+  const showDoneToast = () => {
+    Toast.show({
+      type: 'success',
+      text1: 'Penawaran Sukses!',
+      text2: 'Harga tawarmu berhasil dikirim ke penjual',
+    });
+  };
 
-  // const showFailedToast = () => {
-  //   Toast.show({
-  //     type: 'failed',
-  //     text1: 'Penawaran Gagal!',
-  //     text2: 'Produk gagal ditawar',
-  //   });
-  // };
+  const showFailedToast = () => {
+    Toast.show({
+      type: 'error',
+      text1: 'Penawaran Gagal!',
+      text2: 'Produk gagal ditawar, penawaran produk telah mencapai batas',
+    });
+  };
 
   const handleSnapPress = useCallback(index => {
     sheetRef.current?.snapToIndex(index);
@@ -150,7 +152,6 @@ const DetailProductScreen = () => {
             ]}
             disabled={!isValid}
             onPress={() => {
-              // showDoneToast();
               dispatch(
                 createBuyerOrder({
                   data: {
@@ -160,6 +161,7 @@ const DetailProductScreen = () => {
                   token: access_token,
                 }),
               );
+              orderResponseStatus <= 201 ? showDoneToast() : showFailedToast();
               handleClose(-1);
             }}>
             <Text style={styles.txtBtn}>Kirim</Text>

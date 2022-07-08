@@ -4,7 +4,7 @@ import { Provider } from 'react-redux';
 import SplashScreen from 'react-native-splash-screen';
 import CodePush from 'react-native-code-push';
 import PushNotification from 'react-native-push-notification';
-// import Toast from 'react-native-toast-message';
+import Toast from 'react-native-toast-message';
 
 import { persistor, store } from './data/store';
 import { PersistGate } from 'redux-persist/integration/react';
@@ -33,7 +33,11 @@ const App = () => {
       <PersistGate loading={null} persistor={persistor}>
         <RootNavigator />
       </PersistGate>
-      {/* <Toast /> */}
+      <Toast
+        ref={ref => {
+          Toast.setRef(ref);
+        }}
+      />
     </Provider>
   );
 };

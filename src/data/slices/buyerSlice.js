@@ -96,8 +96,7 @@ export const createBuyerOrder = createAsyncThunk(
           },
         },
       );
-      console.log(response.data);
-      return response.data;
+      return response.status;
     } catch (error) {
       return rejectWithValue(error.response.data);
     } finally {
@@ -156,6 +155,7 @@ const initialState = {
   detailProduct: {},
   order: [],
   detailOrder: {},
+  orderResponseStatus: 0,
 };
 
 const buyerSlice = createSlice({
@@ -186,9 +186,10 @@ const buyerSlice = createSlice({
         detailOrder: action.payload,
       };
     },
-    [createBuyerOrder.fulfilled]: state => {
+    [createBuyerOrder.fulfilled]: (state, action) => {
       return {
         ...state,
+        orderResponseStatus: action.payload,
       };
     },
     [updateBuyerOrder.fulfilled]: state => {
