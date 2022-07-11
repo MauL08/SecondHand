@@ -56,11 +56,6 @@ const HomeScreen = () => {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [currCategory, dispatch]);
 
-  useEffect(() => {
-    searchProduct(searchText);
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [product]);
-
   const searchProduct = value => {
     setAllProduct(
       product.filter(item =>
@@ -122,10 +117,7 @@ const HomeScreen = () => {
           <TextInput
             style={styles.input}
             placeholder="Cari di Second Hand"
-            onChangeText={text => {
-              setSearchText(text);
-              searchProduct(text);
-            }}
+            onChangeText={text => setSearchText(text)}
           />
           <TouchableOpacity onPress={() => searchProduct(searchText)}>
             <Image source={Icons.Search} style={styles.search} />
