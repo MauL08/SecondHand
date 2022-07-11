@@ -6,7 +6,6 @@ import {
   TextInput,
   TouchableOpacity,
   View,
-  ActivityIndicator,
   Alert,
   PermissionsAndroid,
   RefreshControl,
@@ -22,6 +21,8 @@ import { ms } from 'react-native-size-matters';
 import { useDispatch, useSelector } from 'react-redux';
 import { getUser, updateUser } from '../../data/slices/userSlice';
 import { launchCamera, launchImageLibrary } from 'react-native-image-picker';
+import LoadingWidget from '../../widgets/loading_widget';
+import ScreenStatusBar from '../../widgets/screen_status_bar_widget';
 
 const LengkapiInfoAkunScreen = () => {
   const navigation = useNavigation();
@@ -158,11 +159,7 @@ const LengkapiInfoAkunScreen = () => {
   };
 
   if (isLoading) {
-    return (
-      <View style={styles.loadingContainer}>
-        <ActivityIndicator color={COLORS.primaryPurple4} />
-      </View>
-    );
+    return <LoadingWidget />;
   } else {
     return (
       <Formik
@@ -186,6 +183,7 @@ const LengkapiInfoAkunScreen = () => {
             showsVerticalScrollIndicator={false}
             refreshControl={<RefreshControl onRefresh={onRefresh} />}
             style={styles.container}>
+            <ScreenStatusBar />
             <View style={styles.top}>
               <TouchableOpacity onPress={() => navigation.goBack()}>
                 <Image source={Icons.ArrowLeft} style={styles.iconBack} />

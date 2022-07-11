@@ -1,8 +1,6 @@
-// import { Alert } from 'react-native';
 import axios from 'axios';
 import { BASE_URL } from '../baseAPI';
 import { createSlice, createAsyncThunk } from '@reduxjs/toolkit';
-// import { navigate } from '../../core/router/navigator';
 import { setLoading } from './globalSlice';
 
 axios.defaults.validateStatus = status => {
@@ -50,7 +48,7 @@ export const getAllBuyerOrder = createAsyncThunk(
       dispatch(setLoading(true));
       const response = await axios.get(`${BASE_URL}/buyer/order`, {
         headers: {
-          Authorization: `Bearer ${token}`,
+          access_token: token,
         },
       });
       return response.data;
@@ -71,7 +69,7 @@ export const getBuyerOrderByID = createAsyncThunk(
         `${BASE_URL}/buyer/order/${credentials.id}`,
         {
           headers: {
-            Authorization: `Bearer ${credentials.token}`,
+            access_token: credentials.token,
           },
         },
       );
@@ -94,11 +92,11 @@ export const createBuyerOrder = createAsyncThunk(
         credentials.data,
         {
           headers: {
-            Authorization: `Bearer ${credentials.token}`,
+            access_token: credentials.token,
           },
         },
       );
-      return response.data;
+      return response.status;
     } catch (error) {
       return rejectWithValue(error.response.data);
     } finally {
@@ -117,7 +115,7 @@ export const updateBuyerOrder = createAsyncThunk(
         credentials.data,
         {
           headers: {
-            Authorization: `Bearer ${credentials.token}`,
+            access_token: credentials.token,
           },
         },
       );
@@ -139,7 +137,7 @@ export const deleteBuyerOrder = createAsyncThunk(
         `${BASE_URL}/buyer/order/${credentials.id}`,
         {
           headers: {
-            Authorization: `Bearer ${credentials.token}`,
+            access_token: credentials.token,
           },
         },
       );
@@ -153,7 +151,11 @@ export const deleteBuyerOrder = createAsyncThunk(
 );
 
 const initialState = {
-  data: [],
+  product: [],
+  detailProduct: {},
+  order: [],
+  detailOrder: {},
+  orderResponseStatus: 0,
 };
 
 const buyerSlice = createSlice({
@@ -163,30 +165,31 @@ const buyerSlice = createSlice({
     [getAllBuyerProduct.fulfilled]: (state, action) => {
       return {
         ...state,
-        data: action.payload,
+        product: action.payload,
       };
     },
     [getBuyerProductByID.fulfilled]: (state, action) => {
       return {
         ...state,
-        data: action.payload,
+        detailProduct: action.payload,
       };
     },
     [getAllBuyerOrder.fulfilled]: (state, action) => {
       return {
         ...state,
-        data: action.payload,
+        order: action.payload,
       };
     },
     [getBuyerOrderByID.fulfilled]: (state, action) => {
       return {
         ...state,
-        data: action.payload,
+        detailOrder: action.payload,
       };
     },
-    [createBuyerOrder.fulfilled]: state => {
+    [createBuyerOrder.fulfilled]: (state, action) => {
       return {
         ...state,
+        orderResponseStatus: action.payload,
       };
     },
     [updateBuyerOrder.fulfilled]: state => {

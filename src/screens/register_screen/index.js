@@ -16,6 +16,7 @@ import { moderateScale, ms } from 'react-native-size-matters';
 import { useNavigation } from '@react-navigation/native';
 import { useDispatch, useSelector } from 'react-redux';
 import { postRegister } from '../../data/slices/userSlice';
+import ScreenStatusBar from '../../widgets/screen_status_bar_widget';
 
 const Register = () => {
   const [showPassword, setShowPassword] = useState(true);
@@ -56,6 +57,7 @@ const Register = () => {
       validationSchema={RegisterValidationSchema}>
       {({ handleChange, handleBlur, values, touched, errors, isValid }) => (
         <View style={styles.container}>
+          <ScreenStatusBar />
           <TouchableOpacity>
             <Image source={Icons.ArrowLeft} style={styles.iconBack} />
           </TouchableOpacity>
