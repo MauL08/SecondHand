@@ -1,13 +1,13 @@
-import { StatusBar, useColorScheme } from 'react-native';
+import { StatusBar } from 'react-native';
 import React from 'react';
+import { COLORS } from '../../assets/colors';
 
 const ScreenStatusBar = () => {
-  const theme = useColorScheme();
-
-  return theme === 'dark' ? (
-    <StatusBar barStyle="light-content" backgroundColor="black" />
-  ) : (
-    <StatusBar barStyle="dark-content" backgroundColor="white" />
+  return (
+    <StatusBar
+      barStyle="light-content"
+      backgroundColor={COLORS.primaryPurple4}
+    />
   );
 };
 

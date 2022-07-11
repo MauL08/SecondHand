@@ -1,8 +1,7 @@
-// import { Alert } from 'react-native';
 import axios from 'axios';
 import { BASE_URL } from '../baseAPI';
 import { createSlice, createAsyncThunk } from '@reduxjs/toolkit';
-import { setLoading } from './globalSlice';
+import { setLoading, setSecondLoading } from './globalSlice';
 
 axios.defaults.validateStatus = status => {
   return status < 500;
@@ -123,34 +122,23 @@ export const getSellerCategory = createAsyncThunk(
   'seller/getSellerCategory',
   async (credentials, { rejectWithValue, dispatch }) => {
     try {
-      dispatch(setLoading(true));
-      const response = await axios.get(`${BASE_URL}/seller/category`, {
-        // headers: {
-        //   Authorization: `Bearer ${credentials.token}`,
-        // },
-      });
+      dispatch(setSecondLoading(true));
+      const response = await axios.get(`${BASE_URL}/seller/category`);
       return response.data;
     } catch (error) {
       return rejectWithValue(error.response.data);
     } finally {
-      dispatch(setLoading(false));
+      dispatch(setSecondLoading(false));
     }
   },
 );
 
 export const getSellerCategoryByID = createAsyncThunk(
   'seller/getSellerCategoryByID',
-  async (credentials, { rejectWithValue, dispatch }) => {
+  async (id, { rejectWithValue, dispatch }) => {
     try {
       dispatch(setLoading(true));
-      const response = await axios.get(
-        `${BASE_URL}/seller/category/${credentials.id}`,
-        {
-          // headers: {
-          //   Authorization: `Bearer ${credentials.token}`,
-          // },
-        },
-      );
+      const response = await axios.get(`${BASE_URL}/seller/category/${id}`);
       return response.data;
     } catch (error) {
       return rejectWithValue(error.response.data);
@@ -384,6 +372,8 @@ export const getSellerOrderProduct = createAsyncThunk(
 );
 
 const initialState = {
+  category: [],
+  detailCategory: {},
   data: [],
 };
 
@@ -416,13 +406,13 @@ const sellerSlice = createSlice({
     [getSellerCategory.fulfilled]: (state, action) => {
       return {
         ...state,
-        data: action.payload,
+        category: action.payload,
       };
     },
     [getSellerCategoryByID.fulfilled]: (state, action) => {
       return {
         ...state,
-        data: action.payload,
+        detailCategory: action.payload,
       };
     },
     [createSellerCategory.fulfilled]: state => {

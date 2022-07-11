@@ -16,7 +16,7 @@ export const getAllNotification = createAsyncThunk(
       dispatch(setLoading(true));
       const response = await axios.get(`${BASE_URL}/notification`, {
         headers: {
-          Authorization: `Bearer ${token}`,
+          access_token: token,
         },
       });
       return response.data;
@@ -73,7 +73,8 @@ export const updateNotification = createAsyncThunk(
 );
 
 const initialState = {
-  data: [],
+  allNotif: [],
+  detailNotif: {},
 };
 
 const notificationSlice = createSlice({
@@ -83,13 +84,13 @@ const notificationSlice = createSlice({
     [getAllNotification.fulfilled]: (state, action) => {
       return {
         ...state,
-        data: action.payload,
+        allNotif: action.payload,
       };
     },
     [getNotificationByID.fulfilled]: (state, action) => {
       return {
         ...state,
-        data: action.payload,
+        detailNotif: action.payload,
       };
     },
     [updateNotification.fulfilled]: state => {

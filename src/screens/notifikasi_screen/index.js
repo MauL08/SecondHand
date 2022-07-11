@@ -5,54 +5,35 @@ import {
   Text,
   TouchableOpacity,
   View,
+  ActivityIndicator,
+  Dimensions,
 } from 'react-native';
-import React from 'react';
+import React, { useEffect } from 'react';
 import { COLORS } from '../../assets/colors';
 import { ms } from 'react-native-size-matters';
+import { useDispatch, useSelector } from 'react-redux';
+import { getAllNotification } from '../../data/slices/notificationSlice';
+import NumberFormat from 'react-number-format';
+
+const { width } = Dimensions.get('screen');
 
 const NotifikasiScreen = () => {
-  const dataNotifikasi = [
-    {
-      id: 1,
-      name: 'Jam Tangan Casio',
-      product_price: 'Rp 250.000',
-      bid_price: 'Rp 200.000',
-      status: 'bid',
-      transaction_date: '19 Apr, 12:00',
-      image_url:
-        'https://www.utileincasa.it/wp-content/uploads/2021/10/6oM-lgd-olia-nayda-dB3pkARCxHI-unsplash-scaled-e1629735546986.jpg',
-    },
-    {
-      id: 2,
-      name: 'Jam Tangan Casio',
-      product_price: 'Rp 250.000',
-      bid_price: '',
-      status: 'terbit',
-      transaction_date: '19 Apr, 12:00',
-      image_url:
-        'https://www.utileincasa.it/wp-content/uploads/2021/10/6oM-lgd-olia-nayda-dB3pkARCxHI-unsplash-scaled-e1629735546986.jpg',
-    },
-    {
-      id: 3,
-      name: 'Jam Tangan Casio',
-      product_price: 'Rp 250.000',
-      bid_price: 'Rp 200.000',
-      status: 'accepted',
-      transaction_date: '19 Apr, 12:00',
-      image_url:
-        'https://www.utileincasa.it/wp-content/uploads/2021/10/6oM-lgd-olia-nayda-dB3pkARCxHI-unsplash-scaled-e1629735546986.jpg',
-    },
-    {
-      id: 4,
-      name: 'Jam Tangan Casio',
-      product_price: 'Rp 250.000',
-      bid_price: 'Rp 200.000',
-      status: 'declined',
-      transaction_date: '19 Apr, 12:00',
-      image_url:
-        'https://www.utileincasa.it/wp-content/uploads/2021/10/6oM-lgd-olia-nayda-dB3pkARCxHI-unsplash-scaled-e1629735546986.jpg',
-    },
-  ];
+  const dispatch = useDispatch();
+  const { access_token } = useSelector(state => state.user);
+  const { allNotif } = useSelector(state => state.notification);
+  const { isLoading } = useSelector(state => state.global);
+
+  useEffect(() => {
+    dispatch(getAllNotification(access_token));
+  }, [access_token, dispatch]);
+
+  const dateConvert = date => {
+    if (!date) {
+      return '-';
+    }
+    const theDate = date.split('T')[0].split('-');
+    return `${theDate[2]}-${theDate[1]}-${theDate[0]}`;
+  };
 
   const NotifCard = ({
     name,
@@ -61,16 +42,19 @@ const NotifikasiScreen = () => {
     status,
     transaction_date,
     image_url,
+    read,
   }) => {
     return (
       <TouchableOpacity style={styles.cardContainer}>
         <View style={styles.row}>
-          <Image
-            style={styles.imageProduct}
-            source={{
-              uri: image_url,
-            }}
-          />
+          {image_url === null || image_url === '' ? (
+            <Image
+              source={require('../../assets/images/img_no_image.png')}
+              style={styles.imageProduct}
+            />
+          ) : (
+            <Image source={{ uri: image_url }} style={styles.imageProduct} />
+          )}
           <View style={styles.textContainer}>
             <View style={styles.regularContainer}>
               <Text style={styles.regularSubText}>
@@ -81,28 +65,60 @@ const NotifikasiScreen = () => {
               </Text>
               <View style={styles.timestampContainer}>
                 <Text style={styles.regularSubText}>{transaction_date}</Text>
-                <View style={styles.circle}></View>
+                <View style={styles.circle(read)} />
               </View>
             </View>
             <Text style={styles.regularText2}>{name}</Text>
-            <Text
-              style={[
-                styles.regularText2,
-                {
-                  textDecorationLine:
-                    status === 'accepted' ? 'line-through' : null,
-                },
-              ]}>
-              {product_price}
-            </Text>
+            <NumberFormat
+              value={product_price}
+              displayType={'text'}
+              thousandSeparator={true}
+              prefix={'Rp'}
+              renderText={value => (
+                <Text
+                  style={[
+                    styles.regularText2,
+                    {
+                      textDecorationLine:
+                        status === 'accepted' ? 'line-through' : null,
+                    },
+                  ]}>
+                  {value}
+                </Text>
+              )}
+            />
             {status === 'bid' ? (
-              <Text style={styles.regularText2}>Ditawar {bid_price}</Text>
+              <NumberFormat
+                value={bid_price}
+                displayType={'text'}
+                thousandSeparator={true}
+                prefix={'Rp'}
+                renderText={value => (
+                  <Text style={styles.regularText2}>Ditawar {value}</Text>
+                )}
+              />
             ) : status === 'accepted' ? (
-              <Text style={styles.regularText2}>
-                Berhasil ditawar {bid_price}
-              </Text>
+              <NumberFormat
+                value={bid_price}
+                displayType={'text'}
+                thousandSeparator={true}
+                prefix={'Rp'}
+                renderText={value => (
+                  <Text style={styles.regularText2}>
+                    Berhasil ditawar {value}
+                  </Text>
+                )}
+              />
             ) : status === 'declined' ? (
-              <Text style={styles.regularText2}>Gagal ditawar {bid_price}</Text>
+              <NumberFormat
+                value={bid_price}
+                displayType={'text'}
+                thousandSeparator={true}
+                prefix={'Rp'}
+                renderText={value => (
+                  <Text style={styles.regularText2}>Gagal ditawar {value}</Text>
+                )}
+              />
             ) : null}
           </View>
         </View>
@@ -123,23 +139,35 @@ const NotifikasiScreen = () => {
     <View style={styles.container}>
       <Text style={styles.screenTitle}>Notifikasi</Text>
       <View>
-        <FlatList
-          data={dataNotifikasi}
-          key={1}
-          renderItem={({ item }) => (
-            <NotifCard
-              name={item.name}
-              product_price={item.product_price}
-              image_url={item.image_url}
-              bid_price={item.bid_price}
-              transaction_date={item.transaction_date}
-              status={item.status}
-            />
-          )}
-          keyExtractor={item => item.id}
-          showsVerticalScrollIndicator={false}
-          style={styles.flatlistStyle}
-        />
+        {isLoading ? (
+          <View style={styles.loadingContainer}>
+            <ActivityIndicator color={COLORS.primaryPurple4} size="large" />
+          </View>
+        ) : allNotif.length === 0 ? (
+          <View style={styles.dumpText}>
+            <Text>Tidak ada notifikasi</Text>
+          </View>
+        ) : (
+          <FlatList
+            inverted={true}
+            data={allNotif}
+            key={1}
+            renderItem={({ item }) => (
+              <NotifCard
+                name={item.product_name}
+                product_price={item.base_price}
+                image_url={item.image_url}
+                bid_price={item.bid_price}
+                transaction_date={dateConvert(item.transaction_date)}
+                status={item.status}
+                read={item.read}
+              />
+            )}
+            keyExtractor={item => item.id}
+            showsVerticalScrollIndicator={false}
+            style={styles.flatlistStyle}
+          />
+        )}
       </View>
     </View>
   );
@@ -197,23 +225,21 @@ const styles = StyleSheet.create({
     marginLeft: ms(16),
   },
   regularContainer: {
-    flex: 1,
     flexDirection: 'row',
+    width: ms(width - 120),
     justifyContent: 'space-between',
   },
   timestampContainer: {
     flexDirection: 'row',
-    left: ms(206),
-    position: 'absolute',
   },
-  circle: {
+  circle: status => ({
     width: ms(8),
     height: ms(8),
     borderRadius: ms(180) / ms(2),
-    backgroundColor: COLORS.alertDanger,
+    backgroundColor: status ? 'grey' : COLORS.alertDanger,
     alignSelf: 'center',
     marginLeft: ms(8),
-  },
+  }),
   bottomSubText: {
     fontSize: ms(10),
     color: COLORS.neutral3,
@@ -224,5 +250,15 @@ const styles = StyleSheet.create({
   },
   flatlistStyle: {
     marginBottom: ms(16),
+  },
+  dumpText: {
+    marginTop: ms(50),
+    color: COLORS.primaryPurple4,
+    flexDirection: 'column',
+    alignItems: 'center',
+    fontSize: ms(24),
+  },
+  loadingContainer: {
+    marginTop: ms(50),
   },
 });
