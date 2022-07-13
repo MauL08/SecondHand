@@ -91,7 +91,7 @@ const DetailProductScreen = () => {
     if (!cat) {
       return '-';
     }
-    return cat[0].name;
+    return cat[0]?.name;
   };
 
   const validationSchema = yup.object().shape({

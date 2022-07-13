@@ -14,7 +14,7 @@ export const getAllBuyerProduct = createAsyncThunk(
     try {
       dispatch(setLoading(true));
       const response = await axios.get(
-        `${BASE_URL}/buyer/product?status=${credentials.status}&category_id=${credentials.category_id}&search=${credentials.search}`,
+        `${BASE_URL}/buyer/product?status=${credentials.status}&category_id=${credentials.category_id}&search=${credentials.search}&page=${credentials.page}&per_page=${credentials.per_page}`,
       );
       return response.data;
     } catch (error) {
@@ -165,7 +165,7 @@ const buyerSlice = createSlice({
     [getAllBuyerProduct.fulfilled]: (state, action) => {
       return {
         ...state,
-        product: action.payload,
+        product: action.payload.data,
       };
     },
     [getBuyerProductByID.fulfilled]: (state, action) => {

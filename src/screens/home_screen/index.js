@@ -7,6 +7,7 @@ import {
   TextInput,
   TouchableOpacity,
   View,
+  Dimensions,
 } from 'react-native';
 import React, { useState, useEffect } from 'react';
 import { ms } from 'react-native-size-matters';
@@ -17,33 +18,40 @@ import {
   getAllBuyerProduct,
   getBuyerProductByID,
 } from '../../data/slices/buyerSlice';
-import { getSellerCategory } from '../../data/slices/sellerSlice';
+import {
+  getAllSellerBanner,
+  getSellerCategory,
+} from '../../data/slices/sellerSlice';
 import NumberFormat from 'react-number-format';
 import { useNavigation } from '@react-navigation/native';
 import LoadingWidget from '../../widgets/loading_widget';
 import ScreenStatusBar from '../../widgets/screen_status_bar_widget';
+import Carousel from 'react-native-snap-carousel';
+
+const { width } = Dimensions.get('screen');
 
 const HomeScreen = () => {
   const dispatch = useDispatch();
   const navigation = useNavigation();
 
   const { product } = useSelector(state => state.buyer);
-  const { category } = useSelector(state => state.seller);
+  const { category, banner } = useSelector(state => state.seller);
   const { isLoading } = useSelector(state => state.global);
 
   const [currCategory, setCurrCategory] = useState('');
   const [searchText, setSearchText] = useState('');
   const [allCategory, setAllCategory] = useState([]);
 
-  const [allProduct, setAllProduct] = useState([]);
-
   useEffect(() => {
     dispatch(getSellerCategory());
+    dispatch(getAllSellerBanner());
     dispatch(
       getAllBuyerProduct({
         status: '',
         category_id: currCategory,
         search: '',
+        page: 1,
+        per_page: 20,
       }),
     );
     setAllCategory([
@@ -56,14 +64,7 @@ const HomeScreen = () => {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [currCategory, dispatch]);
 
-  const searchProduct = value => {
-    setAllProduct(
-      product.filter(item =>
-        item?.name?.toLowerCase().match(value?.toLowerCase()),
-      ),
-    );
-  };
-
+  // eslint-disable-next-line react/no-unstable-nested-components
   const FilterRender = ({ id, name }) => (
     <TouchableOpacity
       style={styles.btnFilter(currCategory, id)}
@@ -76,6 +77,7 @@ const HomeScreen = () => {
     </TouchableOpacity>
   );
 
+  // eslint-disable-next-line react/no-unstable-nested-components
   const ProductRender = ({ index, name, category, harga, image_url }) => (
     <TouchableOpacity
       style={styles.btnProduct}
@@ -105,6 +107,14 @@ const HomeScreen = () => {
     </TouchableOpacity>
   );
 
+  // eslint-disable-next-line react/no-unstable-nested-components
+  const BannerRender = ({ image, nama }) => (
+    <View style={styles.bannerContainer}>
+      <Image source={{ uri: image }} style={styles.gift} />
+      <Text style={styles.txtTop1}>{nama}</Text>
+    </View>
+  );
+
   return (
     <SafeAreaView style={styles.mainContainer}>
       <ScreenStatusBar />
@@ -119,21 +129,30 @@ const HomeScreen = () => {
             placeholder="Cari di Second Hand"
             onChangeText={text => setSearchText(text)}
           />
-          <TouchableOpacity onPress={() => searchProduct(searchText)}>
+          <TouchableOpacity
+            onPress={() =>
+              dispatch(
+                getAllBuyerProduct({
+                  status: '',
+                  category_id: currCategory,
+                  search: searchText,
+                  page: 1,
+                  per_page: 20,
+                }),
+              )
+            }>
             <Image source={Icons.Search} style={styles.search} />
           </TouchableOpacity>
         </View>
         <View style={styles.bannerWrapper}>
-          <View>
-            <Text style={styles.txtTop1}>
-              Bulan Ramadhan{'\n'}Banyak diskon!
-            </Text>
-            <Text style={styles.txtTop2}>Diskon Hingga</Text>
-            <Text style={styles.txtTop3}>60%</Text>
-          </View>
-          <Image
-            source={require('../../assets/images/img_gift.png')}
-            style={styles.gift}
+          <Carousel
+            layout={'default'}
+            sliderWidth={width}
+            itemWidth={width - 100}
+            data={banner}
+            renderItem={({ item }) => (
+              <BannerRender image={item.image_url} nama={item.name} />
+            )}
           />
         </View>
       </View>
@@ -155,14 +174,14 @@ const HomeScreen = () => {
       </View>
       {isLoading ? (
         <LoadingWidget />
-      ) : allProduct.length === 0 ? (
+      ) : product?.length === 0 ? (
         <View style={styles.dumpText}>
           <Text>Tidak ada produk yang tersedia</Text>
         </View>
       ) : (
         <View style={styles.productContainer}>
           <FlatList
-            data={allProduct}
+            data={product}
             key={2}
             numColumns={2}
             columnWrapperStyle={styles.columnWrapperStyle}
@@ -230,15 +249,15 @@ const styles = StyleSheet.create({
     justifyContent: 'space-between',
   },
   gift: {
-    width: ms(127),
-    height: ms(123),
+    width: width - 100,
+    height: ms(150),
     marginTop: ms(38),
   },
   txtTop1: {
     fontSize: ms(20),
     fontFamily: 'Poppins-Bold',
     color: COLORS.neutral5,
-    marginTop: ms(32),
+    marginTop: ms(20),
   },
   txtTop2: {
     fontFamily: 'Poppins-Regular',
@@ -255,7 +274,7 @@ const styles = StyleSheet.create({
     fontFamily: 'Poppins-Medium',
     fontSize: ms(14),
     color: COLORS.neutral5,
-    marginTop: ms(48),
+    marginTop: ms(25),
     marginLeft: ms(16),
   },
   filterContainer: {

@@ -372,6 +372,7 @@ export const getSellerOrderProduct = createAsyncThunk(
 );
 
 const initialState = {
+  banner: [],
   category: [],
   detailCategory: {},
   data: [],
@@ -384,7 +385,7 @@ const sellerSlice = createSlice({
     [getAllSellerBanner.fulfilled]: (state, action) => {
       return {
         ...state,
-        data: action.payload,
+        banner: action.payload,
       };
     },
     [getSellerBannerByID.fulfilled]: (state, action) => {

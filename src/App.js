@@ -34,9 +34,9 @@ const App = () => {
         <RootNavigator />
       </PersistGate>
       <Toast
-        ref={ref => {
-          Toast.setRef(ref);
-        }}
+      // ref={ref => {
+      //   Toast.setRef(ref);
+      // }}
       />
     </Provider>
   );
