@@ -1,7 +1,7 @@
 import axios from 'axios';
 import { BASE_URL } from '../baseAPI';
 import { createSlice, createAsyncThunk } from '@reduxjs/toolkit';
-import { setLoading, setSecondLoading } from './globalSlice';
+import { setLoading } from './globalSlice';
 
 axios.defaults.validateStatus = status => {
   return status < 500;
@@ -122,13 +122,13 @@ export const getSellerCategory = createAsyncThunk(
   'seller/getSellerCategory',
   async (credentials, { rejectWithValue, dispatch }) => {
     try {
-      dispatch(setSecondLoading(true));
+      dispatch(setLoading(true));
       const response = await axios.get(`${BASE_URL}/seller/category`);
       return response.data;
     } catch (error) {
       return rejectWithValue(error.response.data);
     } finally {
-      dispatch(setSecondLoading(false));
+      dispatch(setLoading(false));
     }
   },
 );
@@ -181,11 +181,12 @@ export const createSellerProduct = createAsyncThunk(
         credentials.data,
         {
           headers: {
-            Authorization: `Bearer ${credentials.token}`,
+            Authorization: credentials.token,
+            'Content-Type': 'multipart/form-data',
           },
         },
       );
-      return response.data;
+      return response.status;
     } catch (error) {
       return rejectWithValue(error.response.data);
     } finally {
@@ -376,6 +377,7 @@ const initialState = {
   category: [],
   detailCategory: {},
   data: [],
+  addProductStatus: 0,
 };
 
 const sellerSlice = createSlice({
@@ -438,9 +440,10 @@ const sellerSlice = createSlice({
         data: action.payload,
       };
     },
-    [createSellerProduct.fulfilled]: state => {
+    [createSellerProduct.fulfilled]: (action, state) => {
       return {
         ...state,
+        addProductStatus: action.payload,
       };
     },
     [updateSellerProduct.fulfilled]: state => {

@@ -21,6 +21,7 @@ import {
   getSellerCategory,
 } from '../../data/slices/sellerSlice';
 import ScreenStatusBar from '../../widgets/screen_status_bar_widget';
+import { getAllBuyerProduct } from '../../data/slices/buyerSlice';
 
 const styles = StyleSheet.create({
   container: {
@@ -143,6 +144,15 @@ function LoginScreen() {
   const onLogin = async (email, password) => {
     dispatch(getSellerCategory());
     dispatch(getAllSellerBanner());
+    dispatch(
+      getAllBuyerProduct({
+        status: '',
+        category_id: '',
+        search: '',
+        page: 1,
+        per_page: 20,
+      }),
+    );
     dispatch(
       postLogin({
         email,

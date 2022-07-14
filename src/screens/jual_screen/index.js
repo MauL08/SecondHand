@@ -15,9 +15,12 @@ import { Formik } from 'formik';
 import DropDownPicker from 'react-native-dropdown-picker';
 import { useNavigation } from '@react-navigation/native';
 import { ms } from 'react-native-size-matters';
+// import { useDispatch, useSelector } from 'react-redux';
 
 const JualScreen = () => {
   const navigation = useNavigation();
+  // const dispatch = useDispatch();
+  // const { category } = useSelector(state => state.seller);
   const [open, setOpen] = useState(false);
   const [value, setValue] = useState(null);
   const [items, setItems] = useState([
@@ -35,6 +38,23 @@ const JualScreen = () => {
     kategori: yup.string().required('Pilih kategori'),
     deskripsi: yup.string().required('Masukkan deskripsi'),
   });
+
+  // const onPostProduct = (imageFile, name, desc, price, catID, loc) => {
+  //   const formData = new FormData();
+
+  //   formData.append('name', name);
+  //   formData.append('description', desc);
+  //   formData.append('base_price', price);
+  //   formData.append('category_ids', catID);
+  //   formData.append('location', loc);
+  //   formData.append('image', {
+  //     uri: imageFile.uri,
+  //     name: imageFile.fileName,
+  //     type: imageFile.type,
+  //   });
+
+  //   dispatch();
+  // };
 
   return (
     <Formik

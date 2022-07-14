@@ -42,6 +42,9 @@ const HomeScreen = () => {
   const [searchText, setSearchText] = useState('');
   const [allCategory, setAllCategory] = useState([]);
 
+  // const [dataProduct, setDataProduct] = useState(product);
+  // const [pages, setPages] = useState(1);
+
   useEffect(() => {
     dispatch(getSellerCategory());
     dispatch(getAllSellerBanner());
@@ -61,8 +64,25 @@ const HomeScreen = () => {
       },
       ...category,
     ]);
+    // loadMore();
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [currCategory, dispatch]);
+
+  // const loadMore = () => {
+  //   setDataProduct(prevState => [
+  //     ...prevState,
+  //     ...Array.from({ length: 20 }).map((_, i) =>
+  //       setPages(i + 1 + prevState.length),
+  //     ),
+  //   ]);
+  // };
+
+  const onCategoryProductCheck = cat => {
+    if (!cat) {
+      return '';
+    }
+    return cat[0]?.name;
+  };
 
   // eslint-disable-next-line react/no-unstable-nested-components
   const FilterRender = ({ id, name }) => (
@@ -159,7 +179,7 @@ const HomeScreen = () => {
       <Text style={styles.midTitle}>Telusuri Kategori</Text>
       <View style={styles.filterContainer}>
         {isLoading ? (
-          <View />
+          <Text style={styles.loadKategoriText}>Memuat Kategori...</Text>
         ) : (
           <FlatList
             data={allCategory}
@@ -189,7 +209,7 @@ const HomeScreen = () => {
               <ProductRender
                 index={item.id}
                 name={item.name}
-                category={item?.Categories[0]?.name}
+                category={onCategoryProductCheck(item.Categories)}
                 harga={item.base_price}
                 image_url={item.image_url}
               />
@@ -279,6 +299,7 @@ const styles = StyleSheet.create({
   },
   filterContainer: {
     flexDirection: 'row',
+    justifyContent: 'center',
     marginTop: ms(16),
     marginLeft: ms(16),
   },
@@ -329,7 +350,7 @@ const styles = StyleSheet.create({
     flex: 1,
     flexDirection: 'row',
     marginHorizontal: ms(16),
-    marginTop: ms(32),
+    marginTop: ms(25),
     justifyContent: 'space-between',
   },
   btnProduct: {
@@ -368,5 +389,10 @@ const styles = StyleSheet.create({
     flexDirection: 'column',
     alignItems: 'center',
     fontSize: ms(18),
+  },
+  loadKategoriText: {
+    marginTop: ms(20),
+    fontSize: ms(14),
+    fontWeight: 'bold',
   },
 });
