@@ -6,8 +6,11 @@ import {
   TextInput,
   TouchableOpacity,
   View,
+  PermissionsAndroid,
+  Alert,
+  RefreshControl,
 } from 'react-native';
-import React, { useState } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { COLORS } from '../../assets/colors';
 import { Icons } from '../../assets/icons';
 import * as yup from 'yup';
@@ -15,71 +18,218 @@ import { Formik } from 'formik';
 import DropDownPicker from 'react-native-dropdown-picker';
 import { useNavigation } from '@react-navigation/native';
 import { ms } from 'react-native-size-matters';
-// import { useDispatch, useSelector } from 'react-redux';
+import { useDispatch, useSelector } from 'react-redux';
+import {
+  createSellerProduct,
+  getSellerCategory,
+} from '../../data/slices/sellerSlice';
+import { launchCamera, launchImageLibrary } from 'react-native-image-picker';
+import ScreenStatusBar from '../../widgets/screen_status_bar_widget';
+import Toast from 'react-native-toast-message';
+import { getUser } from '../../data/slices/userSlice';
 
 const JualScreen = () => {
+  const { category, addProductStatus } = useSelector(state => state.seller);
+  const { access_token } = useSelector(state => state.user);
+
   const navigation = useNavigation();
-  // const dispatch = useDispatch();
-  // const { category } = useSelector(state => state.seller);
+  const dispatch = useDispatch();
   const [open, setOpen] = useState(false);
   const [value, setValue] = useState(null);
-  const [items, setItems] = useState([
-    { label: 'Electronic', value: 'electronic' },
-    { label: 'Hobbi', value: 'hobbi' },
-    { label: 'Olahraga', value: 'olahraga' },
-    { label: 'Kendaraan', value: 'kendaraan' },
-    { label: 'Aksesoris', value: 'aksesoris' },
-    { label: 'Kesehatan', value: 'kesehatan' },
-    { label: 'Food', value: 'food' },
-  ]);
+  const [usedCat, setUsedCat] = useState([]);
+  const [staticLoad, setStaticLoad] = useState(false);
+
+  const [cameraPermission, setCameraPermission] = useState(true);
+  const [file, setFile] = useState(null);
+
   const FormValidationSchema = yup.object().shape({
     name: yup.string().required('Masukkan nama produk'),
     harga: yup.string().required('Masukkan harga produk'),
     kategori: yup.string().required('Pilih kategori'),
     deskripsi: yup.string().required('Masukkan deskripsi'),
+    lokasi: yup.string().required('Masukkan lokasi produk'),
   });
 
-  // const onPostProduct = (imageFile, name, desc, price, catID, loc) => {
-  //   const formData = new FormData();
+  const onRefresh = () => {
+    setStaticLoad(true);
+    setFile(null);
+    setStaticLoad(false);
+  };
 
-  //   formData.append('name', name);
-  //   formData.append('description', desc);
-  //   formData.append('base_price', price);
-  //   formData.append('category_ids', catID);
-  //   formData.append('location', loc);
-  //   formData.append('image', {
-  //     uri: imageFile.uri,
-  //     name: imageFile.fileName,
-  //     type: imageFile.type,
-  //   });
+  useEffect(() => {
+    dispatch(getSellerCategory());
+    onDestroyCategories();
+  }, [dispatch, onDestroyCategories]);
 
-  //   dispatch();
-  // };
+  const onDestroyCategories = useCallback(() => {
+    setUsedCat(
+      category.map(val => {
+        return {
+          label: val.name,
+          value: val.id,
+        };
+      }),
+    );
+  }, [category]);
+
+  const showDoneToast = () => {
+    Toast.show({
+      type: 'success',
+      text1: 'Sukses!',
+      text2: 'Produk Sukses Diterbitkan',
+    });
+  };
+
+  const showFailedToast = () => {
+    Toast.show({
+      type: 'error',
+      text1: 'Gagal!',
+      text2: 'Produk Gagal Diterbitkan',
+    });
+  };
+
+  const onPostProduct = (name, lokasi, desc, price, catID, imageFile) => {
+    if (imageFile === null) {
+      Alert.alert('Error', 'Lengkapi Form terlebih dahulu!');
+    } else {
+      const formData = new FormData();
+
+      formData.append('name', name);
+      formData.append('base_price', price);
+      formData.append('category_ids', catID);
+      formData.append('description', desc);
+      formData.append('location', lokasi);
+      formData.append('image', {
+        uri: imageFile.uri,
+        name: imageFile.fileName,
+        type: imageFile.type,
+      });
+
+      dispatch(
+        createSellerProduct({
+          token: access_token,
+          data: formData,
+        }),
+      );
+      setFile(null);
+      addProductStatus <= 201 ? showDoneToast() : showFailedToast();
+    }
+  };
+
+  const requestCameraPermission = async () => {
+    try {
+      const granted = await PermissionsAndroid.request(
+        PermissionsAndroid.PERMISSIONS.CAMERA,
+        {
+          title: 'App Camera Permission',
+          message: 'App needs access to your camera ',
+          buttonNeutral: 'Ask Me Later',
+          buttonNegative: 'Cancel',
+          buttonPositive: 'OK',
+        },
+      );
+      if (granted === PermissionsAndroid.RESULTS.GRANTED) {
+        setCameraPermission(granted);
+      } else {
+        setCameraPermission(false);
+      }
+    } catch (err) {
+      console.warn(err);
+    }
+  };
+
+  const onUploadImage = () => {
+    Alert.alert('Choose your Option', '', [
+      {
+        text: 'Cancel',
+        style: 'cancel',
+      },
+      {
+        text: 'Go To Gallery',
+        onPress: () => {
+          openStorage();
+        },
+      },
+      {
+        text: 'Open Camera',
+        onPress: () => {
+          openCamera();
+        },
+      },
+    ]);
+  };
+
+  const openCamera = async () => {
+    if (!cameraPermission) {
+      requestCameraPermission();
+    } else {
+      const options = {
+        title: 'Open Camera',
+        mediaType: 'photo',
+        path: 'images',
+      };
+      launchCamera(options, response => {
+        if (response.assets) {
+          setFile(response.assets[0]);
+        } else {
+          setFile(currState => currState);
+        }
+      });
+    }
+  };
+
+  const openStorage = async () => {
+    if (!cameraPermission) {
+      requestCameraPermission();
+    } else {
+      const options = {
+        title: 'Open Gallery',
+        mediaType: 'photo',
+        path: 'images',
+      };
+      launchImageLibrary(options, response => {
+        if (response.assets) {
+          setFile(response.assets[0]);
+        } else {
+          setFile(currState => currState);
+        }
+      });
+    }
+  };
 
   return (
     <Formik
-      initialValues={{ name: '', harga: '', kategori: '', deskripsi: '' }}
+      initialValues={{
+        name: '',
+        harga: '',
+        kategori: '',
+        deskripsi: '',
+        lokasi: '',
+      }}
       validateOnMount={true}
       validationSchema={FormValidationSchema}>
       {({
         handleChange,
         handleBlur,
-        setFieldValue,
         values,
         touched,
         errors,
         isValid,
+        setFieldValue,
       }) => (
         <ScrollView
+          refreshControl={
+            <RefreshControl onRefresh={onRefresh} refreshing={staticLoad} />
+          }
           showsVerticalScrollIndicator={false}
           style={styles.container}>
+          <ScreenStatusBar />
           <View style={styles.top}>
             <TouchableOpacity onPress={() => navigation.goBack()}>
               <Image source={Icons.ArrowLeft} style={styles.icon} />
             </TouchableOpacity>
             <Text style={styles.title}>Lengkapi Detail Produk</Text>
           </View>
-
           <View>
             <Text style={styles.label}>Nama Produk</Text>
             <TextInput
@@ -92,7 +242,6 @@ const JualScreen = () => {
             {errors.name && touched.name && (
               <Text style={styles.errors}>{errors.name}</Text>
             )}
-
             <Text style={styles.label}>Harga Produk</Text>
             <TextInput
               style={styles.input}
@@ -104,22 +253,31 @@ const JualScreen = () => {
             {errors.harga && touched.harga && (
               <Text style={styles.errors}>{errors.harga}</Text>
             )}
-
+            <Text style={styles.label}>Lokasi</Text>
+            <TextInput
+              style={styles.input}
+              placeholder="Lokasi Produk"
+              onChangeText={handleChange('lokasi')}
+              onBlur={handleBlur('lokasi')}
+              value={values.lokasi}
+            />
+            {errors.lokasi && touched.lokasi && (
+              <Text style={styles.errors}>{errors.lokasi}</Text>
+            )}
             <Text style={styles.label}>Kategori</Text>
             <DropDownPicker
               open={open}
               value={value}
-              items={items}
+              items={usedCat}
               setOpen={setOpen}
               setValue={setValue}
-              setItems={setItems}
+              setItems={setUsedCat}
               listMode="SCROLLVIEW"
               style={styles.input}
               textStyle={styles.dropdownText}
               onChangeValue={itemValue => setFieldValue('kategori', itemValue)}
               placeholder="Pilih Kategori"
             />
-
             <Text style={styles.label}>Deskripsi</Text>
             <TextInput
               style={styles.inputBig}
@@ -131,18 +289,35 @@ const JualScreen = () => {
             {errors.deskripsi && touched.deskripsi && (
               <Text style={styles.errors}>{errors.deskripsi}</Text>
             )}
-
             <Text style={styles.label}>Foto Produk</Text>
-            <TouchableOpacity style={styles.fotoProduk}>
-              <Image
-                source={Icons.Plus}
-                style={[styles.icon, { tintColor: COLORS.neutral2 }]}
-              />
+            <TouchableOpacity style={styles.fotoProduk} onPress={onUploadImage}>
+              {file === null ? (
+                <Image
+                  source={Icons.Plus}
+                  style={[styles.icon, { tintColor: COLORS.neutral2 }]}
+                />
+              ) : (
+                <Image source={{ uri: file.uri }} style={styles.image} />
+              )}
             </TouchableOpacity>
           </View>
-
           <View style={styles.buttonContainer}>
             <TouchableOpacity
+              onPress={() => {
+                dispatch(getUser(access_token));
+                if (file === null) {
+                  Alert.alert('Error', 'Lengkapi Form terlebih dahulu!');
+                } else {
+                  navigation.navigate('Terbitkan', {
+                    image: file,
+                    name: values.name,
+                    kategori: value,
+                    harga: values.harga,
+                    deskripsi: values.deskripsi,
+                    lokasi: values.lokasi,
+                  });
+                }
+              }}
               style={[
                 styles.buttonPreview,
                 {
@@ -156,8 +331,7 @@ const JualScreen = () => {
                 style={[
                   styles.txtButton,
                   { color: isValid ? COLORS.black : COLORS.neutral2 },
-                ]}
-                onPress={() => navigation.navigate('Terbitkan')}>
+                ]}>
                 Preview
               </Text>
             </TouchableOpacity>
@@ -171,7 +345,20 @@ const JualScreen = () => {
                 },
               ]}
               disabled={!isValid}>
-              <Text style={styles.txtButton}>Terbitkan</Text>
+              <Text
+                style={styles.txtButton}
+                onPress={() => {
+                  onPostProduct(
+                    values.name,
+                    values.lokasi,
+                    values.deskripsi,
+                    values.harga,
+                    values.kategori,
+                    file,
+                  );
+                }}>
+                Terbitkan
+              </Text>
             </TouchableOpacity>
           </View>
         </ScrollView>
@@ -197,6 +384,11 @@ const styles = StyleSheet.create({
     height: ms(24),
     width: ms(24),
     tintColor: COLORS.neutral5,
+  },
+  image: {
+    height: ms(96),
+    width: ms(96),
+    borderRadius: ms(10),
   },
   title: {
     flex: 1,

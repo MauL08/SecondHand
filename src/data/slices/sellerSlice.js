@@ -181,11 +181,12 @@ export const createSellerProduct = createAsyncThunk(
         credentials.data,
         {
           headers: {
-            Authorization: credentials.token,
+            access_token: credentials.token,
             'Content-Type': 'multipart/form-data',
           },
         },
       );
+      console.log(response.status);
       return response.status;
     } catch (error) {
       return rejectWithValue(error.response.data);
@@ -440,9 +441,8 @@ const sellerSlice = createSlice({
         data: action.payload,
       };
     },
-    [createSellerProduct.fulfilled]: (action, state) => {
+    [createSellerProduct.fulfilled]: action => {
       return {
-        ...state,
         addProductStatus: action.payload,
       };
     },
