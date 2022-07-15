@@ -1,6 +1,7 @@
 import {
   FlatList,
   Image,
+  RefreshControl,
   SafeAreaView,
   StyleSheet,
   Text,
@@ -34,6 +35,7 @@ const HomeScreen = () => {
   const [currCategory, setCurrCategory] = useState('');
   const [searchText, setSearchText] = useState('');
   const [allCategory, setAllCategory] = useState([]);
+  const [refreshing, setRefreshing] = useState(false);
 
   const [allProduct, setAllProduct] = useState([]);
 
@@ -67,6 +69,11 @@ const HomeScreen = () => {
         item?.name?.toLowerCase().match(value?.toLowerCase()),
       ),
     );
+  };
+
+  const onRefresh = () => {
+    setRefreshing(true);
+    setRefreshing(false);
   };
 
   const FilterRender = ({ id, name }) => (
@@ -112,82 +119,97 @@ const HomeScreen = () => {
 
   return (
     <SafeAreaView style={styles.mainContainer}>
-      <ScreenStatusBar />
-      <Image
-        style={styles.gradient}
-        source={require('../../assets/images/img_gradient_home.png')}
+      <FlatList
+        data={[]}
+        keyExtractor={() => 'key'}
+        renderItem={null}
+        showsVerticalScrollIndicator={false}
+        refreshControl={
+          <RefreshControl refreshing={refreshing} onRefresh={onRefresh} />
+        }
+        ListHeaderComponent={
+          <>
+            <ScreenStatusBar />
+            <Image
+              style={styles.gradient}
+              source={require('../../assets/images/img_gradient_home.png')}
+            />
+            <View style={styles.topContainer}>
+              <View style={styles.searchBarContainer}>
+                <TextInput
+                  style={styles.input}
+                  placeholder="Cari di Second Hand"
+                  onChangeText={text => {
+                    setSearchText(text);
+                    searchProduct(text);
+                  }}
+                />
+                <TouchableOpacity onPress={() => searchProduct(searchText)}>
+                  <Image source={Icons.Search} style={styles.search} />
+                </TouchableOpacity>
+              </View>
+              <View style={styles.bannerWrapper}>
+                <View>
+                  <Text style={styles.txtTop1}>
+                    Bulan Ramadhan{'\n'}Banyak diskon!
+                  </Text>
+                  <Text style={styles.txtTop2}>Diskon Hingga</Text>
+                  <Text style={styles.txtTop3}>60%</Text>
+                </View>
+                <Image
+                  source={require('../../assets/images/img_gift.png')}
+                  style={styles.gift}
+                />
+              </View>
+            </View>
+            <Text style={styles.midTitle}>Telusuri Kategori</Text>
+            <View style={styles.filterContainer}>
+              {isLoading ? (
+                <View />
+              ) : (
+                <FlatList
+                  data={allCategory}
+                  renderItem={({ item }) => (
+                    <FilterRender name={item.name} id={item.id} />
+                  )}
+                  keyExtractor={item => item.id}
+                  horizontal={true}
+                  showsHorizontalScrollIndicator={false}
+                />
+              )}
+            </View>
+            {isLoading ? (
+              <View style={{ marginTop: ms(100) }}>
+                <LoadingWidget />
+              </View>
+            ) : allProduct.length === 0 ? (
+              <View style={styles.dumpText}>
+                <Text>Tidak ada produk yang tersedia</Text>
+              </View>
+            ) : (
+              <View style={styles.productContainer}>
+                <FlatList
+                  data={allProduct}
+                  key={2}
+                  numColumns={2}
+                  columnWrapperStyle={styles.columnWrapperStyle}
+                  renderItem={({ item }) => (
+                    <ProductRender
+                      index={item.id}
+                      name={item.name}
+                      category={item?.Categories[0]?.name}
+                      harga={item.base_price}
+                      image_url={item.image_url}
+                    />
+                  )}
+                  keyExtractor={item => item.id}
+                  showsVerticalScrollIndicator={false}
+                />
+              </View>
+            )}
+          </>
+        }
       />
-      <View style={styles.topContainer}>
-        <View style={styles.searchBarContainer}>
-          <TextInput
-            style={styles.input}
-            placeholder="Cari di Second Hand"
-            onChangeText={text => {
-              setSearchText(text);
-              searchProduct(text);
-            }}
-          />
-          <TouchableOpacity onPress={() => searchProduct(searchText)}>
-            <Image source={Icons.Search} style={styles.search} />
-          </TouchableOpacity>
-        </View>
-        <View style={styles.bannerWrapper}>
-          <View>
-            <Text style={styles.txtTop1}>
-              Bulan Ramadhan{'\n'}Banyak diskon!
-            </Text>
-            <Text style={styles.txtTop2}>Diskon Hingga</Text>
-            <Text style={styles.txtTop3}>60%</Text>
-          </View>
-          <Image
-            source={require('../../assets/images/img_gift.png')}
-            style={styles.gift}
-          />
-        </View>
-      </View>
-      <Text style={styles.midTitle}>Telusuri Kategori</Text>
-      <View style={styles.filterContainer}>
-        {isLoading ? (
-          <View />
-        ) : (
-          <FlatList
-            data={allCategory}
-            renderItem={({ item }) => (
-              <FilterRender name={item.name} id={item.id} />
-            )}
-            keyExtractor={item => item.id}
-            horizontal={true}
-            showsHorizontalScrollIndicator={false}
-          />
-        )}
-      </View>
-      {isLoading ? (
-        <LoadingWidget />
-      ) : allProduct.length === 0 ? (
-        <View style={styles.dumpText}>
-          <Text>Tidak ada produk yang tersedia</Text>
-        </View>
-      ) : (
-        <View style={styles.productContainer}>
-          <FlatList
-            data={allProduct}
-            key={2}
-            numColumns={2}
-            columnWrapperStyle={styles.columnWrapperStyle}
-            renderItem={({ item }) => (
-              <ProductRender
-                index={item.id}
-                name={item.name}
-                category={item?.Categories[0]?.name}
-                harga={item.base_price}
-                image_url={item.image_url}
-              />
-            )}
-            keyExtractor={item => item.id}
-            showsVerticalScrollIndicator={false}
-          />
-        </View>
-      )}
     </SafeAreaView>
   );
 };
@@ -316,10 +338,8 @@ const styles = StyleSheet.create({
   },
   productContainer: {
     flex: 1,
-    flexDirection: 'row',
     marginHorizontal: ms(16),
     marginTop: ms(32),
-    justifyContent: 'space-between',
   },
   btnProduct: {
     padding: ms(8),
