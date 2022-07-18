@@ -21,7 +21,192 @@ import {
   getSellerCategory,
 } from '../../data/slices/sellerSlice';
 import ScreenStatusBar from '../../widgets/screen_status_bar_widget';
+import TouchID from 'react-native-touch-id';
 import { getAllBuyerProduct } from '../../data/slices/buyerSlice';
+
+function LoginScreen() {
+  const [showPassword, setShowPassword] = useState(true);
+  const navigation = useNavigation();
+  const dispatch = useDispatch();
+  const { isLoading } = useSelector(state => state.global);
+  const { access_token } = useSelector(state => state.user);
+
+  const optionalConfigObject = {
+    title: 'SECOND HAND',
+    imageColor: COLORS.primaryPurple4,
+    imageErrorColor: COLORS.alertDanger,
+    sensorDescription: 'Touch the fingerprint sensor',
+    sensorErrorDescription: 'Failed',
+    cancelText: 'CANCEL',
+  };
+
+  const pressHandler = () => {
+    TouchID.authenticate(
+      'Put your finger on the fingerprint sensor.',
+      optionalConfigObject,
+    ).then(() => {
+      dispatch(getSellerCategory());
+      dispatch(getAllSellerBanner());
+      dispatch(
+        getAllBuyerProduct({
+          status: '',
+          category_id: '',
+          search: '',
+          page: 1,
+          per_page: 20,
+        }),
+      );
+      navigation.navigate('Main');
+    });
+  };
+
+  const LoginValidationSchema = yup.object().shape({
+    email: yup
+      .string()
+      .email('Harap masukkan email yang valid')
+      .required('Email dibutuhkan'),
+    password: yup
+      .string()
+      .min(6, ({ min }) => `Password setidaknya ${min} karakter`)
+      .required('Password dibutuhkan'),
+  });
+
+  const onLogin = async (email, password) => {
+    dispatch(getSellerCategory());
+    dispatch(getAllSellerBanner());
+    dispatch(
+      getAllBuyerProduct({
+        status: '',
+        category_id: '',
+        search: '',
+        page: 1,
+        per_page: 20,
+      }),
+    );
+    dispatch(
+      postLogin({
+        email,
+        password,
+      }),
+    );
+  };
+
+  return (
+    <Formik
+      initialValues={{ email: '', password: '' }}
+      validateOnMount={true}
+      validationSchema={LoginValidationSchema}>
+      {({ values, handleChange, handleBlur, touched, errors, isValid }) => (
+        <View style={styles.container}>
+          <ScreenStatusBar />
+          <TouchableOpacity>
+            <Image
+              style={styles.icon}
+              source={require('../../assets/icons/icon_arrow-left.png')}
+            />
+          </TouchableOpacity>
+          <Text style={styles.title}>Masuk</Text>
+          <Text style={styles.label}>Email</Text>
+          <TextInput
+            style={styles.input1}
+            placeholder="Contoh: johndee@gmail.com"
+            autoCapitalize="none"
+            autoCorrect={false}
+            keyboardType="email-address"
+            value={values.email}
+            onChangeText={handleChange('email')}
+            onBlur={handleBlur('email')}
+          />
+          {errors.email && touched.email && (
+            <Text style={styles.errors}>{errors.email}</Text>
+          )}
+
+          <Text style={[styles.label, { marginTop: moderateScale(12) }]}>
+            Password
+          </Text>
+          <View style={styles.input2Container}>
+            <TextInput
+              style={styles.input2}
+              placeholder="Masukkan password"
+              autoCapitalize="none"
+              autoCorrect={false}
+              value={values.password}
+              onChangeText={handleChange('password')}
+              onBlur={handleBlur('password')}
+              secureTextEntry={showPassword}
+            />
+            <TouchableOpacity
+              onPress={() => {
+                setShowPassword(val => !val);
+              }}>
+              <Image
+                source={showPassword ? Icons.Eye : Icons.EyeOff}
+                style={styles.iconEye}
+              />
+            </TouchableOpacity>
+          </View>
+          {errors.password && touched.password && (
+            <Text style={styles.errors}>{errors.password}</Text>
+          )}
+
+          <View style={styles.buttonFingerprintContainer}>
+            <TouchableOpacity
+              style={[
+                styles.button,
+                {
+                  backgroundColor: isValid
+                    ? COLORS.primaryPurple4
+                    : COLORS.neutral2,
+                },
+              ]}
+              disabled={!isValid}
+              onPress={() => onLogin(values.email, values.password)}>
+              {isLoading ? (
+                <ActivityIndicator color="white" />
+              ) : (
+                <Text style={styles.buttonText}>Masuk</Text>
+              )}
+            </TouchableOpacity>
+            {access_token === '' ? (
+              <View style={styles.buttonFingerprint}>
+                <Image
+                  source={require('../../assets/images/img_no_image.png')}
+                  style={{
+                    width: moderateScale(40),
+                    height: moderateScale(40),
+                    borderRadius: moderateScale(16),
+                    tintColor: COLORS.primaryPurple4,
+                  }}
+                />
+              </View>
+            ) : (
+              <TouchableOpacity
+                onPress={() => pressHandler()}
+                style={styles.buttonFingerprint}>
+                <Image
+                  source={require('../../assets/images/image_fingerprint.png')}
+                  style={{
+                    width: moderateScale(30),
+                    height: moderateScale(30),
+                    marginVertical: moderateScale(16),
+                    tintColor: COLORS.primaryPurple4,
+                  }}
+                />
+              </TouchableOpacity>
+            )}
+          </View>
+          <View style={styles.bottomText}>
+            <Text style={styles.regularText}>Belum punya akun? </Text>
+            <TouchableOpacity onPress={() => navigation.navigate('Register')}>
+              <Text style={styles.bottomText1}>Daftar di sini</Text>
+            </TouchableOpacity>
+          </View>
+        </View>
+      )}
+    </Formik>
+  );
+}
+export default LoginScreen;
 
 const styles = StyleSheet.create({
   container: {
@@ -86,8 +271,8 @@ const styles = StyleSheet.create({
   },
   button: {
     borderRadius: moderateScale(16),
-    marginTop: moderateScale(20),
     backgroundColor: COLORS.primaryPurple4,
+    width: '80%',
     height: moderateScale(48),
     justifyContent: 'center',
     alignItems: 'center',
@@ -100,6 +285,21 @@ const styles = StyleSheet.create({
     fontWeight: '500',
     textAlign: 'center',
   },
+  buttonFingerprint: {
+    borderColor: COLORS.primaryPurple4,
+    borderWidth: moderateScale(2),
+    borderRadius: moderateScale(16),
+    width: '15%',
+    height: moderateScale(48),
+    marginLeft: moderateScale(16),
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  buttonFingerprintContainer: {
+    flexDirection: 'row',
+    marginTop: moderateScale(20),
+  },
+
   regularText: {
     fontSize: moderateScale(14),
     color: COLORS.neutral5,
@@ -122,130 +322,23 @@ const styles = StyleSheet.create({
     fontSize: 14,
     color: COLORS.primaryPurple4,
   },
+  handleIndicatorStyle: {
+    backgroundColor: '#C4C4C4',
+    borderRadius: moderateScale(20),
+    width: moderateScale(60),
+    height: moderateScale(6),
+    marginTop: moderateScale(8),
+  },
+  bsContainer: {
+    paddingHorizontal: moderateScale(32),
+    paddingTop: moderateScale(8),
+    flex: 1,
+  },
+  title2: {
+    fontFamily: 'Poppins-Regular',
+    color: COLORS.neutral5,
+    fontSize: moderateScale(20),
+    lineHeight: moderateScale(20),
+    paddingTop: moderateScale(6),
+  },
 });
-
-function LoginScreen() {
-  const [showPassword, setShowPassword] = useState(true);
-  const navigation = useNavigation();
-  const dispatch = useDispatch();
-  const { isLoading } = useSelector(state => state.global);
-
-  const LoginValidationSchema = yup.object().shape({
-    email: yup
-      .string()
-      .email('Harap masukkan email yang valid')
-      .required('Email dibutuhkan'),
-    password: yup
-      .string()
-      .min(6, ({ min }) => `Password setidaknya ${min} karakter`)
-      .required('Password dibutuhkan'),
-  });
-
-  const onLogin = async (email, password) => {
-    dispatch(getSellerCategory());
-    dispatch(getAllSellerBanner());
-    dispatch(
-      getAllBuyerProduct({
-        status: '',
-        category_id: '',
-        search: '',
-        page: 1,
-        per_page: 20,
-      }),
-    );
-    dispatch(
-      postLogin({
-        email,
-        password,
-      }),
-    );
-  };
-
-  return (
-    <Formik
-      initialValues={{ email: '', password: '' }}
-      validateOnMount={true}
-      validationSchema={LoginValidationSchema}>
-      {({ values, handleChange, handleBlur, touched, errors, isValid }) => (
-        <View style={styles.container}>
-          <ScreenStatusBar />
-          <TouchableOpacity>
-            <Image
-              style={styles.icon}
-              source={require('../../assets/icons/icon_arrow-left.png')}
-            />
-          </TouchableOpacity>
-
-          <Text style={styles.title}>Masuk</Text>
-          <Text style={styles.label}>Email</Text>
-          <TextInput
-            style={styles.input1}
-            placeholder="Contoh: johndee@gmail.com"
-            autoCapitalize="none"
-            autoCorrect={false}
-            keyboardType="email-address"
-            value={values.email}
-            onChangeText={handleChange('email')}
-            onBlur={handleBlur('email')}
-          />
-          {errors.email && touched.email && (
-            <Text style={styles.errors}>{errors.email}</Text>
-          )}
-
-          <Text style={[styles.label, { marginTop: moderateScale(12) }]}>
-            Password
-          </Text>
-          <View style={styles.input2Container}>
-            <TextInput
-              style={styles.input2}
-              placeholder="Masukkan password"
-              autoCapitalize="none"
-              autoCorrect={false}
-              value={values.password}
-              onChangeText={handleChange('password')}
-              onBlur={handleBlur('password')}
-              secureTextEntry={showPassword}
-            />
-            <TouchableOpacity
-              onPress={() => {
-                setShowPassword(val => !val);
-              }}>
-              <Image
-                source={showPassword ? Icons.Eye : Icons.EyeOff}
-                style={styles.iconEye}
-              />
-            </TouchableOpacity>
-          </View>
-          {errors.password && touched.password && (
-            <Text style={styles.errors}>{errors.password}</Text>
-          )}
-          <TouchableOpacity
-            style={[
-              styles.button,
-              {
-                backgroundColor: isValid
-                  ? COLORS.primaryPurple4
-                  : COLORS.neutral2,
-              },
-            ]}
-            disabled={!isValid}
-            onPress={() => onLogin(values.email, values.password)}>
-            {isLoading ? (
-              <ActivityIndicator color="white" />
-            ) : (
-              <Text style={styles.buttonText}>Masuk</Text>
-            )}
-          </TouchableOpacity>
-
-          <View style={styles.bottomText}>
-            <Text style={styles.regularText}>Belum punya akun? </Text>
-            <TouchableOpacity onPress={() => navigation.navigate('Register')}>
-              <Text style={styles.bottomText1}>Daftar di sini</Text>
-            </TouchableOpacity>
-          </View>
-        </View>
-      )}
-    </Formik>
-  );
-}
-export default LoginScreen;
