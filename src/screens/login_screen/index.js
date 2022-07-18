@@ -53,7 +53,7 @@ function LoginScreen() {
           category_id: '',
           search: '',
           page: 1,
-          per_page: 20,
+          per_page: 15,
         }),
       );
       navigation.navigate('Main');
@@ -80,7 +80,7 @@ function LoginScreen() {
         category_id: '',
         search: '',
         page: 1,
-        per_page: 20,
+        per_page: 15,
       }),
     );
     dispatch(

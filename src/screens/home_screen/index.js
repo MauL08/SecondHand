@@ -44,8 +44,8 @@ const HomeScreen = () => {
   const [allCategory, setAllCategory] = useState([]);
   const [refreshing, setRefreshing] = useState(false);
 
-  // const [dataProduct, setDataProduct] = useState(product);
-  // const [pages, setPages] = useState(1);
+  const [dataProduct] = useState(product);
+  const [pages, setPages] = useState(1);
 
   useEffect(() => {
     dispatch(getSellerCategory());
@@ -55,8 +55,8 @@ const HomeScreen = () => {
         status: '',
         category_id: currCategory,
         search: '',
-        page: 1,
-        per_page: 20,
+        page: pages,
+        per_page: 15,
       }),
     );
     setAllCategory([
@@ -66,18 +66,22 @@ const HomeScreen = () => {
       },
       ...category,
     ]);
-    // loadMore();
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [currCategory, dispatch]);
 
-  // const loadMore = () => {
-  //   setDataProduct(prevState => [
-  //     ...prevState,
-  //     ...Array.from({ length: 20 }).map((_, i) =>
-  //       setPages(i + 1 + prevState.length),
-  //     ),
-  //   ]);
-  // };
+  const loadMore = () => {
+    // setPages(currState => currState + 1);
+    // dispatch(
+    //   getAllBuyerProduct({
+    //     status: '',
+    //     category_id: currCategory,
+    //     search: '',
+    //     page: pages,
+    //     per_page: 15,
+    //   }),
+    // );
+    // setDataProduct(currState => [...currState, product]);
+  };
 
   const onCategoryProductCheck = cat => {
     if (!cat) {
@@ -90,13 +94,14 @@ const HomeScreen = () => {
     setRefreshing(true);
     dispatch(getSellerCategory());
     dispatch(getAllSellerBanner());
+    setPages(1);
     dispatch(
       getAllBuyerProduct({
         status: '',
         category_id: currCategory,
         search: '',
         page: 1,
-        per_page: 20,
+        per_page: 15,
       }),
     );
     setAllCategory([
@@ -230,14 +235,14 @@ const HomeScreen = () => {
               <View style={{ marginTop: ms(100) }}>
                 <LoadingWidget />
               </View>
-            ) : product.length === 0 ? (
+            ) : dataProduct.length === 0 ? (
               <View style={styles.dumpText}>
                 <Text>Tidak ada produk yang tersedia</Text>
               </View>
             ) : (
               <View style={styles.productContainer}>
                 <FlatList
-                  data={product}
+                  data={dataProduct}
                   key={2}
                   numColumns={2}
                   columnWrapperStyle={styles.columnWrapperStyle}
@@ -254,6 +259,15 @@ const HomeScreen = () => {
                   showsVerticalScrollIndicator={false}
                 />
               </View>
+            )}
+            {isLoading ? (
+              <View />
+            ) : (
+              <TouchableOpacity
+                style={styles.loadMoreButton}
+                onPress={loadMore}>
+                <Text style={styles.loadMoreText}>Lebih Banyak Produk</Text>
+              </TouchableOpacity>
             )}
           </>
         }
@@ -432,5 +446,19 @@ const styles = StyleSheet.create({
     marginTop: ms(20),
     fontSize: ms(14),
     fontWeight: 'bold',
+  },
+  loadMoreButton: {
+    alignSelf: 'center',
+    alignItems: 'center',
+    marginTop: ms(10),
+    marginBottom: ms(14),
+    borderRadius: ms(8),
+    padding: ms(12),
+    backgroundColor: COLORS.primaryPurple4,
+  },
+  loadMoreText: {
+    color: COLORS.neutral01,
+    fontSize: ms(12),
+    fontWeight: '700',
   },
 });
