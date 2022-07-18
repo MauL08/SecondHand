@@ -11,14 +11,17 @@ axios.defaults.validateStatus = status => {
 
 export const getAllNotification = createAsyncThunk(
   'notification/getAllNotification',
-  async (token, { rejectWithValue, dispatch }) => {
+  async (credentials, { rejectWithValue, dispatch }) => {
     try {
       dispatch(setLoading(true));
-      const response = await axios.get(`${BASE_URL}/notification`, {
-        headers: {
-          access_token: token,
+      const response = await axios.get(
+        `${BASE_URL}/notification?notification_type=${credentials.type}`,
+        {
+          headers: {
+            access_token: credentials.token,
+          },
         },
-      });
+      );
       return response.data;
     } catch (error) {
       return rejectWithValue(error.response.data);

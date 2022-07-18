@@ -8,11 +8,12 @@ import {
   ActivityIndicator,
   Dimensions,
 } from 'react-native';
-import React, { useEffect } from 'react';
+import React, { useEffect, useState } from 'react';
 import { COLORS } from '../../assets/colors';
 import { ms } from 'react-native-size-matters';
 import { useDispatch, useSelector } from 'react-redux';
 import { getAllNotification } from '../../data/slices/notificationSlice';
+import DropDownPicker from 'react-native-dropdown-picker';
 import NumberFormat from 'react-number-format';
 
 const { width } = Dimensions.get('screen');
@@ -23,9 +24,22 @@ const NotifikasiScreen = () => {
   const { allNotif } = useSelector(state => state.notification);
   const { isLoading } = useSelector(state => state.global);
 
+  const [type, setType] = useState('buyer');
+  const [open, setOpen] = useState(false);
+  const [value, setValue] = useState(null);
+  const [items, setItems] = useState([
+    { label: 'Sebagai Pembeli', value: 'buyer' },
+    { label: 'Sebagai Penjual', value: 'seller' },
+  ]);
+
   useEffect(() => {
-    dispatch(getAllNotification(access_token));
-  }, [access_token, dispatch]);
+    dispatch(
+      getAllNotification({
+        token: access_token,
+        type,
+      }),
+    );
+  }, [access_token, dispatch, type]);
 
   const dateConvert = date => {
     if (!date) {
@@ -45,7 +59,8 @@ const NotifikasiScreen = () => {
     read,
   }) => {
     return (
-      <TouchableOpacity style={styles.cardContainer}>
+      <TouchableOpacity
+        style={styles.cardContainer(allNotif.length === allNotif.length - 1)}>
         <View style={styles.row}>
           {image_url === null || image_url === '' ? (
             <Image
@@ -58,7 +73,6 @@ const NotifikasiScreen = () => {
           <View style={styles.textContainer}>
             <View style={styles.regularContainer}>
               <Text style={styles.regularSubText}>
-                {' '}
                 {status === 'terbit'
                   ? 'Berhasil diterbitkan'
                   : 'Penawaran produk'}
@@ -138,6 +152,20 @@ const NotifikasiScreen = () => {
   return (
     <View style={styles.container}>
       <Text style={styles.screenTitle}>Notifikasi</Text>
+      <DropDownPicker
+        open={open}
+        value={value}
+        items={items}
+        setOpen={setOpen}
+        setValue={setValue}
+        setItems={setItems}
+        listMode="SCROLLVIEW"
+        style={styles.input}
+        textStyle={styles.dropdownText}
+        placeholder="Pilih Status"
+        placeholderStyle={styles.placeholderDropdown}
+        onChangeValue={itemValue => setType(itemValue)}
+      />
       <View>
         {isLoading ? (
           <View style={styles.loadingContainer}>
@@ -196,12 +224,12 @@ const styles = StyleSheet.create({
   row: {
     flexDirection: 'row',
   },
-  cardContainer: {
+  cardContainer: lastIndex => ({
     borderBottomWidth: 1,
     borderBottomColor: COLORS.neutral01,
     paddingBottom: ms(16),
-    marginBottom: ms(16),
-  },
+    marginBottom: lastIndex ? ms(30) : ms(16),
+  }),
   regularText: {
     fontSize: ms(14),
     color: COLORS.neutral5,
@@ -260,5 +288,23 @@ const styles = StyleSheet.create({
   },
   loadingContainer: {
     marginTop: ms(50),
+  },
+  input: {
+    borderWidth: 1,
+    borderRadius: ms(16),
+    borderColor: COLORS.neutral2,
+    paddingHorizontal: ms(16),
+    fontFamily: 'Poppins-Regular',
+    marginBottom: ms(18),
+  },
+  dropdownText: {
+    fontFamily: 'Poppins-Regular',
+    fontSize: 14,
+    color: COLORS.neutral5,
+  },
+  placeholderDropdown: {
+    fontFamily: 'Poppins-Regular',
+    fontSize: 14,
+    color: COLORS.neutral3,
   },
 });
