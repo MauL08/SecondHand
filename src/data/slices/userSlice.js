@@ -92,20 +92,11 @@ export const updateUser = createAsyncThunk(
           },
         },
       );
-      if (response.status <= 201) {
-        dispatch(setLoading(false));
-        Alert.alert(
-          'User Diperbarui!',
-          'Refresh halaman ini untuk melihat perubahan',
-        );
-      }
-      if (response.status === 400) {
-        Alert.alert('Error', response.data.message);
-        dispatch(setLoading(false));
-      }
-      return response.data;
+      return response.status;
     } catch (error) {
       return rejectWithValue(error.response.data);
+    } finally {
+      dispatch(setLoading(false));
     }
   },
 );
@@ -113,6 +104,7 @@ export const updateUser = createAsyncThunk(
 const initialState = {
   access_token: '',
   userDetail: {},
+  userUpdateResponse: 0,
 };
 
 const userSlice = createSlice({
@@ -148,7 +140,7 @@ const userSlice = createSlice({
     [updateUser.fulfilled]: (state, action) => {
       return {
         ...state,
-        userDetail: action.payload,
+        userUpdateResponse: action.payload,
       };
     },
   },

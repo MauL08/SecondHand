@@ -23,11 +23,14 @@ import { getUser, updateUser } from '../../data/slices/userSlice';
 import { launchCamera, launchImageLibrary } from 'react-native-image-picker';
 import LoadingWidget from '../../widgets/loading_widget';
 import ScreenStatusBar from '../../widgets/screen_status_bar_widget';
+import Toast from 'react-native-toast-message';
 
 const LengkapiInfoAkunScreen = () => {
   const navigation = useNavigation();
   const dispatch = useDispatch();
-  const { access_token, userDetail } = useSelector(state => state.user);
+  const { access_token, userDetail, userUpdateResponse } = useSelector(
+    state => state.user,
+  );
   const { isLoading } = useSelector(state => state.global);
 
   const [cameraPermission, setCameraPermission] = useState(true);
@@ -74,18 +77,37 @@ const LengkapiInfoAkunScreen = () => {
     }
   };
 
+  const showDoneToast = () => {
+    Toast.show({
+      type: 'success',
+      text1: 'Update Profil Sukses!',
+      text2: 'Silahkan refresh halaman ini untuk melihat perubahan',
+    });
+  };
+
+  const showFailedToast = () => {
+    Toast.show({
+      type: 'error',
+      text1: 'Update Profil Gagal!',
+      text2: 'Silahkan cek kembali dan coba lagi',
+    });
+  };
+
   const onUpdateProfile = (imageFile, name, city, address, phone) => {
     const formData = new FormData();
 
     formData.append('full_name', name);
     formData.append('phone_number', phone);
     formData.append('address', address);
-    formData.append('image', {
-      uri: imageFile.uri,
-      name: imageFile.fileName,
-      type: imageFile.type,
-    });
     formData.append('city', city);
+
+    imageFile === ''
+      ? formData.append('image', '')
+      : formData.append('image', {
+          uri: imageFile.uri,
+          name: imageFile.fileName,
+          type: imageFile.type,
+        });
 
     dispatch(
       updateUser({
@@ -94,7 +116,9 @@ const LengkapiInfoAkunScreen = () => {
       }),
     );
 
-    setUserImage(imageFile.uri);
+    userUpdateResponse <= 201 ? showDoneToast() : showFailedToast();
+
+    imageFile !== '' && setUserImage(imageFile.uri);
   };
 
   const onUploadImage = () => {
@@ -253,13 +277,15 @@ const LengkapiInfoAkunScreen = () => {
                 <Text style={styles.errors}>{errors.alamat}</Text>
               )}
               <Text style={styles.label}>No Handphone*</Text>
-              <TextInput
-                style={styles.input}
-                placeholder="contoh: +62 8123456789"
-                onChangeText={handleChange('nomor')}
-                onBlur={handleBlur('nomor')}
-                value={values.nomor}
-              />
+              <View style={styles.numberPhoneInputContainer}>
+                <Text style={styles.prefix}>+62</Text>
+                <TextInput
+                  style={{ width: ms(180) }}
+                  onChangeText={handleChange('nomor')}
+                  onBlur={handleBlur('nomor')}
+                  value={values.nomor}
+                />
+              </View>
               {errors.nomor && touched.nomor && (
                 <Text style={styles.errors}>{errors.nomor}</Text>
               )}
@@ -393,5 +419,20 @@ const styles = StyleSheet.create({
     backgroundColor: COLORS.neutral1,
     justifyContent: 'center',
     alignItems: 'center',
+  },
+  numberPhoneInputContainer: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    backgroundColor: 'white',
+    borderWidth: 1,
+    borderRadius: ms(16),
+    borderColor: COLORS.neutral2,
+    paddingHorizontal: ms(8),
+    fontFamily: 'Poppins-Regular',
+  },
+  prefix: {
+    paddingHorizontal: 10,
+    fontWeight: 'bold',
+    color: 'black',
   },
 });
