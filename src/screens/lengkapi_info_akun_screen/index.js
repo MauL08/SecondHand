@@ -15,7 +15,6 @@ import { COLORS } from '../../assets/colors';
 import { Icons } from '../../assets/icons';
 import * as yup from 'yup';
 import { Formik } from 'formik';
-import DropDownPicker from 'react-native-dropdown-picker';
 import { useNavigation } from '@react-navigation/native';
 import { ms } from 'react-native-size-matters';
 import { useDispatch, useSelector } from 'react-redux';
@@ -42,15 +41,9 @@ const LengkapiInfoAkunScreen = () => {
     dispatch(getUser(access_token));
   };
 
-  const [open, setOpen] = useState(false);
-  const [value, setValue] = useState(null);
-  const [items, setItems] = useState([
-    { label: 'Surabaya', value: 'Surabaya' },
-    { label: 'Jakarta', value: 'Jakarta' },
-  ]);
   const FormValidationSchema = yup.object().shape({
     name: yup.string().required('Masukkan Nama'),
-    kota: yup.string().required('Pilih Kota'),
+    kota: yup.string().required('Masukkan Kota'),
     alamat: yup.string().required('Masukkan Alamat'),
     nomor: yup.string().required('Masukkan Nomor'),
   });
@@ -191,18 +184,11 @@ const LengkapiInfoAkunScreen = () => {
           name: userDetail.full_name,
           alamat: userDetail.address === 'unknown' ? '' : userDetail.address,
           nomor: userDetail.phone_number === 1 ? '' : userDetail.phone_number,
+          kota: userDetail.city,
         }}
         validateOnMount={true}
         validationSchema={FormValidationSchema}>
-        {({
-          handleChange,
-          handleBlur,
-          setFieldValue,
-          values,
-          touched,
-          errors,
-          isValid,
-        }) => (
+        {({ handleChange, handleBlur, values, touched, errors, isValid }) => (
           <ScrollView
             showsVerticalScrollIndicator={false}
             refreshControl={<RefreshControl onRefresh={onRefresh} />}
@@ -251,20 +237,16 @@ const LengkapiInfoAkunScreen = () => {
                 <Text style={styles.errors}>{errors.name}</Text>
               )}
               <Text style={styles.label}>Kota*</Text>
-              <DropDownPicker
-                open={open}
-                value={value}
-                items={items}
-                setOpen={setOpen}
-                setValue={setValue}
-                setItems={setItems}
-                listMode="SCROLLVIEW"
+              <TextInput
                 style={styles.input}
-                textStyle={styles.dropdownText}
-                placeholder="Pilih Kota"
-                onChangeValue={itemValue => setFieldValue('kota', itemValue)}
-                placeholderStyle={styles.placeholderDropdown}
+                placeholder="Kota"
+                onChangeText={handleChange('kota')}
+                onBlur={handleBlur('kota')}
+                value={values.kota}
               />
+              {errors.kota && touched.kota && (
+                <Text style={styles.errors}>{errors.kota}</Text>
+              )}
               <Text style={styles.label}>Alamat*</Text>
               <TextInput
                 style={styles.inputBig}
@@ -304,7 +286,7 @@ const LengkapiInfoAkunScreen = () => {
                 onUpdateProfile(
                   file,
                   values.name,
-                  value,
+                  values.kota,
                   values.alamat,
                   values.nomor,
                 );
