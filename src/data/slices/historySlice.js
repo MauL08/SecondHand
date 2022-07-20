@@ -14,7 +14,7 @@ export const getAllHistory = createAsyncThunk(
       dispatch(setLoading(true));
       const response = await axios.get(`${BASE_URL}/history`, {
         headers: {
-          Authorization: `Bearer ${token}`,
+          access_token: token,
         },
       });
       return response.data;
@@ -49,7 +49,7 @@ export const getHistoryByID = createAsyncThunk(
 );
 
 const initialState = {
-  data: [],
+  historyData: [],
 };
 
 const historySlice = createSlice({
@@ -59,7 +59,7 @@ const historySlice = createSlice({
     [getAllHistory.fulfilled]: (state, action) => {
       return {
         ...state,
-        data: action.payload,
+        historyData: action.payload,
       };
     },
     [getHistoryByID.fulfilled]: (state, action) => {

@@ -7,45 +7,22 @@ import {
   FlatList,
   ScrollView,
 } from 'react-native';
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { COLORS } from '../../assets/colors';
 import { ms } from 'react-native-size-matters';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { Icons } from '../../assets/icons';
-import { useSelector } from 'react-redux';
+import { useDispatch, useSelector } from 'react-redux';
 import { useNavigation } from '@react-navigation/native';
+import { getSellerProduct } from '../../data/slices/sellerSlice';
+import NumberFormat from 'react-number-format';
+import LoadingWidget from '../../widgets/loading_widget';
+import { getAllHistory } from '../../data/slices/historySlice';
 
 const categories = [
   { id: 1, name: 'Produk', icon: Icons.Box },
   { id: 2, name: 'Diminati', icon: Icons.Heart },
   { id: 3, name: 'Terjual', icon: Icons.Dollar },
-];
-
-const dataProduk = [
-  {
-    id: 1,
-    name: 'Jam Tangan Casio',
-    price: 'Rp 250.000',
-    category: 'Aksesoris',
-    ditawar: 'Rp 200.000',
-    image: require('../../assets/images/image_produk_temporary.png'),
-  },
-  {
-    id: 2,
-    name: 'Jam Tangan Casio',
-    price: 'Rp 250.000',
-    category: 'Aksesoris',
-    ditawar: 'Rp 200.000',
-    image: require('../../assets/images/image_produk_temporary.png'),
-  },
-  {
-    id: 3,
-    name: 'Jam Tangan Casio',
-    price: 'Rp 250.000',
-    category: 'Aksesoris',
-    ditawar: 'Rp 200.000',
-    image: require('../../assets/images/image_produk_temporary.png'),
-  },
 ];
 
 const dataProdukDiminati = [
@@ -67,27 +44,34 @@ const dataProdukDiminati = [
   },
 ];
 
-const dataProdukTerjual = [
-  // {
-  //   id: 1,
-  //   name: 'Jam Tangan Casio',
-  //   price: 'Rp 250.000',
-  //   category: 'Aksesoris',
-  //   image: require('../../assets/images/image_produk_temporary.png'),
-  // },
-];
+const onCategoryProductCheck = cat => {
+  if (!cat) {
+    return '';
+  }
+  return cat[0]?.name;
+};
 
 const ProdukCard = ({ item }) => {
   return (
     <TouchableOpacity style={styles.produkContainer}>
-      <Image style={styles.imageProduk} source={item.image} />
+      <Image style={styles.imageProduk} source={{ uri: item.image_url }} />
       <Text style={[styles.regularText2, { paddingVertical: ms(4) }]}>
         {item.name}
       </Text>
-      <Text style={styles.regularSubText}>{item.category}</Text>
-      <Text style={[styles.regularText2, { paddingVertical: ms(4) }]}>
-        {item.price}
+      <Text style={styles.regularSubText}>
+        {onCategoryProductCheck(item.Categories)}
       </Text>
+      <NumberFormat
+        value={item.base_price}
+        displayType={'text'}
+        thousandSeparator={true}
+        prefix={'Rp'}
+        renderText={value => (
+          <Text style={[styles.regularText2, { paddingVertical: ms(4) }]}>
+            {value}
+          </Text>
+        )}
+      />
     </TouchableOpacity>
   );
 };
@@ -113,26 +97,29 @@ const ProdukYangDitawarCard = ({ item }) => {
 
 const DaftarJualScreen = () => {
   const [selectedCategory, setSelectedCategory] = useState('Produk');
-  const [dataProdukList, setDataProdukList] = useState(dataProduk);
   const [dataProdukDiminatiList, setDataProdukDiminatiList] =
     useState(dataProdukDiminati);
-  const [dataProdukTerjualList, setDataProdukTerjualList] =
-    useState(dataProdukTerjual);
 
-  // const dispatch = useDispatch();
+  const dispatch = useDispatch();
   const navigation = useNavigation();
-  const { userDetail } = useSelector(state => state.user);
+  const { userDetail, access_token } = useSelector(state => state.user);
+  const { isLoading } = useSelector(state => state.global);
   const { sellerProduct } = useSelector(state => state.seller);
+  const { historyData } = useSelector(state => state.history);
+
+  useEffect(() => {
+    dispatch(getSellerProduct(access_token));
+    dispatch(getAllHistory(access_token));
+  }, [access_token, dispatch]);
 
   const setSelectedCategoryFilter = category => {
     setSelectedCategory(category);
     if (category === 'Produk') {
-      // produk
-      setDataProdukList(dataProduk);
+      dispatch(getSellerProduct(access_token));
     } else if (category === 'Diminati') {
       setDataProdukDiminatiList(dataProdukDiminati); // diminati
     } else {
-      setDataProdukTerjualList(dataProdukTerjual); // terjual
+      dispatch(getAllHistory(access_token));
     }
   };
 
@@ -202,26 +189,31 @@ const DaftarJualScreen = () => {
           </TouchableOpacity>
         ))}
       </ScrollView>
-      {selectedCategory === 'Produk' && dataProdukList.length !== 0 ? (
+      {selectedCategory === 'Produk' ? (
         <View style={styles.daftarProdukContainer}>
-          <FlatList
-            key={'Produk'}
-            data={sellerProduct}
-            numColumns={2}
-            showsVerticalScrollIndicator={false}
-            renderItem={({ item }) => (
-              <>
-                {/* <TouchableOpacity style={styles.tambahProduk}>
-                  <Image
-                    source={Icons.Plus}
-                    style={[styles.icon, { tintColor: COLORS.neutral2 }]}
-                  />
-                  <Text style={styles.regularSubText}>Tambah Produk</Text>
-                </TouchableOpacity> */}
+          {isLoading ? (
+            <LoadingWidget />
+          ) : sellerProduct.length === 0 ? (
+            <TouchableOpacity
+              style={styles.tambahProduk}
+              onPress={() => navigation.navigate('Jual')}>
+              <Image
+                source={Icons.Plus}
+                style={[styles.icon, { tintColor: COLORS.neutral2 }]}
+              />
+              <Text style={styles.regularSubText}>Tambah Produk</Text>
+            </TouchableOpacity>
+          ) : (
+            <FlatList
+              key={'Produk'}
+              data={sellerProduct}
+              numColumns={2}
+              showsVerticalScrollIndicator={false}
+              renderItem={({ item }) => (
                 <ProdukCard name={item.name} icon={item.icon} item={item} />
-              </>
-            )}
-          />
+              )}
+            />
+          )}
         </View>
       ) : selectedCategory === 'Diminati' &&
         dataProdukDiminatiList.length !== 0 ? (
@@ -240,42 +232,39 @@ const DaftarJualScreen = () => {
             )}
           />
         </View>
-      ) : selectedCategory === 'Terjual' &&
-        dataProdukTerjualList.length !== 0 ? (
+      ) : selectedCategory === 'Terjual' ? (
         <View style={{ marginTop: ms(8), flex: 1 }}>
-          <FlatList
-            key={'Terjual'}
-            data={dataProdukTerjualList}
-            numColumns={1}
-            showsVerticalScrollIndicator={false}
-            renderItem={({ item }) => (
-              <ProdukYangDitawarCard
-                name={item.name}
-                icon={item.icon}
-                item={item}
+          {isLoading ? (
+            <LoadingWidget />
+          ) : historyData.length === 0 ? (
+            <View>
+              <Image
+                style={styles.nothingSold}
+                source={require('../../assets/images/image_nothing_sold.png')}
               />
-            )}
-          />
+              <Text style={styles.nothingSoldText}>
+                Belum ada produkmu yang diminati nih, sabar ya rejeki nggak
+                kemana kok
+              </Text>
+            </View>
+          ) : (
+            <FlatList
+              key={'Terjual'}
+              data={historyData}
+              numColumns={1}
+              showsVerticalScrollIndicator={false}
+              renderItem={({ item }) => (
+                <ProdukYangDitawarCard
+                  name={item.name}
+                  icon={item.icon}
+                  item={item}
+                />
+              )}
+            />
+          )}
         </View>
-      ) : dataProdukList.length === 0 ? (
-        <TouchableOpacity style={styles.tambahProduk}>
-          <Image
-            source={Icons.Plus}
-            style={[styles.icon, { tintColor: COLORS.neutral2 }]}
-          />
-          <Text style={styles.regularSubText}>Tambah Produk</Text>
-        </TouchableOpacity>
       ) : (
-        <View>
-          <Image
-            style={styles.nothingSold}
-            source={require('../../assets/images/image_nothing_sold.png')}
-          />
-          <Text style={styles.nothingSoldText}>
-            Belum ada produkmu yang diminati nih, sabar ya rejeki nggak kemana
-            kok
-          </Text>
-        </View>
+        <View />
       )}
     </SafeAreaView>
   );
