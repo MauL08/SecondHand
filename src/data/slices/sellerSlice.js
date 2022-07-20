@@ -288,11 +288,14 @@ export const getSellerOrder = createAsyncThunk(
   async (credentials, { rejectWithValue, dispatch }) => {
     try {
       dispatch(setLoading(true));
-      const response = await axios.get(`${BASE_URL}/seller/order`, {
-        headers: {
-          Authorization: `Bearer ${credentials.token}`,
+      const response = await axios.get(
+        `${BASE_URL}/seller/order?status=${credentials.type}`,
+        {
+          headers: {
+            access_token: credentials.token,
+          },
         },
-      });
+      );
       return response.data;
     } catch (error) {
       return rejectWithValue(error.response.data);
@@ -374,6 +377,7 @@ const initialState = {
   category: [],
   detailCategory: {},
   sellerProduct: [],
+  sellerOrder: [],
   data: [],
   addProductStatus: 0,
 };
@@ -456,7 +460,7 @@ const sellerSlice = createSlice({
     [getSellerOrder.fulfilled]: (state, action) => {
       return {
         ...state,
-        data: action.payload,
+        sellerOrder: action.payload,
       };
     },
     [getSellerOrderByID.fulfilled]: (state, action) => {
