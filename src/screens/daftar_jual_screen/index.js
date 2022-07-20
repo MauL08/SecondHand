@@ -17,12 +17,12 @@ import { useDispatch, useSelector } from 'react-redux';
 import { useNavigation } from '@react-navigation/native';
 import {
   getSellerOrder,
+  // getSellerOrderByID,
   getSellerProduct,
 } from '../../data/slices/sellerSlice';
 import NumberFormat from 'react-number-format';
 import LoadingWidget from '../../widgets/loading_widget';
 import { getAllHistory } from '../../data/slices/historySlice';
-import DropDownPicker from 'react-native-dropdown-picker';
 
 const categories = [
   { id: 1, name: 'Produk', icon: Icons.Box },
@@ -64,12 +64,24 @@ const ProdukCard = ({ item }) => {
 
 const ProdukYangDitawarCard = ({ item, type }) => {
   const navigation = useNavigation();
+  // const dispatch = useDispatch();
+  // const { access_token } = useSelector(state => state.user);
 
-  if (type === 'accepted') {
+  if (type === 'Diminati') {
     return (
       <TouchableOpacity
         style={styles.produkDitawarContainer}
-        onPress={() => navigation.navigate('InfoPenawar')}>
+        onPress={() => {
+          navigation.navigate('InfoPenawar', {
+            id: item.id,
+          });
+          // dispatch(
+          //   getSellerOrderByID({
+          //     token: access_token,
+          //     id: item.id,
+          //   }),
+          // );
+        }}>
         <View style={styles.row}>
           <Image
             style={[styles.imageUser, { marginRight: ms(16) }]}
@@ -98,25 +110,21 @@ const ProdukYangDitawarCard = ({ item, type }) => {
             />
           </View>
         </View>
-        <Text style={styles.regularText2}>Penawaran Diterima</Text>
       </TouchableOpacity>
     );
-  }
-  if (type === 'declined') {
+  } else {
     return (
-      <TouchableOpacity
-        style={styles.produkDitawarContainer}
-        onPress={() => navigation.navigate('InfoPenawar')}>
+      <View style={styles.produkDitawarContainer}>
         <View style={styles.row}>
           <Image
             style={[styles.imageUser, { marginRight: ms(16) }]}
-            source={{ uri: item.Product.image_url }}
+            source={{ uri: item.image_url }}
           />
           <View>
-            <Text style={styles.regularSubText}>Penawaran produk</Text>
+            <Text style={styles.regularSubText}>Berhasil Terjual</Text>
             <Text style={styles.regularText2}>{item.product_name}</Text>
             <NumberFormat
-              value={item.Product.base_price}
+              value={item.price}
               displayType={'text'}
               thousandSeparator={true}
               prefix={'Rp'}
@@ -124,70 +132,15 @@ const ProdukYangDitawarCard = ({ item, type }) => {
                 <Text style={styles.regularText2}>{value}</Text>
               )}
             />
-            <NumberFormat
-              value={item.price}
-              displayType={'text'}
-              thousandSeparator={true}
-              prefix={'Rp'}
-              renderText={value => (
-                <Text style={styles.regularText2}>Ditawar {value}</Text>
-              )}
-            />
           </View>
         </View>
-        <Text style={styles.regularText2}>Penawaran Ditolak</Text>
-      </TouchableOpacity>
-    );
-  }
-  if (type === 'pending') {
-    return (
-      <TouchableOpacity
-        style={styles.produkDitawarContainer}
-        onPress={() => navigation.navigate('InfoPenawar')}>
-        <View style={styles.row}>
-          <Image
-            style={[styles.imageUser, { marginRight: ms(16) }]}
-            source={{ uri: item.Product.image_url }}
-          />
-          <View>
-            <Text style={styles.regularSubText}>Penawaran produk</Text>
-            <Text style={styles.regularText2}>{item.product_name}</Text>
-            <NumberFormat
-              value={item.Product.base_price}
-              displayType={'text'}
-              thousandSeparator={true}
-              prefix={'Rp'}
-              renderText={value => (
-                <Text style={styles.regularText2}>{value}</Text>
-              )}
-            />
-            <NumberFormat
-              value={item.price}
-              displayType={'text'}
-              thousandSeparator={true}
-              prefix={'Rp'}
-              renderText={value => (
-                <Text style={styles.regularText2}>Ditawar {value}</Text>
-              )}
-            />
-          </View>
-        </View>
-      </TouchableOpacity>
+      </View>
     );
   }
 };
 
 const DaftarJualScreen = () => {
   const [selectedCategory, setSelectedCategory] = useState('Produk');
-
-  const [type, setType] = useState('');
-  const [open, setOpen] = useState(false);
-  const [value, setValue] = useState(null);
-  const [items, setItems] = useState([
-    { label: 'Diterima', value: 'accepted' },
-    { label: 'Ditolak', value: 'declined' },
-    { label: 'Menunggu', value: 'pending' },
-  ]);
 
   const [refresh, setRefresh] = useState(false);
 
@@ -205,7 +158,7 @@ const DaftarJualScreen = () => {
     dispatch(
       getSellerOrder({
         token: access_token,
-        type: type,
+        type: '',
       }),
     );
     setRefresh(false);
@@ -217,10 +170,10 @@ const DaftarJualScreen = () => {
     dispatch(
       getSellerOrder({
         token: access_token,
-        type: type,
+        type: '',
       }),
     );
-  }, [access_token, dispatch, type]);
+  }, [access_token, dispatch]);
 
   const setSelectedCategoryFilter = category => {
     setSelectedCategory(category);
@@ -230,7 +183,7 @@ const DaftarJualScreen = () => {
       dispatch(
         getSellerOrder({
           token: access_token,
-          type: type,
+          type: '',
         }),
       );
     } else {
@@ -335,20 +288,6 @@ const DaftarJualScreen = () => {
         </View>
       ) : selectedCategory === 'Diminati' ? (
         <View style={{ marginTop: ms(8), flex: 1 }}>
-          <DropDownPicker
-            open={open}
-            value={value}
-            items={items}
-            setOpen={setOpen}
-            setValue={setValue}
-            setItems={setItems}
-            listMode="SCROLLVIEW"
-            style={styles.input}
-            textStyle={styles.dropdownText}
-            placeholder="Pilih Status"
-            placeholderStyle={styles.placeholderDropdown}
-            onChangeValue={itemValue => setType(itemValue)}
-          />
           {isLoading ? (
             <LoadingWidget />
           ) : sellerOrder.length === 0 ? (
@@ -377,7 +316,7 @@ const DaftarJualScreen = () => {
                     name={item.name}
                     icon={item.icon}
                     item={item}
-                    type={item.status}
+                    type="Diminati"
                   />
                 )}
               />
@@ -413,6 +352,7 @@ const DaftarJualScreen = () => {
                   name={item.name}
                   icon={item.icon}
                   item={item}
+                  type="Terjual"
                 />
               )}
             />

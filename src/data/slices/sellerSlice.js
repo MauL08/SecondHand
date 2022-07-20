@@ -314,10 +314,11 @@ export const getSellerOrderByID = createAsyncThunk(
         `${BASE_URL}/seller/order/${credentials.id}`,
         {
           headers: {
-            Authorization: `Bearer ${credentials.token}`,
+            access_token: credentials.token,
           },
         },
       );
+
       return response.data;
     } catch (error) {
       return rejectWithValue(error.response.data);
@@ -337,7 +338,8 @@ export const updateSellerOrder = createAsyncThunk(
         credentials.data,
         {
           headers: {
-            Authorization: `Bearer ${credentials.token}`,
+            access_token: credentials.token,
+            'Content-Type': 'multipart/form-data',
           },
         },
       );
@@ -378,6 +380,7 @@ const initialState = {
   detailCategory: {},
   sellerProduct: [],
   sellerOrder: [],
+  sellerOrderDetail: {},
   data: [],
   addProductStatus: 0,
 };
@@ -466,7 +469,7 @@ const sellerSlice = createSlice({
     [getSellerOrderByID.fulfilled]: (state, action) => {
       return {
         ...state,
-        data: action.payload,
+        sellerOrderDetail: action.payload,
       };
     },
     [updateSellerOrder.fulfilled]: state => {
