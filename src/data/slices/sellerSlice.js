@@ -198,18 +198,14 @@ export const createSellerProduct = createAsyncThunk(
 
 export const getSellerProduct = createAsyncThunk(
   'seller/getSellerProduct',
-  async (credentials, { rejectWithValue, dispatch }) => {
+  async (token, { rejectWithValue, dispatch }) => {
     try {
       dispatch(setLoading(true));
-      const response = await axios.get(
-        `${BASE_URL}/seller/product`,
-
-        {
-          headers: {
-            Authorization: `Bearer ${credentials.token}`,
-          },
+      const response = await axios.get(`${BASE_URL}/seller/product`, {
+        headers: {
+          access_token: token,
         },
-      );
+      });
       return response.data;
     } catch (error) {
       return rejectWithValue(error.response.data);
@@ -377,6 +373,7 @@ const initialState = {
   banner: [],
   category: [],
   detailCategory: {},
+  sellerProduct: [],
   data: [],
   addProductStatus: 0,
 };
@@ -432,7 +429,7 @@ const sellerSlice = createSlice({
     [getSellerProduct.fulfilled]: (state, action) => {
       return {
         ...state,
-        data: action.payload,
+        sellerProduct: action.payload,
       };
     },
     [getSellerProductByID.fulfilled]: (state, action) => {

@@ -165,7 +165,7 @@ const buyerSlice = createSlice({
     [getAllBuyerProduct.fulfilled]: (state, action) => {
       return {
         ...state,
-        product: action.payload.data,
+        product: action.payload,
       };
     },
     [getBuyerProductByID.fulfilled]: (state, action) => {

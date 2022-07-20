@@ -44,8 +44,8 @@ const HomeScreen = () => {
   const [allCategory, setAllCategory] = useState([]);
   const [refreshing, setRefreshing] = useState(false);
 
-  const [dataProduct] = useState(product);
-  const [pages, setPages] = useState(1);
+  // const [dataProduct] = useState(product);
+  // const [pages, setPages] = useState(1);
 
   useEffect(() => {
     dispatch(getSellerCategory());
@@ -55,7 +55,7 @@ const HomeScreen = () => {
         status: '',
         category_id: currCategory,
         search: '',
-        page: pages,
+        page: 1,
         per_page: 15,
       }),
     );
@@ -94,7 +94,6 @@ const HomeScreen = () => {
     setRefreshing(true);
     dispatch(getSellerCategory());
     dispatch(getAllSellerBanner());
-    setPages(1);
     dispatch(
       getAllBuyerProduct({
         status: '',
@@ -196,7 +195,7 @@ const HomeScreen = () => {
                         category_id: currCategory,
                         search: searchText,
                         page: 1,
-                        per_page: 20,
+                        per_page: 15,
                       }),
                     )
                   }>
@@ -204,15 +203,24 @@ const HomeScreen = () => {
                 </TouchableOpacity>
               </View>
               <View style={styles.bannerWrapper}>
-                <Carousel
-                  layout={'default'}
-                  sliderWidth={width}
-                  itemWidth={width - 100}
-                  data={banner}
-                  renderItem={({ item }) => (
-                    <BannerRender image={item.image_url} nama={item.name} />
-                  )}
-                />
+                {isLoading ? (
+                  <View style={styles.onLoadBannerImageContainer}>
+                    <Image
+                      source={require('../../assets/images/img_no_image.png')}
+                      style={styles.onLoadBannerImage}
+                    />
+                  </View>
+                ) : (
+                  <Carousel
+                    layout={'default'}
+                    sliderWidth={width}
+                    itemWidth={width - 100}
+                    data={banner}
+                    renderItem={({ item }) => (
+                      <BannerRender image={item.image_url} nama={item.name} />
+                    )}
+                  />
+                )}
               </View>
             </View>
             <Text style={styles.midTitle}>Telusuri Kategori</Text>
@@ -220,29 +228,31 @@ const HomeScreen = () => {
               {isLoading ? (
                 <Text style={styles.loadKategoriText}>Memuat Kategori...</Text>
               ) : (
-                <FlatList
-                  data={allCategory}
-                  renderItem={({ item }) => (
-                    <FilterRender name={item.name} id={item.id} />
-                  )}
-                  keyExtractor={item => item.id}
-                  horizontal={true}
-                  showsHorizontalScrollIndicator={false}
-                />
+                <>
+                  <FlatList
+                    data={allCategory}
+                    renderItem={({ item }) => (
+                      <FilterRender name={item.name} id={item.id} />
+                    )}
+                    keyExtractor={item => item.id}
+                    horizontal={true}
+                    showsHorizontalScrollIndicator={false}
+                  />
+                </>
               )}
             </View>
             {isLoading ? (
               <View style={{ marginTop: ms(100) }}>
                 <LoadingWidget />
               </View>
-            ) : dataProduct.length === 0 ? (
+            ) : product.length === 0 ? (
               <View style={styles.dumpText}>
                 <Text>Tidak ada produk yang tersedia</Text>
               </View>
             ) : (
               <View style={styles.productContainer}>
                 <FlatList
-                  data={dataProduct}
+                  data={product}
                   key={2}
                   numColumns={2}
                   columnWrapperStyle={styles.columnWrapperStyle}
@@ -460,5 +470,11 @@ const styles = StyleSheet.create({
     color: COLORS.neutral01,
     fontSize: ms(12),
     fontWeight: '700',
+  },
+  onLoadBannerImage: {
+    width: width - 100,
+    height: ms(150),
+    marginVertical: ms(30),
+    tintColor: 'grey',
   },
 });

@@ -9,11 +9,18 @@ import Toast from 'react-native-toast-message';
 import { persistor, store } from './data/store';
 import { PersistGate } from 'redux-persist/integration/react';
 
+import { LogBox } from 'react-native';
+
 const codePushOptions = {
   checkFrequency: CodePush.CheckFrequency.ON_APP_START,
 };
 
 const App = () => {
+  LogBox.ignoreLogs([
+    'ViewPropTypes will be removed',
+    'ColorPropType will be removed',
+  ]);
+
   useEffect(() => {
     createChannels();
     setTimeout(() => {

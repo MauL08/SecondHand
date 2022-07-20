@@ -12,6 +12,8 @@ import { COLORS } from '../../assets/colors';
 import { ms } from 'react-native-size-matters';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { Icons } from '../../assets/icons';
+import { useSelector } from 'react-redux';
+import { useNavigation } from '@react-navigation/native';
 
 const categories = [
   { id: 1, name: 'Produk', icon: Icons.Box },
@@ -117,6 +119,11 @@ const DaftarJualScreen = () => {
   const [dataProdukTerjualList, setDataProdukTerjualList] =
     useState(dataProdukTerjual);
 
+  // const dispatch = useDispatch();
+  const navigation = useNavigation();
+  const { userDetail } = useSelector(state => state.user);
+  const { sellerProduct } = useSelector(state => state.seller);
+
   const setSelectedCategoryFilter = category => {
     setSelectedCategory(category);
     if (category === 'Produk') {
@@ -136,14 +143,16 @@ const DaftarJualScreen = () => {
         <View style={styles.row}>
           <Image
             style={styles.imageUser}
-            source={require('../../assets/images/image_user_temporary.png')}
+            source={{ uri: userDetail.image_url }}
           />
           <View style={{ marginLeft: ms(16) }}>
-            <Text style={styles.regularText}>Nama Penjual</Text>
-            <Text style={styles.regularSubText}>Kota</Text>
+            <Text style={styles.regularText}>{userDetail.full_name}</Text>
+            <Text style={styles.regularSubText}>{userDetail.city}</Text>
           </View>
         </View>
-        <TouchableOpacity style={styles.bottonEdit}>
+        <TouchableOpacity
+          style={styles.bottonEdit}
+          onPress={() => navigation.navigate('LengkapiAkun')}>
           <Text style={styles.bo}>Edit</Text>
         </TouchableOpacity>
       </View>
@@ -165,7 +174,6 @@ const DaftarJualScreen = () => {
             ]}
             onPress={() => {
               setSelectedCategoryFilter(category.name);
-              console.log(dataProdukList);
             }}>
             <Image
               style={[
@@ -194,12 +202,11 @@ const DaftarJualScreen = () => {
           </TouchableOpacity>
         ))}
       </ScrollView>
-
       {selectedCategory === 'Produk' && dataProdukList.length !== 0 ? (
         <View style={styles.daftarProdukContainer}>
           <FlatList
             key={'Produk'}
-            data={dataProdukList}
+            data={sellerProduct}
             numColumns={2}
             showsVerticalScrollIndicator={false}
             renderItem={({ item }) => (
