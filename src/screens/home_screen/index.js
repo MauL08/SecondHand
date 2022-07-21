@@ -18,6 +18,7 @@ import { useDispatch, useSelector } from 'react-redux';
 import {
   getAllBuyerProduct,
   getBuyerProductByID,
+  getNextPageProduct,
 } from '../../data/slices/buyerSlice';
 import {
   getAllSellerBanner,
@@ -35,7 +36,7 @@ const HomeScreen = () => {
   const dispatch = useDispatch();
   const navigation = useNavigation();
 
-  const { product } = useSelector(state => state.buyer);
+  const { product, nextPageProduct } = useSelector(state => state.buyer);
   const { category, banner } = useSelector(state => state.seller);
   const { isLoading } = useSelector(state => state.global);
 
@@ -44,8 +45,8 @@ const HomeScreen = () => {
   const [allCategory, setAllCategory] = useState([]);
   const [refreshing, setRefreshing] = useState(false);
 
-  // const [dataProduct] = useState(product);
-  // const [pages, setPages] = useState(1);
+  const [dataProduct, setDataProduct] = useState([]);
+  const [pages, setPages] = useState(1);
 
   useEffect(() => {
     dispatch(getSellerCategory());
@@ -66,20 +67,23 @@ const HomeScreen = () => {
       },
       ...category,
     ]);
+    setDataProduct(product);
+    fetchNextProduct();
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [currCategory, dispatch]);
 
-  const loadMore = () => {
+  const fetchNextProduct = () => {
     // setPages(currState => currState + 1);
-    // dispatch(
-    //   getAllBuyerProduct({
-    //     status: '',
-    //     category_id: currCategory,
-    //     search: '',
-    //     page: pages,
-    //     per_page: 15,
-    //   }),
-    // );
+    dispatch(
+      getNextPageProduct({
+        status: '',
+        category_id: currCategory,
+        search: '',
+        page: pages + 1,
+        per_page: 15,
+      }),
+    );
+    setPages(currState => currState + 1);
     // setDataProduct(currState => [...currState, product]);
   };
 
@@ -273,11 +277,13 @@ const HomeScreen = () => {
             {isLoading ? (
               <View />
             ) : (
-              <TouchableOpacity
-                style={styles.loadMoreButton}
-                onPress={loadMore}>
-                <Text style={styles.loadMoreText}>Lebih Banyak Produk</Text>
-              </TouchableOpacity>
+              nextPageProduct.length > 0 && (
+                <TouchableOpacity
+                  style={styles.loadMoreButton}
+                  onPress={fetchNextProduct}>
+                  <Text style={styles.loadMoreText}>Lebih Banyak Produk</Text>
+                </TouchableOpacity>
+              )
             )}
           </>
         }

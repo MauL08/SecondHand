@@ -25,6 +25,23 @@ export const getAllBuyerProduct = createAsyncThunk(
   },
 );
 
+export const getNextPageProduct = createAsyncThunk(
+  'buyer/getNextBuyerProduct',
+  async (credentials, { rejectWithValue, dispatch }) => {
+    try {
+      dispatch(setLoading(true));
+      const response = await axios.get(
+        `${BASE_URL}/buyer/product?status=${credentials.status}&category_id=${credentials.category_id}&search=${credentials.search}&page=${credentials.page}&per_page=${credentials.per_page}`,
+      );
+      return response.data;
+    } catch (error) {
+      return rejectWithValue(error.response.data);
+    } finally {
+      dispatch(setLoading(false));
+    }
+  },
+);
+
 export const getBuyerProductByID = createAsyncThunk(
   'buyer/getBuyerProductByID',
   async (id, { rejectWithValue, dispatch }) => {
@@ -152,6 +169,7 @@ export const deleteBuyerOrder = createAsyncThunk(
 
 const initialState = {
   product: [],
+  nextPageProduct: [],
   detailProduct: {},
   order: [],
   detailOrder: {},
@@ -166,6 +184,13 @@ const buyerSlice = createSlice({
       return {
         ...state,
         product: action.payload,
+      };
+    },
+    [getNextPageProduct.fulfilled]: (state, action) => {
+      return {
+        ...state,
+        nextPageProduct: action.payload,
+        product: [...state.product, ...state.nextPageProduct],
       };
     },
     [getBuyerProductByID.fulfilled]: (state, action) => {
