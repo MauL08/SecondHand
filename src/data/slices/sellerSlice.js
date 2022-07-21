@@ -186,7 +186,7 @@ export const createSellerProduct = createAsyncThunk(
           },
         },
       );
-      console.log(response.status);
+      console.log(response);
       return response.status;
     } catch (error) {
       return rejectWithValue(error.response.data);

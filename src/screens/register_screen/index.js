@@ -145,7 +145,9 @@ export default Register;
 
 const styles = StyleSheet.create({
   container: {
-    marginHorizontal: 16,
+    flex: 1,
+    backgroundColor: COLORS.neutral1,
+    paddingHorizontal: moderateScale(16),
   },
   iconBack: {
     height: 24,

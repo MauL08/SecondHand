@@ -261,7 +261,7 @@ const DaftarJualScreen = () => {
         <View style={styles.daftarProdukContainer}>
           {isLoading ? (
             <LoadingWidget />
-          ) : sellerProduct.length === 0 ? (
+          ) : sellerProduct?.length === 0 ? (
             <TouchableOpacity
               style={styles.tambahProduk}
               onPress={() => navigation.navigate('Jual')}>

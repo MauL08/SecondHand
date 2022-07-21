@@ -19,6 +19,7 @@ import { useEffect } from 'react';
 import { useCallback } from 'react';
 import Toast from 'react-native-toast-message';
 import { createSellerProduct } from '../../data/slices/sellerSlice';
+import NumberFormat from 'react-number-format';
 
 const WIDTH = Dimensions.get('window').width;
 
@@ -28,7 +29,9 @@ const DetailProductScreen = ({ route }) => {
 
   const { image, name, kategori, harga, deskripsi, lokasi } = route.params;
   const { userDetail, access_token } = useSelector(state => state.user);
-  const { category, addProductStatus } = useSelector(state => state.seller);
+  const { category, addProductStatus, sellerProduct } = useSelector(
+    state => state.seller,
+  );
 
   const [showCategory, setShowCategory] = useState('');
 
@@ -44,25 +47,31 @@ const DetailProductScreen = ({ route }) => {
   );
 
   const onPostProduct = () => {
-    const formData = new FormData();
+    if (sellerProduct.length === 5) {
+      showFailedMaxToast();
+    } else {
+      const formData = new FormData();
 
-    formData.append('name', name);
-    formData.append('base_price', harga);
-    formData.append('category_ids', kategori);
-    formData.append('description', deskripsi);
-    formData.append('location', lokasi);
-    formData.append('image', {
-      uri: image.uri,
-      name: image.fileName,
-      type: image.type,
-    });
+      formData.append('name', name);
+      formData.append('base_price', harga);
+      formData.append('category_ids', kategori);
+      formData.append('description', deskripsi);
+      formData.append('location', lokasi);
+      formData.append('image', {
+        uri: image.uri,
+        name: image.fileName,
+        type: image.type,
+      });
 
-    dispatch(
-      createSellerProduct({
-        token: access_token,
-        data: formData,
-      }),
-    );
+      dispatch(
+        createSellerProduct({
+          token: access_token,
+          data: formData,
+        }),
+      );
+
+      addProductStatus <= 201 ? showDoneToast() : showFailedToast();
+    }
   };
 
   const showDoneToast = () => {
@@ -79,6 +88,14 @@ const DetailProductScreen = ({ route }) => {
       type: 'error',
       text1: 'Gagal!',
       text2: 'Produk Gagal Diterbitkan',
+    });
+  };
+
+  const showFailedMaxToast = () => {
+    Toast.show({
+      type: 'error',
+      text1: 'Gagal!',
+      text2: 'Anda hanya dapat membuat 5 buah produk',
     });
   };
 
@@ -106,9 +123,14 @@ const DetailProductScreen = ({ route }) => {
         <View style={styles.productContainer}>
           <Text style={styles.cardName}>{name}</Text>
           <Text style={styles.txtSecondary}>{showCategory}</Text>
-          <Text style={styles.txtPrice}>{harga}</Text>
+          <NumberFormat
+            value={harga}
+            displayType={'text'}
+            thousandSeparator={true}
+            prefix={'Rp'}
+            renderText={value => <Text style={styles.txtPrice}>{value}</Text>}
+          />
         </View>
-
         <View style={styles.cardUser}>
           <Image
             source={{ uri: userDetail.image_url }}
@@ -130,7 +152,6 @@ const DetailProductScreen = ({ route }) => {
         style={styles.btnTerbitkan}
         onPress={() => {
           onPostProduct();
-          addProductStatus <= 201 ? showDoneToast() : showFailedToast();
         }}>
         <Text style={styles.txtBtn}>Terbitkan</Text>
       </TouchableOpacity>

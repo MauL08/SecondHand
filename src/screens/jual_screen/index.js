@@ -22,6 +22,7 @@ import { useDispatch, useSelector } from 'react-redux';
 import {
   createSellerProduct,
   getSellerCategory,
+  getSellerProduct,
 } from '../../data/slices/sellerSlice';
 import { launchCamera, launchImageLibrary } from 'react-native-image-picker';
 import ScreenStatusBar from '../../widgets/screen_status_bar_widget';
@@ -29,7 +30,9 @@ import Toast from 'react-native-toast-message';
 import { getUser } from '../../data/slices/userSlice';
 
 const JualScreen = () => {
-  const { category, addProductStatus } = useSelector(state => state.seller);
+  const { category, addProductStatus, sellerProduct } = useSelector(
+    state => state.seller,
+  );
   const { access_token } = useSelector(state => state.user);
 
   const navigation = useNavigation();
@@ -58,12 +61,14 @@ const JualScreen = () => {
 
   useEffect(() => {
     dispatch(getSellerCategory());
+    dispatch(getSellerProduct(access_token));
     onDestroyCategories();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [dispatch, onDestroyCategories]);
 
   const onDestroyCategories = useCallback(() => {
     setUsedCat(
-      category.map(val => {
+      category?.map(val => {
         return {
           label: val.name,
           value: val.id,
@@ -88,31 +93,43 @@ const JualScreen = () => {
     });
   };
 
+  const showFailedMaxToast = () => {
+    Toast.show({
+      type: 'error',
+      text1: 'Gagal!',
+      text2: 'Anda hanya dapat membuat 5 buah produk',
+    });
+  };
+
   const onPostProduct = (name, lokasi, desc, price, catID, imageFile) => {
-    if (imageFile === null) {
-      Alert.alert('Error', 'Lengkapi Form terlebih dahulu!');
+    if (sellerProduct.length === 5) {
+      showFailedMaxToast();
     } else {
-      const formData = new FormData();
+      if (imageFile === null) {
+        Alert.alert('Error', 'Lengkapi Form terlebih dahulu!');
+      } else {
+        const formData = new FormData();
 
-      formData.append('name', name);
-      formData.append('base_price', price);
-      formData.append('category_ids', catID);
-      formData.append('description', desc);
-      formData.append('location', lokasi);
-      formData.append('image', {
-        uri: imageFile.uri,
-        name: imageFile.fileName,
-        type: imageFile.type,
-      });
+        formData.append('name', name);
+        formData.append('base_price', price);
+        formData.append('category_ids', catID);
+        formData.append('description', desc);
+        formData.append('location', lokasi);
+        formData.append('image', {
+          uri: imageFile.uri,
+          name: imageFile.fileName,
+          type: imageFile.type,
+        });
 
-      dispatch(
-        createSellerProduct({
-          token: access_token,
-          data: formData,
-        }),
-      );
-      setFile(null);
-      addProductStatus <= 201 ? showDoneToast() : showFailedToast();
+        dispatch(
+          createSellerProduct({
+            token: access_token,
+            data: formData,
+          }),
+        );
+        setFile(null);
+        addProductStatus <= 201 ? showDoneToast() : showFailedToast();
+      }
     }
   };
 
