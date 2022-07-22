@@ -30,9 +30,7 @@ import Toast from 'react-native-toast-message';
 import { getUser } from '../../data/slices/userSlice';
 
 const JualScreen = () => {
-  const { category, addProductStatus, sellerProduct } = useSelector(
-    state => state.seller,
-  );
+  const { category, sellerProduct } = useSelector(state => state.seller);
   const { access_token } = useSelector(state => state.user);
 
   const navigation = useNavigation();
@@ -77,22 +75,6 @@ const JualScreen = () => {
     );
   }, [category]);
 
-  const showDoneToast = () => {
-    Toast.show({
-      type: 'success',
-      text1: 'Sukses!',
-      text2: 'Produk Sukses Diterbitkan',
-    });
-  };
-
-  const showFailedToast = () => {
-    Toast.show({
-      type: 'error',
-      text1: 'Gagal!',
-      text2: 'Produk Gagal Diterbitkan',
-    });
-  };
-
   const showFailedMaxToast = () => {
     Toast.show({
       type: 'error',
@@ -128,7 +110,6 @@ const JualScreen = () => {
           }),
         );
         setFile(null);
-        addProductStatus <= 201 ? showDoneToast() : showFailedToast();
       }
     }
   };
@@ -242,9 +223,6 @@ const JualScreen = () => {
           style={styles.container}>
           <ScreenStatusBar />
           <View style={styles.top}>
-            <TouchableOpacity onPress={() => navigation.goBack()}>
-              <Image source={Icons.ArrowLeft} style={styles.icon} />
-            </TouchableOpacity>
             <Text style={styles.title}>Lengkapi Detail Produk</Text>
           </View>
           <View>

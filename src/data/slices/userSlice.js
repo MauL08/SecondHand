@@ -4,9 +4,26 @@ import { BASE_URL } from '../baseAPI';
 import { createSlice, createAsyncThunk } from '@reduxjs/toolkit';
 import { navigate } from '../../core/router/navigator';
 import { setLoading } from './globalSlice';
+import Toast from 'react-native-toast-message';
 
 axios.defaults.validateStatus = status => {
   return status < 500;
+};
+
+const showDoneToast = () => {
+  Toast.show({
+    type: 'success',
+    text1: 'Update Profil Sukses!',
+    text2: 'Silahkan refresh halaman ini untuk melihat perubahan',
+  });
+};
+
+const showFailedToast = () => {
+  Toast.show({
+    type: 'error',
+    text1: 'Update Profil Gagal!',
+    text2: 'Silahkan cek kembali dan coba lagi',
+  });
 };
 
 export const postRegister = createAsyncThunk(
@@ -92,7 +109,12 @@ export const updateUser = createAsyncThunk(
           },
         },
       );
-      return response.status;
+      if (response.status <= 201) {
+        showDoneToast();
+      } else {
+        showFailedToast();
+      }
+      return response.data;
     } catch (error) {
       return rejectWithValue(error.response.data);
     } finally {
@@ -104,7 +126,6 @@ export const updateUser = createAsyncThunk(
 const initialState = {
   access_token: '',
   userDetail: {},
-  userUpdateResponse: 0,
 };
 
 const userSlice = createSlice({
@@ -137,10 +158,9 @@ const userSlice = createSlice({
         userDetail: action.payload,
       };
     },
-    [updateUser.fulfilled]: (state, action) => {
+    [updateUser.fulfilled]: state => {
       return {
         ...state,
-        userUpdateResponse: action.payload,
       };
     },
   },

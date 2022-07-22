@@ -22,14 +22,11 @@ import { getUser, updateUser } from '../../data/slices/userSlice';
 import { launchCamera, launchImageLibrary } from 'react-native-image-picker';
 import LoadingWidget from '../../widgets/loading_widget';
 import ScreenStatusBar from '../../widgets/screen_status_bar_widget';
-import Toast from 'react-native-toast-message';
 
 const LengkapiInfoAkunScreen = () => {
   const navigation = useNavigation();
   const dispatch = useDispatch();
-  const { access_token, userDetail, userUpdateResponse } = useSelector(
-    state => state.user,
-  );
+  const { access_token, userDetail } = useSelector(state => state.user);
   const { isLoading } = useSelector(state => state.global);
 
   const [cameraPermission, setCameraPermission] = useState(true);
@@ -70,22 +67,6 @@ const LengkapiInfoAkunScreen = () => {
     }
   };
 
-  const showDoneToast = () => {
-    Toast.show({
-      type: 'success',
-      text1: 'Update Profil Sukses!',
-      text2: 'Silahkan refresh halaman ini untuk melihat perubahan',
-    });
-  };
-
-  const showFailedToast = () => {
-    Toast.show({
-      type: 'error',
-      text1: 'Update Profil Gagal!',
-      text2: 'Silahkan cek kembali dan coba lagi',
-    });
-  };
-
   const onUpdateProfile = (imageFile, name, city, address, phone) => {
     const formData = new FormData();
 
@@ -108,8 +89,6 @@ const LengkapiInfoAkunScreen = () => {
         data: formData,
       }),
     );
-
-    userUpdateResponse <= 201 ? showDoneToast() : showFailedToast();
 
     imageFile !== '' && setUserImage(imageFile.uri);
   };

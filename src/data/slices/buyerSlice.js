@@ -2,9 +2,26 @@ import axios from 'axios';
 import { BASE_URL } from '../baseAPI';
 import { createSlice, createAsyncThunk } from '@reduxjs/toolkit';
 import { setLoading, setSecondLoading } from './globalSlice';
+import Toast from 'react-native-toast-message';
 
 axios.defaults.validateStatus = status => {
   return status < 500;
+};
+
+const showDoneToast = () => {
+  Toast.show({
+    type: 'success',
+    text1: 'Penawaran Sukses!',
+    text2: 'Harga tawarmu berhasil dikirim ke penjual',
+  });
+};
+
+const showFailedToast = mes => {
+  Toast.show({
+    type: 'error',
+    text1: 'Penawaran Gagal!',
+    text2: `${mes}`,
+  });
 };
 
 // Buyer Product
@@ -113,7 +130,12 @@ export const createBuyerOrder = createAsyncThunk(
           },
         },
       );
-      return response.status;
+      if (response.status <= 201) {
+        showDoneToast();
+      } else {
+        showFailedToast(response.data);
+      }
+      return response.data;
     } catch (error) {
       return rejectWithValue(error.response.data);
     } finally {
@@ -173,20 +195,12 @@ const initialState = {
   detailProduct: {},
   order: [],
   detailOrder: {},
-  orderResponseStatus: 0,
 };
 
 const buyerSlice = createSlice({
   name: 'buyer',
   initialState,
-  reducers: {
-    setResetStatus: state => {
-      return {
-        ...state,
-        orderResponseStatus: 0,
-      };
-    },
-  },
+
   extraReducers: {
     [getAllBuyerProduct.fulfilled]: (state, action) => {
       return {
@@ -219,10 +233,9 @@ const buyerSlice = createSlice({
         detailOrder: action.payload,
       };
     },
-    [createBuyerOrder.fulfilled]: (state, action) => {
+    [createBuyerOrder.fulfilled]: state => {
       return {
         ...state,
-        orderResponseStatus: action.payload,
       };
     },
     [updateBuyerOrder.fulfilled]: state => {
@@ -238,5 +251,4 @@ const buyerSlice = createSlice({
   },
 });
 
-export const { setResetStatus } = buyerSlice.actions;
 export default buyerSlice.reducer;

@@ -132,10 +132,17 @@ const DetailProductScreen = ({ route }) => {
           />
         </View>
         <View style={styles.cardUser}>
-          <Image
-            source={{ uri: userDetail.image_url }}
-            style={styles.userImg}
-          />
+          {userDetail.image_url === null ? (
+            <Image
+              style={styles.userImg}
+              source={require('../../assets/images/img_no_image.png')}
+            />
+          ) : (
+            <Image
+              source={{ uri: userDetail.image_url }}
+              style={styles.userImg}
+            />
+          )}
           <View style={styles.userContainer}>
             <Text style={styles.cardName}>{userDetail.full_name}</Text>
             <Text style={styles.txtSecondary}>{userDetail.city}</Text>

@@ -364,43 +364,7 @@ const RenderProductList = ({ item, type }) => {
         </View>
       );
     }
-    if (type === 'declined') {
-      return (
-        <View style={styles.produkCard}>
-          <View style={styles.row}>
-            <Image
-              style={[styles.imageUser, { marginRight: ms(16) }]}
-              source={{ uri: item?.Product?.image_url }}
-            />
-            <View>
-              <Text style={styles.regularSubText}>Gagal Ditawar</Text>
-              <Text style={styles.regularText2}>{item?.Product?.name}</Text>
-              <NumberFormat
-                value={item?.Product?.base_price}
-                displayType={'text'}
-                thousandSeparator={true}
-                prefix={'Rp'}
-                renderText={value => (
-                  <Text style={styles.regularText2}>{value}</Text>
-                )}
-              />
-              <NumberFormat
-                value={item?.price}
-                displayType={'text'}
-                thousandSeparator={true}
-                prefix={'Rp'}
-                renderText={value => (
-                  <Text style={styles.regularText2Cancel}>Ditawar {value}</Text>
-                )}
-              />
-            </View>
-          </View>
-          <Text style={styles.regularSubText}>
-            {dateConvert(item?.transaction_date)}
-          </Text>
-        </View>
-      );
-    }
+
     if (type === 'pending') {
       return (
         <View style={styles.produkCardContainer}>
@@ -464,6 +428,42 @@ const RenderProductList = ({ item, type }) => {
               <RenderTerimaBsView item={item} />
             </BottomSheet>
           ) : null}
+        </View>
+      );
+    } else {
+      return (
+        <View style={styles.produkCard}>
+          <View style={styles.row}>
+            <Image
+              style={[styles.imageUser, { marginRight: ms(16) }]}
+              source={{ uri: item?.Product?.image_url }}
+            />
+            <View>
+              <Text style={styles.regularSubText}>Gagal Ditawar</Text>
+              <Text style={styles.regularText2}>{item?.Product?.name}</Text>
+              <NumberFormat
+                value={item?.Product?.base_price}
+                displayType={'text'}
+                thousandSeparator={true}
+                prefix={'Rp'}
+                renderText={value => (
+                  <Text style={styles.regularText2}>{value}</Text>
+                )}
+              />
+              <NumberFormat
+                value={item?.price}
+                displayType={'text'}
+                thousandSeparator={true}
+                prefix={'Rp'}
+                renderText={value => (
+                  <Text style={styles.regularText2Cancel}>Ditawar {value}</Text>
+                )}
+              />
+            </View>
+          </View>
+          <Text style={styles.regularSubText}>
+            {dateConvert(item?.transaction_date)}
+          </Text>
         </View>
       );
     }

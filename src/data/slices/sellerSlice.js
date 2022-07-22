@@ -2,9 +2,26 @@ import axios from 'axios';
 import { BASE_URL } from '../baseAPI';
 import { createSlice, createAsyncThunk } from '@reduxjs/toolkit';
 import { setLoading } from './globalSlice';
+import Toast from 'react-native-toast-message';
 
 axios.defaults.validateStatus = status => {
   return status < 500;
+};
+
+const showDoneToast = () => {
+  Toast.show({
+    type: 'success',
+    text1: 'Sukses!',
+    text2: 'Produk Sukses Diterbitkan',
+  });
+};
+
+const showFailedToast = mes => {
+  Toast.show({
+    type: 'error',
+    text1: 'Gagal!',
+    text2: `${mes}`,
+  });
 };
 
 // Seller Banner
@@ -186,7 +203,12 @@ export const createSellerProduct = createAsyncThunk(
           },
         },
       );
-      return response.status;
+      if (response.status <= 201) {
+        showDoneToast();
+      } else {
+        showFailedToast(response.data);
+      }
+      return response.data;
     } catch (error) {
       return rejectWithValue(error.response.data);
     } finally {
@@ -382,7 +404,6 @@ const initialState = {
   sellerOrder: [],
   sellerOrderDetail: {},
   data: [],
-  addProductStatus: 0,
 };
 
 const sellerSlice = createSlice({
@@ -445,9 +466,9 @@ const sellerSlice = createSlice({
         data: action.payload,
       };
     },
-    [createSellerProduct.fulfilled]: action => {
+    [createSellerProduct.fulfilled]: state => {
       return {
-        addProductStatus: action.payload,
+        ...state,
       };
     },
     [updateSellerProduct.fulfilled]: state => {
