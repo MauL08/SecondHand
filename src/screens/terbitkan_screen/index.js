@@ -17,7 +17,6 @@ import { useDispatch, useSelector } from 'react-redux';
 import { useState } from 'react';
 import { useEffect } from 'react';
 import { useCallback } from 'react';
-import Toast from 'react-native-toast-message';
 import { createSellerProduct } from '../../data/slices/sellerSlice';
 import NumberFormat from 'react-number-format';
 
@@ -29,9 +28,7 @@ const DetailProductScreen = ({ route }) => {
 
   const { image, name, kategori, harga, deskripsi, lokasi } = route.params;
   const { userDetail, access_token } = useSelector(state => state.user);
-  const { category, addProductStatus, sellerProduct } = useSelector(
-    state => state.seller,
-  );
+  const { category } = useSelector(state => state.seller);
 
   const [showCategory, setShowCategory] = useState('');
 
@@ -47,56 +44,23 @@ const DetailProductScreen = ({ route }) => {
   );
 
   const onPostProduct = () => {
-    if (sellerProduct.length === 5) {
-      showFailedMaxToast();
-    } else {
-      const formData = new FormData();
-
-      formData.append('name', name);
-      formData.append('base_price', harga);
-      formData.append('category_ids', kategori);
-      formData.append('description', deskripsi);
-      formData.append('location', lokasi);
-      formData.append('image', {
-        uri: image.uri,
-        name: image.fileName,
-        type: image.type,
-      });
-
-      dispatch(
-        createSellerProduct({
-          token: access_token,
-          data: formData,
-        }),
-      );
-
-      addProductStatus <= 201 ? showDoneToast() : showFailedToast();
-    }
-  };
-
-  const showDoneToast = () => {
-    Toast.show({
-      type: 'success',
-      text1: 'Sukses!',
-      text2: 'Produk Sukses Diterbitkan',
+    const formData = new FormData();
+    formData.append('name', name);
+    formData.append('base_price', harga);
+    formData.append('category_ids', kategori);
+    formData.append('description', deskripsi);
+    formData.append('location', lokasi);
+    formData.append('image', {
+      uri: image.uri,
+      name: image.fileName,
+      type: image.type,
     });
-    navigation.goBack();
-  };
-
-  const showFailedToast = () => {
-    Toast.show({
-      type: 'error',
-      text1: 'Gagal!',
-      text2: 'Produk Gagal Diterbitkan',
-    });
-  };
-
-  const showFailedMaxToast = () => {
-    Toast.show({
-      type: 'error',
-      text1: 'Gagal!',
-      text2: 'Anda hanya dapat membuat 5 buah produk',
-    });
+    dispatch(
+      createSellerProduct({
+        token: access_token,
+        data: formData,
+      }),
+    );
   };
 
   useEffect(() => {

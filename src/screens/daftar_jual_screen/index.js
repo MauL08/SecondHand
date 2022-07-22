@@ -37,6 +37,14 @@ const onCategoryProductCheck = cat => {
   return cat[0]?.name;
 };
 
+const dateConvert = date => {
+  if (!date) {
+    return '-';
+  }
+  const theDate = date.split('T')[0].split('-');
+  return `${theDate[2]}-${theDate[1]}-${theDate[0]}`;
+};
+
 const ProdukCard = ({ item }) => {
   return (
     <TouchableOpacity style={styles.produkContainer}>
@@ -72,7 +80,7 @@ const ProdukYangDitawarCard = ({ item }) => {
           id: item.id,
         })
       }>
-      <View style={styles.row}>
+      <View style={{ flexDirection: 'row' }}>
         <Image
           style={[styles.imageUser, { marginRight: ms(16) }]}
           source={{ uri: item?.Product?.image_url }}
@@ -100,30 +108,52 @@ const ProdukYangDitawarCard = ({ item }) => {
           />
         </View>
       </View>
+      <Text style={styles.regularSubText}>
+        {dateConvert(item?.transaction_date)}
+      </Text>
     </TouchableOpacity>
   );
 };
 
 const SoldProduct = ({ item }) => {
   return (
-    <View style={styles.produkDitawarContainer}>
+    <View style={styles.produkTerjualContainer}>
       <View style={styles.row}>
-        <Image
-          style={[styles.imageUser, { marginRight: ms(16) }]}
-          source={{ uri: item?.Product?.image_url }}
-        />
-        <View>
-          <Text style={styles.regularSubText}>Berhasil Terjual</Text>
-          <Text style={styles.regularText2}>{item.product_name}</Text>
-          <NumberFormat
-            value={item.price}
-            displayType={'text'}
-            thousandSeparator={true}
-            prefix={'Rp'}
-            renderText={value => (
-              <Text style={styles.regularText2}>{value}</Text>
-            )}
+        <View style={{ flexDirection: 'row' }}>
+          <Image
+            style={[styles.imageUser, { marginRight: ms(16) }]}
+            source={{ uri: item?.Product?.image_url }}
           />
+          <View>
+            <Text style={styles.regularSubText}>Berhasil Terjual</Text>
+            <Text style={styles.regularText2}>{item.product_name}</Text>
+            <NumberFormat
+              value={item.price}
+              displayType={'text'}
+              thousandSeparator={true}
+              prefix={'Rp'}
+              renderText={value => (
+                <Text style={styles.regularText2}>{value}</Text>
+              )}
+            />
+          </View>
+        </View>
+        <View style={{ alignItems: 'center' }}>
+          <Text style={styles.regularSubText}>
+            {dateConvert(item?.transaction_date)}
+          </Text>
+          <TouchableOpacity style={styles.button}>
+            <Text style={styles.txtButton}>Whatsapp</Text>
+            <Image
+              style={{
+                width: ms(13.33),
+                height: ms(13.33),
+                tintColor: COLORS.neutral1,
+                marginLeft: ms(8),
+              }}
+              source={Icons.Whatsapp}
+            />
+          </TouchableOpacity>
         </View>
       </View>
     </View>
@@ -360,7 +390,7 @@ const styles = StyleSheet.create({
     shadowOpacity: 0.15,
     elevation: ms(4),
   },
-  row: { flexDirection: 'row' },
+  row: { flexDirection: 'row', justifyContent: 'space-between' },
   imageUser: {
     width: ms(48),
     height: ms(48),
@@ -433,7 +463,15 @@ const styles = StyleSheet.create({
     shadowOpacity: 0.15,
     elevation: ms(4),
   },
+  produkTerjualContainer: {
+    borderBottomWidth: ms(1),
+    borderBottomColor: COLORS.neutral01,
+    paddingBottom: ms(16),
+    marginTop: ms(16),
+  },
   produkDitawarContainer: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
     borderBottomWidth: ms(1),
     borderBottomColor: COLORS.neutral01,
     paddingBottom: ms(16),
@@ -491,5 +529,21 @@ const styles = StyleSheet.create({
     lineHeight: ms(20),
     fontFamily: 'Poppins-Regular',
     textDecorationLine: 'line-through',
+  },
+  txtButton: {
+    fontFamily: 'Poppins-Regular',
+    color: COLORS.neutral1,
+    textAlign: 'center',
+    fontSize: ms(10),
+    fontWeight: '400',
+  },
+  button: {
+    marginTop: ms(10),
+    borderRadius: ms(16),
+    padding: ms(12),
+    flexDirection: 'row',
+    justifyContent: 'center',
+    alignItems: 'center',
+    backgroundColor: COLORS.primaryPurple4,
   },
 });

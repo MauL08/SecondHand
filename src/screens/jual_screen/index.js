@@ -26,11 +26,10 @@ import {
 } from '../../data/slices/sellerSlice';
 import { launchCamera, launchImageLibrary } from 'react-native-image-picker';
 import ScreenStatusBar from '../../widgets/screen_status_bar_widget';
-import Toast from 'react-native-toast-message';
 import { getUser } from '../../data/slices/userSlice';
 
 const JualScreen = () => {
-  const { category, sellerProduct } = useSelector(state => state.seller);
+  const { category } = useSelector(state => state.seller);
   const { access_token } = useSelector(state => state.user);
 
   const navigation = useNavigation();
@@ -75,42 +74,28 @@ const JualScreen = () => {
     );
   }, [category]);
 
-  const showFailedMaxToast = () => {
-    Toast.show({
-      type: 'error',
-      text1: 'Gagal!',
-      text2: 'Anda hanya dapat membuat 5 buah produk',
-    });
-  };
-
   const onPostProduct = (name, lokasi, desc, price, catID, imageFile) => {
-    if (sellerProduct.length === 5) {
-      showFailedMaxToast();
+    if (imageFile === null) {
+      Alert.alert('Error', 'Lengkapi Form terlebih dahulu!');
     } else {
-      if (imageFile === null) {
-        Alert.alert('Error', 'Lengkapi Form terlebih dahulu!');
-      } else {
-        const formData = new FormData();
-
-        formData.append('name', name);
-        formData.append('base_price', price);
-        formData.append('category_ids', catID);
-        formData.append('description', desc);
-        formData.append('location', lokasi);
-        formData.append('image', {
-          uri: imageFile.uri,
-          name: imageFile.fileName,
-          type: imageFile.type,
-        });
-
-        dispatch(
-          createSellerProduct({
-            token: access_token,
-            data: formData,
-          }),
-        );
-        setFile(null);
-      }
+      const formData = new FormData();
+      formData.append('name', name);
+      formData.append('base_price', price);
+      formData.append('category_ids', catID);
+      formData.append('description', desc);
+      formData.append('location', lokasi);
+      formData.append('image', {
+        uri: imageFile.uri,
+        name: imageFile.fileName,
+        type: imageFile.type,
+      });
+      dispatch(
+        createSellerProduct({
+          token: access_token,
+          data: formData,
+        }),
+      );
+      setFile(null);
     }
   };
 
