@@ -265,7 +265,7 @@ const RenderStatusBsView = ({ item, token }) => {
   );
 };
 
-const RenderProductList = ({ item, type }) => {
+const RenderProductList = ({ item }) => {
   const dispatch = useDispatch();
   const { access_token } = useSelector(state => state.user);
 
@@ -295,36 +295,9 @@ const RenderProductList = ({ item, type }) => {
     [],
   );
 
-  if (item?.Product?.status === 'sold') {
+  if (item?.status === 'accepted') {
     return (
-      <View style={styles.produkCard}>
-        <View style={styles.row}>
-          <Image
-            style={[styles.imageUser, { marginRight: ms(16) }]}
-            source={{ uri: item?.Product?.image_url }}
-          />
-          <View>
-            <Text style={styles.regularSubText}>Berhasil Terjual</Text>
-            <Text style={styles.regularText2}>{item?.Product?.name}</Text>
-            <NumberFormat
-              value={item?.price}
-              displayType={'text'}
-              thousandSeparator={true}
-              prefix={'Rp'}
-              renderText={value => (
-                <Text style={styles.regularText2}>{value}</Text>
-              )}
-            />
-          </View>
-        </View>
-        <Text style={styles.regularSubText}>
-          {dateConvert(item?.transaction_date)}
-        </Text>
-      </View>
-    );
-  } else {
-    if (type === 'accepted') {
-      return (
+      <>
         <View style={styles.produkCardContainer}>
           <ProdukYangDitawarCard item={item} />
           <View style={styles.buttonContainer}>
@@ -349,24 +322,26 @@ const RenderProductList = ({ item, type }) => {
               />
             </TouchableOpacity>
           </View>
-          {isOpen ? (
-            <BottomSheet
-              ref={sheetRef}
-              snapPoints={snapPoints}
-              handleIndicatorStyle={styles.handleIndicatorStyle}
-              enablePanDownToClose={true}
-              backdropComponent={renderBackdrop}
-              onChange={handleSheetChanges}
-              onClose={() => setIsOpen(false)}>
-              <RenderStatusBsView item={item} token={access_token} />
-            </BottomSheet>
-          ) : null}
         </View>
-      );
-    }
+        {isOpen ? (
+          <BottomSheet
+            ref={sheetRef}
+            snapPoints={snapPoints}
+            handleIndicatorStyle={styles.handleIndicatorStyle}
+            enablePanDownToClose={true}
+            backdropComponent={renderBackdrop}
+            onChange={handleSheetChanges}
+            onClose={() => setIsOpen(false)}>
+            <RenderStatusBsView item={item} token={access_token} />
+          </BottomSheet>
+        ) : null}
+      </>
+    );
+  }
 
-    if (type === 'pending') {
-      return (
+  if (item?.status === 'pending') {
+    return (
+      <>
         <View style={styles.produkCardContainer}>
           <ProdukYangDitawarCard item={item} />
           <View style={styles.buttonContainer}>
@@ -416,58 +391,89 @@ const RenderProductList = ({ item, type }) => {
               <Text style={styles.txtButton}>Terima</Text>
             </TouchableOpacity>
           </View>
-          {isOpen ? (
-            <BottomSheet
-              ref={sheetRef}
-              snapPoints={snapPoints}
-              handleIndicatorStyle={styles.handleIndicatorStyle}
-              enablePanDownToClose={true}
-              backdropComponent={renderBackdrop}
-              onChange={handleSheetChanges}
-              onClose={() => setIsOpen(false)}>
-              <RenderTerimaBsView item={item} />
-            </BottomSheet>
-          ) : null}
         </View>
-      );
-    } else {
-      return (
-        <View style={styles.produkCard}>
-          <View style={styles.row}>
-            <Image
-              style={[styles.imageUser, { marginRight: ms(16) }]}
-              source={{ uri: item?.Product?.image_url }}
+        {isOpen ? (
+          <BottomSheet
+            ref={sheetRef}
+            snapPoints={snapPoints}
+            handleIndicatorStyle={styles.handleIndicatorStyle}
+            enablePanDownToClose={true}
+            backdropComponent={renderBackdrop}
+            onChange={handleSheetChanges}
+            onClose={() => setIsOpen(false)}>
+            <RenderTerimaBsView item={item} />
+          </BottomSheet>
+        ) : null}
+      </>
+    );
+  } else {
+    return (
+      <View style={styles.produkCard}>
+        <View style={styles.row}>
+          <Image
+            style={[styles.imageUser, { marginRight: ms(16) }]}
+            source={{ uri: item?.Product?.image_url }}
+          />
+          <View>
+            <Text style={styles.regularSubText}>Gagal Ditawar</Text>
+            <Text style={styles.regularText2}>{item?.Product?.name}</Text>
+            <NumberFormat
+              value={item?.Product?.base_price}
+              displayType={'text'}
+              thousandSeparator={true}
+              prefix={'Rp'}
+              renderText={value => (
+                <Text style={styles.regularText2}>{value}</Text>
+              )}
             />
-            <View>
-              <Text style={styles.regularSubText}>Gagal Ditawar</Text>
-              <Text style={styles.regularText2}>{item?.Product?.name}</Text>
-              <NumberFormat
-                value={item?.Product?.base_price}
-                displayType={'text'}
-                thousandSeparator={true}
-                prefix={'Rp'}
-                renderText={value => (
-                  <Text style={styles.regularText2}>{value}</Text>
-                )}
-              />
-              <NumberFormat
-                value={item?.price}
-                displayType={'text'}
-                thousandSeparator={true}
-                prefix={'Rp'}
-                renderText={value => (
-                  <Text style={styles.regularText2Cancel}>Ditawar {value}</Text>
-                )}
-              />
-            </View>
+            <NumberFormat
+              value={item?.price}
+              displayType={'text'}
+              thousandSeparator={true}
+              prefix={'Rp'}
+              renderText={value => (
+                <Text style={styles.regularText2Cancel}>Ditawar {value}</Text>
+              )}
+            />
           </View>
-          <Text style={styles.regularSubText}>
-            {dateConvert(item?.transaction_date)}
-          </Text>
         </View>
-      );
-    }
+        <Text style={styles.regularSubText}>
+          {dateConvert(item?.transaction_date)}
+        </Text>
+      </View>
+    );
   }
+
+  // if (item?.Product?.status === 'sold') {
+  //   return (
+  //     <View style={styles.produkCard}>
+  //       <View style={styles.row}>
+  //         <Image
+  //           style={[styles.imageUser, { marginRight: ms(16) }]}
+  //           source={{ uri: item?.Product?.image_url }}
+  //         />
+  //         <View>
+  //           <Text style={styles.regularSubText}>Berhasil Terjual</Text>
+  //           <Text style={styles.regularText2}>{item?.Product?.name}</Text>
+  //           <NumberFormat
+  //             value={item?.price}
+  //             displayType={'text'}
+  //             thousandSeparator={true}
+  //             prefix={'Rp'}
+  //             renderText={value => (
+  //               <Text style={styles.regularText2}>{value}</Text>
+  //             )}
+  //           />
+  //         </View>
+  //       </View>
+  //       <Text style={styles.regularSubText}>
+  //         {dateConvert(item?.transaction_date)}
+  //       </Text>
+  //     </View>
+  //   );
+  // } else {
+
+  // }
 };
 
 const InfoPenawarScreen = ({ route }) => {
@@ -524,10 +530,7 @@ const InfoPenawarScreen = ({ route }) => {
           <Text style={[styles.regularText, { marginVertical: ms(8) }]}>
             Daftar Produkmu yang Ditawar
           </Text>
-          <RenderProductList
-            item={sellerOrderDetail}
-            type={sellerOrderDetail?.status}
-          />
+          <RenderProductList item={sellerOrderDetail} />
         </SafeAreaView>
       </GestureHandlerRootView>
     );

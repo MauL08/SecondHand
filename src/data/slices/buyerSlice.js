@@ -200,7 +200,14 @@ const initialState = {
 const buyerSlice = createSlice({
   name: 'buyer',
   initialState,
-
+  reducers: {
+    resetBuyerData: state => {
+      return {
+        ...state,
+        order: [],
+      };
+    },
+  },
   extraReducers: {
     [getAllBuyerProduct.fulfilled]: (state, action) => {
       return {
@@ -251,4 +258,5 @@ const buyerSlice = createSlice({
   },
 });
 
+export const { resetBuyerData } = buyerSlice.actions;
 export default buyerSlice.reducer;

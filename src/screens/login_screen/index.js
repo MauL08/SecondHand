@@ -19,10 +19,14 @@ import { postLogin } from '../../data/slices/userSlice';
 import {
   getAllSellerBanner,
   getSellerCategory,
+  resetSellerData,
 } from '../../data/slices/sellerSlice';
 import ScreenStatusBar from '../../widgets/screen_status_bar_widget';
 import TouchID from 'react-native-touch-id';
-import { getAllBuyerProduct } from '../../data/slices/buyerSlice';
+import {
+  getAllBuyerProduct,
+  resetBuyerData,
+} from '../../data/slices/buyerSlice';
 
 function LoginScreen() {
   const [showPassword, setShowPassword] = useState(true);
@@ -72,6 +76,8 @@ function LoginScreen() {
   });
 
   const onLogin = async (email, password) => {
+    dispatch(resetBuyerData());
+    dispatch(resetSellerData());
     dispatch(getSellerCategory());
     dispatch(getAllSellerBanner());
     dispatch(

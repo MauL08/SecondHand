@@ -326,6 +326,50 @@ export const getSellerOrder = createAsyncThunk(
   },
 );
 
+export const getSellerPendingOrder = createAsyncThunk(
+  'seller/getSellerPendingOrder',
+  async (token, { rejectWithValue, dispatch }) => {
+    try {
+      dispatch(setLoading(true));
+      const response = await axios.get(
+        `${BASE_URL}/seller/order?status=pending`,
+        {
+          headers: {
+            access_token: token,
+          },
+        },
+      );
+      return response.data;
+    } catch (error) {
+      return rejectWithValue(error.response.data);
+    } finally {
+      dispatch(setLoading(false));
+    }
+  },
+);
+
+export const getSellerAcceptedOrder = createAsyncThunk(
+  'seller/getSellerAcceptedOrder',
+  async (token, { rejectWithValue, dispatch }) => {
+    try {
+      dispatch(setLoading(true));
+      const response = await axios.get(
+        `${BASE_URL}/seller/order?status=accepted`,
+        {
+          headers: {
+            access_token: token,
+          },
+        },
+      );
+      return response.data;
+    } catch (error) {
+      return rejectWithValue(error.response.data);
+    } finally {
+      dispatch(setLoading(false));
+    }
+  },
+);
+
 export const getSellerOrderByID = createAsyncThunk(
   'seller/getSellerOrderByID',
   async (credentials, { rejectWithValue, dispatch }) => {
@@ -339,7 +383,6 @@ export const getSellerOrderByID = createAsyncThunk(
           },
         },
       );
-
       return response.data;
     } catch (error) {
       return rejectWithValue(error.response.data);
@@ -364,7 +407,6 @@ export const updateSellerOrder = createAsyncThunk(
           },
         },
       );
-      console.log(response.data);
       return response.data;
     } catch (error) {
       return rejectWithValue(error.response.data);
@@ -403,12 +445,23 @@ const initialState = {
   sellerProduct: [],
   sellerOrder: [],
   sellerOrderDetail: {},
+  sellerAcceptedOrder: [],
+  sellerPendingOrder: [],
   data: [],
 };
 
 const sellerSlice = createSlice({
   name: 'seller',
   initialState,
+  reducers: {
+    resetSellerData: state => {
+      return {
+        ...state,
+        sellerProduct: [],
+        sellerOrder: [],
+      };
+    },
+  },
   extraReducers: {
     [getAllSellerBanner.fulfilled]: (state, action) => {
       return {
@@ -487,6 +540,18 @@ const sellerSlice = createSlice({
         sellerOrder: action.payload,
       };
     },
+    [getSellerAcceptedOrder.fulfilled]: (state, action) => {
+      return {
+        ...state,
+        sellerAcceptedOrder: action.payload,
+      };
+    },
+    [getSellerPendingOrder.fulfilled]: (state, action) => {
+      return {
+        ...state,
+        sellerPendingOrder: action.payload,
+      };
+    },
     [getSellerOrderByID.fulfilled]: (state, action) => {
       return {
         ...state,
@@ -507,4 +572,5 @@ const sellerSlice = createSlice({
   },
 });
 
+export const { resetSellerData } = sellerSlice.actions;
 export default sellerSlice.reducer;
