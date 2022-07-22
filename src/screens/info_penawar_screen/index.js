@@ -76,16 +76,22 @@ const ProductMatchCard = ({ item }) => {
     <View style={styles.productMatchContainer}>
       <Text style={styles.titleProductMatch}>Product Match</Text>
       <View style={styles.itemProductMatch}>
-        <Image
-          style={styles.imageUser}
-          source={{ uri: item?.User?.image_url }}
-        />
+        {item?.User?.image_url === null ? (
+          <Image
+            source={require('../../assets/images/img_no_image.png')}
+            style={styles.imageUser}
+          />
+        ) : (
+          <Image
+            style={styles.imageUser}
+            source={{ uri: item?.User?.image_url }}
+          />
+        )}
         <View style={{ marginLeft: ms(16) }}>
           <Text style={styles.regularText}>{item?.User?.full_name}</Text>
           <Text style={styles.regularSubText}>{item?.User?.city}</Text>
         </View>
       </View>
-
       <View style={styles.itemProductMatch}>
         <Image
           style={styles.imageUser}
@@ -247,8 +253,7 @@ const RenderProductList = ({ item, handleBsFunc }) => {
         </Text>
       </View>
     );
-  }
-  if (item.status === 'accepted') {
+  } else {
     return (
       <View style={styles.produkCard}>
         <View style={styles.row}>

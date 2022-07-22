@@ -24,6 +24,14 @@ const showFailedToast = mes => {
   });
 };
 
+const showDoneUpdateToast = () => {
+  Toast.show({
+    type: 'success',
+    text1: 'Sukses!',
+    text2: 'Produk Sukses Diterbitkan',
+  });
+};
+
 // Seller Banner
 export const getAllSellerBanner = createAsyncThunk(
   'seller/getAllSellerBanner',
@@ -407,6 +415,11 @@ export const updateSellerOrder = createAsyncThunk(
           },
         },
       );
+      if (response.status <= 201) {
+        showDoneUpdateToast();
+      } else {
+        showFailedToast();
+      }
       return response.data;
     } catch (error) {
       return rejectWithValue(error.response.data);
