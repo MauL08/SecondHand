@@ -120,7 +120,7 @@ export const createBuyerOrder = createAsyncThunk(
   'buyer/createBuyerOrder',
   async (credentials, { rejectWithValue, dispatch }) => {
     try {
-      dispatch(setLoading(true));
+      dispatch(setSecondLoading(true));
       const response = await axios.post(
         `${BASE_URL}/buyer/order`,
         credentials.data,
@@ -139,7 +139,7 @@ export const createBuyerOrder = createAsyncThunk(
     } catch (error) {
       return rejectWithValue(error.response.data);
     } finally {
-      dispatch(setLoading(false));
+      dispatch(setSecondLoading(false));
     }
   },
 );

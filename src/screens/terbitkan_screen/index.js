@@ -7,6 +7,7 @@ import {
   View,
   Image,
   TouchableOpacity,
+  ActivityIndicator,
 } from 'react-native';
 import React from 'react';
 import { ms } from 'react-native-size-matters';
@@ -29,6 +30,7 @@ const DetailProductScreen = ({ route }) => {
   const { image, name, kategori, harga, deskripsi, lokasi } = route.params;
   const { userDetail, access_token } = useSelector(state => state.user);
   const { category } = useSelector(state => state.seller);
+  const { isLoading } = useSelector(state => state.global);
 
   const [showCategory, setShowCategory] = useState('');
 
@@ -124,7 +126,11 @@ const DetailProductScreen = ({ route }) => {
         onPress={() => {
           onPostProduct();
         }}>
-        <Text style={styles.txtBtn}>Terbitkan</Text>
+        {isLoading ? (
+          <ActivityIndicator color="white" style={{ marginVertical: ms(14) }} />
+        ) : (
+          <Text style={styles.txtBtn}>Terbitkan</Text>
+        )}
       </TouchableOpacity>
     </SafeAreaView>
   );

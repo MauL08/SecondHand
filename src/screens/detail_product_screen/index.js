@@ -8,6 +8,7 @@ import {
   Image,
   TouchableOpacity,
   TextInput,
+  ActivityIndicator,
 } from 'react-native';
 import React, { useState, useCallback, useRef, useMemo } from 'react';
 import { ms } from 'react-native-size-matters';
@@ -32,12 +33,12 @@ const DetailProductScreen = () => {
   const navigation = useNavigation();
   const sheetRef = useRef(null);
   const [isOpen, setIsOpen] = useState(false);
-  const [btnActive, setBtnActive] = useState(true);
+  const [btnActive] = useState(true);
 
   const dispatch = useDispatch();
   const { access_token } = useSelector(state => state.user);
   const { detailProduct } = useSelector(state => state.buyer);
-  const { isLoading } = useSelector(state => state.global);
+  const { isLoading, isSecondLoading } = useSelector(state => state.global);
 
   const snapPoints = useMemo(() => ['69%', '90%'], []);
 
@@ -48,12 +49,6 @@ const DetailProductScreen = () => {
 
   const handleSheetChanges = useCallback(index => {
     console.log('handleSheetChanges', index);
-  }, []);
-
-  const handleClose = useCallback(index => {
-    sheetRef.current?.snapToIndex(index);
-    setBtnActive(false);
-    setIsOpen(false);
   }, []);
 
   const renderBackdrop = useCallback(
@@ -79,7 +74,7 @@ const DetailProductScreen = () => {
     bid_price: yup.string().required('Masukkan harga yang ditawarkan'),
   });
 
-  const RenderBsView = () => (
+  const RenderBsView = ({ loading }) => (
     <Formik
       initialValues={{ bid_price: '' }}
       validateOnMount={true}
@@ -142,9 +137,15 @@ const DetailProductScreen = () => {
                   token: access_token,
                 }),
               );
-              handleClose(-1);
             }}>
-            <Text style={styles.txtBtn}>Kirim</Text>
+            {loading ? (
+              <ActivityIndicator
+                color={COLORS.primaryPurple4}
+                style={{ marginVertical: ms(18) }}
+              />
+            ) : (
+              <Text style={styles.txtBtn}>Kirim</Text>
+            )}
           </TouchableOpacity>
         </BottomSheetView>
       )}
@@ -253,7 +254,7 @@ const DetailProductScreen = () => {
             backdropComponent={renderBackdrop}
             onChange={handleSheetChanges}
             onClose={() => setIsOpen(false)}>
-            <RenderBsView />
+            <RenderBsView loading={isSecondLoading} />
           </BottomSheet>
         ) : null}
       </GestureHandlerRootView>

@@ -9,6 +9,7 @@ import {
   PermissionsAndroid,
   Alert,
   RefreshControl,
+  ActivityIndicator,
 } from 'react-native';
 import React, { useState, useEffect, useCallback } from 'react';
 import { COLORS } from '../../assets/colors';
@@ -31,6 +32,7 @@ import { getUser } from '../../data/slices/userSlice';
 const JualScreen = () => {
   const { category } = useSelector(state => state.seller);
   const { access_token } = useSelector(state => state.user);
+  const { isLoading } = useSelector(state => state.global);
 
   const navigation = useNavigation();
   const dispatch = useDispatch();
@@ -324,21 +326,25 @@ const JualScreen = () => {
                     : COLORS.neutral2,
                 },
               ]}
+              onPress={() => {
+                onPostProduct(
+                  values.name,
+                  values.lokasi,
+                  values.deskripsi,
+                  values.harga,
+                  values.kategori,
+                  file,
+                );
+              }}
               disabled={!isValid}>
-              <Text
-                style={styles.txtButton}
-                onPress={() => {
-                  onPostProduct(
-                    values.name,
-                    values.lokasi,
-                    values.deskripsi,
-                    values.harga,
-                    values.kategori,
-                    file,
-                  );
-                }}>
-                Terbitkan
-              </Text>
+              {isLoading ? (
+                <ActivityIndicator
+                  color="white"
+                  style={{ marginVertical: ms(14) }}
+                />
+              ) : (
+                <Text style={styles.txtButton}>Terbitkan</Text>
+              )}
             </TouchableOpacity>
           </View>
         </ScrollView>

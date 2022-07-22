@@ -61,7 +61,7 @@ const ProdukCard = ({ item }) => {
         thousandSeparator={true}
         prefix={'Rp'}
         renderText={value => (
-          <Text style={[styles.regularText2, { paddingVertical: ms(4) }]}>
+          <Text style={[styles.titleText, { paddingVertical: ms(4) }]}>
             {value}
           </Text>
         )}
@@ -417,6 +417,14 @@ const styles = StyleSheet.create({
     lineHeight: ms(20),
     fontFamily: 'Poppins-Regular',
   },
+  titleText: {
+    fontSize: ms(14),
+    color: COLORS.neutral4,
+    fontWeight: '400',
+    lineHeight: ms(20),
+    fontFamily: 'Poppins-Regular',
+    flexShrink: 1,
+  },
   bottonEdit: {
     fontSize: ms(12),
     fontFamily: 'Poppins-Medium',
@@ -462,6 +470,7 @@ const styles = StyleSheet.create({
     backgroundColor: 'white',
     shadowOpacity: 0.15,
     elevation: ms(4),
+    flexShrink: 1,
   },
   produkTerjualContainer: {
     borderBottomWidth: ms(1),
