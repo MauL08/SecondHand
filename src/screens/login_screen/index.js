@@ -152,7 +152,7 @@ function LoginScreen() {
           <View style={styles.buttonFingerprintContainer}>
             <TouchableOpacity
               style={[
-                styles.button,
+                styles.button(access_token),
                 {
                   backgroundColor: isValid
                     ? COLORS.primaryPurple4
@@ -168,17 +168,7 @@ function LoginScreen() {
               )}
             </TouchableOpacity>
             {access_token === '' ? (
-              <View style={styles.buttonFingerprint}>
-                <Image
-                  source={require('../../assets/images/img_no_image.png')}
-                  style={{
-                    width: moderateScale(40),
-                    height: moderateScale(40),
-                    borderRadius: moderateScale(16),
-                    tintColor: COLORS.primaryPurple4,
-                  }}
-                />
-              </View>
+              <View />
             ) : (
               <TouchableOpacity
                 onPress={() => pressHandler()}
@@ -269,14 +259,14 @@ const styles = StyleSheet.create({
     marginRight: moderateScale(16),
     tintColor: COLORS.neutral3,
   },
-  button: {
+  button: token => ({
     borderRadius: moderateScale(16),
     backgroundColor: COLORS.primaryPurple4,
-    width: '80%',
+    width: token === '' ? '100%' : '80%',
     height: moderateScale(48),
     justifyContent: 'center',
     alignItems: 'center',
-  },
+  }),
   buttonText: {
     fontSize: moderateScale(14),
     lineHeight: moderateScale(20),

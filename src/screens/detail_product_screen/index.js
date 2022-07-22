@@ -22,7 +22,7 @@ import BottomSheet, {
 import { GestureHandlerRootView } from 'react-native-gesture-handler';
 import { useDispatch, useSelector } from 'react-redux';
 import NumberFormat from 'react-number-format';
-import { createBuyerOrder, setResetStatus } from '../../data/slices/buyerSlice';
+import { createBuyerOrder } from '../../data/slices/buyerSlice';
 import * as yup from 'yup';
 import { Formik } from 'formik';
 import LoadingWidget from '../../widgets/loading_widget';
@@ -232,7 +232,7 @@ const DetailProductScreen = () => {
                     // } else {
                     //   handleSnapPress(0);
                     // }
-                    dispatch(setResetStatus());
+
                     handleSnapPress(0);
                   }
                 : null

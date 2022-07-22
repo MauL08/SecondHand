@@ -267,7 +267,7 @@ const HomeScreen = () => {
                       image_url={item.image_url}
                     />
                   )}
-                  keyExtractor={item => item.id}
+                  keyExtractor={item => String(item.id)}
                   showsVerticalScrollIndicator={false}
                 />
               </View>

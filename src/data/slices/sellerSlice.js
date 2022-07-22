@@ -20,7 +20,7 @@ const showFailedToast = mes => {
   Toast.show({
     type: 'error',
     text1: 'Gagal!',
-    text2: `${mes}`,
+    text2: `${mes.message}`,
   });
 };
 
