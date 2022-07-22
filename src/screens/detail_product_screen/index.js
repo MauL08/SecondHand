@@ -22,7 +22,7 @@ import BottomSheet, {
 import { GestureHandlerRootView } from 'react-native-gesture-handler';
 import { useDispatch, useSelector } from 'react-redux';
 import NumberFormat from 'react-number-format';
-import { createBuyerOrder } from '../../data/slices/buyerSlice';
+import { createBuyerOrder, setResetStatus } from '../../data/slices/buyerSlice';
 import * as yup from 'yup';
 import { Formik } from 'formik';
 import LoadingWidget from '../../widgets/loading_widget';
@@ -162,6 +162,7 @@ const DetailProductScreen = () => {
                 }),
               );
               orderResponseStatus <= 201 ? showDoneToast() : showFailedToast();
+              dispatch(setResetStatus());
               handleClose(-1);
             }}>
             <Text style={styles.txtBtn}>Kirim</Text>

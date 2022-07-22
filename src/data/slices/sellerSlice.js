@@ -246,7 +246,7 @@ export const updateSellerProduct = createAsyncThunk(
         credentials.data,
         {
           headers: {
-            Authorization: `Bearer ${credentials.token}`,
+            access_token: credentials.token,
           },
         },
       );
@@ -342,6 +342,7 @@ export const updateSellerOrder = createAsyncThunk(
           },
         },
       );
+      console.log(response.data);
       return response.data;
     } catch (error) {
       return rejectWithValue(error.response.data);

@@ -38,14 +38,13 @@ const HomeScreen = () => {
 
   const { product, nextPageProduct } = useSelector(state => state.buyer);
   const { category, banner } = useSelector(state => state.seller);
-  const { isLoading } = useSelector(state => state.global);
+  const { isLoading, isSecondLoading } = useSelector(state => state.global);
 
   const [currCategory, setCurrCategory] = useState('');
   const [searchText, setSearchText] = useState('');
   const [allCategory, setAllCategory] = useState([]);
   const [refreshing, setRefreshing] = useState(false);
 
-  const [dataProduct, setDataProduct] = useState([]);
   const [pages, setPages] = useState(1);
 
   useEffect(() => {
@@ -67,7 +66,6 @@ const HomeScreen = () => {
       },
       ...category,
     ]);
-    setDataProduct(product);
     fetchNextProduct();
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [currCategory, dispatch]);
@@ -274,8 +272,8 @@ const HomeScreen = () => {
                 />
               </View>
             )}
-            {isLoading ? (
-              <View />
+            {isSecondLoading ? (
+              <LoadingWidget />
             ) : (
               nextPageProduct.length > 0 && (
                 <TouchableOpacity

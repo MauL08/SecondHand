@@ -23,6 +23,7 @@ import {
 import NumberFormat from 'react-number-format';
 import LoadingWidget from '../../widgets/loading_widget';
 import { getAllHistory } from '../../data/slices/historySlice';
+import { getUser } from '../../data/slices/userSlice';
 
 const categories = [
   { id: 1, name: 'Produk', icon: Icons.Box },
@@ -64,54 +65,113 @@ const ProdukCard = ({ item }) => {
 
 const ProdukYangDitawarCard = ({ item, type }) => {
   const navigation = useNavigation();
-  // const dispatch = useDispatch();
-  // const { access_token } = useSelector(state => state.user);
 
   if (type === 'Diminati') {
-    return (
-      <TouchableOpacity
-        style={styles.produkDitawarContainer}
-        onPress={() => {
-          navigation.navigate('InfoPenawar', {
-            id: item.id,
-          });
-          // dispatch(
-          //   getSellerOrderByID({
-          //     token: access_token,
-          //     id: item.id,
-          //   }),
-          // );
-        }}>
-        <View style={styles.row}>
-          <Image
-            style={[styles.imageUser, { marginRight: ms(16) }]}
-            source={{ uri: item.Product.image_url }}
-          />
-          <View>
-            <Text style={styles.regularSubText}>Penawaran produk</Text>
-            <Text style={styles.regularText2}>{item.product_name}</Text>
-            <NumberFormat
-              value={item.Product.base_price}
-              displayType={'text'}
-              thousandSeparator={true}
-              prefix={'Rp'}
-              renderText={value => (
-                <Text style={styles.regularText2}>{value}</Text>
-              )}
+    if (item.status === 'declined') {
+      return (
+        <View style={styles.produkDitawarContainer}>
+          <View style={styles.row}>
+            <Image
+              style={[styles.imageUser, { marginRight: ms(16) }]}
+              source={{ uri: item.Product.image_url }}
             />
-            <NumberFormat
-              value={item.price}
-              displayType={'text'}
-              thousandSeparator={true}
-              prefix={'Rp'}
-              renderText={value => (
-                <Text style={styles.regularText2}>Ditawar {value}</Text>
-              )}
-            />
+            <View>
+              <Text style={styles.regularSubText}>Gagal ditawar</Text>
+              <Text style={styles.regularText2}>{item.product_name}</Text>
+              <NumberFormat
+                value={item.Product.base_price}
+                displayType={'text'}
+                thousandSeparator={true}
+                prefix={'Rp'}
+                renderText={value => (
+                  <Text style={styles.regularText2}>{value}</Text>
+                )}
+              />
+              <NumberFormat
+                value={item.price}
+                displayType={'text'}
+                thousandSeparator={true}
+                prefix={'Rp'}
+                renderText={value => (
+                  <Text style={styles.regularText2Cancel}>Ditawar {value}</Text>
+                )}
+              />
+            </View>
           </View>
         </View>
-      </TouchableOpacity>
-    );
+      );
+    }
+    if (item.status === 'accepted') {
+      return (
+        <TouchableOpacity
+          style={styles.produkDitawarContainer}
+          onPress={() =>
+            navigation.navigate('InfoPenawar', {
+              id: item.id,
+            })
+          }>
+          <View style={styles.row}>
+            <Image
+              style={[styles.imageUser, { marginRight: ms(16) }]}
+              source={{ uri: item.Product.image_url }}
+            />
+            <View>
+              <Text style={styles.regularSubText}>Penawaran diterima</Text>
+              <Text style={styles.regularText2}>{item.product_name}</Text>
+              <NumberFormat
+                value={item.price}
+                displayType={'text'}
+                thousandSeparator={true}
+                prefix={'Rp'}
+                renderText={value => (
+                  <Text style={styles.regularText2}>{value}</Text>
+                )}
+              />
+            </View>
+          </View>
+        </TouchableOpacity>
+      );
+    }
+    if (item.status === 'pending') {
+      return (
+        <TouchableOpacity
+          style={styles.produkDitawarContainer}
+          onPress={() =>
+            navigation.navigate('InfoPenawar', {
+              id: item.id,
+            })
+          }>
+          <View style={styles.row}>
+            <Image
+              style={[styles.imageUser, { marginRight: ms(16) }]}
+              source={{ uri: item.Product.image_url }}
+            />
+            <View>
+              <Text style={styles.regularSubText}>Penawaran produk</Text>
+              <Text style={styles.regularText2}>{item.product_name}</Text>
+              <NumberFormat
+                value={item.Product.base_price}
+                displayType={'text'}
+                thousandSeparator={true}
+                prefix={'Rp'}
+                renderText={value => (
+                  <Text style={styles.regularText2}>{value}</Text>
+                )}
+              />
+              <NumberFormat
+                value={item.price}
+                displayType={'text'}
+                thousandSeparator={true}
+                prefix={'Rp'}
+                renderText={value => (
+                  <Text style={styles.regularText2}>Ditawar {value}</Text>
+                )}
+              />
+            </View>
+          </View>
+        </TouchableOpacity>
+      );
+    }
   } else {
     return (
       <View style={styles.produkDitawarContainer}>
@@ -165,6 +225,7 @@ const DaftarJualScreen = () => {
   };
 
   useEffect(() => {
+    dispatch(getUser(access_token));
     dispatch(getSellerProduct(access_token));
     dispatch(getAllHistory(access_token));
     dispatch(
@@ -196,10 +257,17 @@ const DaftarJualScreen = () => {
       <Text style={styles.title}>Daftar Jual Saya</Text>
       <View style={styles.infoSellerContainer}>
         <View style={styles.row}>
-          <Image
-            style={styles.imageUser}
-            source={{ uri: userDetail.image_url }}
-          />
+          {userDetail.image_url === null ? (
+            <Image
+              style={styles.imageUser}
+              source={require('../../assets/images/img_no_image.png')}
+            />
+          ) : (
+            <Image
+              style={styles.imageUser}
+              source={{ uri: userDetail.image_url }}
+            />
+          )}
           <View style={{ marginLeft: ms(16) }}>
             <Text style={styles.regularText}>{userDetail.full_name}</Text>
             <Text style={styles.regularSubText}>{userDetail.city}</Text>
@@ -513,5 +581,13 @@ const styles = StyleSheet.create({
     fontFamily: 'Poppins-Regular',
     fontSize: 14,
     color: COLORS.neutral3,
+  },
+  regularText2Cancel: {
+    fontSize: ms(14),
+    color: COLORS.neutral5,
+    fontWeight: '400',
+    lineHeight: ms(20),
+    fontFamily: 'Poppins-Regular',
+    textDecorationLine: 'line-through',
   },
 });

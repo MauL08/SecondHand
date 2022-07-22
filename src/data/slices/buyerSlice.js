@@ -1,7 +1,7 @@
 import axios from 'axios';
 import { BASE_URL } from '../baseAPI';
 import { createSlice, createAsyncThunk } from '@reduxjs/toolkit';
-import { setLoading } from './globalSlice';
+import { setLoading, setSecondLoading } from './globalSlice';
 
 axios.defaults.validateStatus = status => {
   return status < 500;
@@ -29,7 +29,7 @@ export const getNextPageProduct = createAsyncThunk(
   'buyer/getNextBuyerProduct',
   async (credentials, { rejectWithValue, dispatch }) => {
     try {
-      dispatch(setLoading(true));
+      dispatch(setSecondLoading(true));
       const response = await axios.get(
         `${BASE_URL}/buyer/product?status=${credentials.status}&category_id=${credentials.category_id}&search=${credentials.search}&page=${credentials.page}&per_page=${credentials.per_page}`,
       );
@@ -37,7 +37,7 @@ export const getNextPageProduct = createAsyncThunk(
     } catch (error) {
       return rejectWithValue(error.response.data);
     } finally {
-      dispatch(setLoading(false));
+      dispatch(setSecondLoading(false));
     }
   },
 );
@@ -179,6 +179,14 @@ const initialState = {
 const buyerSlice = createSlice({
   name: 'buyer',
   initialState,
+  reducers: {
+    setResetStatus: state => {
+      return {
+        ...state,
+        orderResponseStatus: 0,
+      };
+    },
+  },
   extraReducers: {
     [getAllBuyerProduct.fulfilled]: (state, action) => {
       return {
@@ -230,4 +238,5 @@ const buyerSlice = createSlice({
   },
 });
 
+export const { setResetStatus } = buyerSlice.actions;
 export default buyerSlice.reducer;

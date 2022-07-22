@@ -3,7 +3,6 @@ import {
   Image,
   StyleSheet,
   Text,
-  TouchableOpacity,
   View,
   ActivityIndicator,
   Dimensions,
@@ -59,7 +58,7 @@ const NotifikasiScreen = () => {
     read,
   }) => {
     return (
-      <TouchableOpacity
+      <View
         style={styles.cardContainer(allNotif.length === allNotif.length - 1)}>
         <View style={styles.row}>
           {image_url === null || image_url === '' ? (
@@ -145,7 +144,7 @@ const NotifikasiScreen = () => {
             Penawaran ditolak oleh penjual
           </Text>
         ) : null}
-      </TouchableOpacity>
+      </View>
     );
   };
 
