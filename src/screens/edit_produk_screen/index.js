@@ -21,18 +21,19 @@ import { useNavigation } from '@react-navigation/native';
 import { ms } from 'react-native-size-matters';
 import { useDispatch, useSelector } from 'react-redux';
 import {
-  createSellerProduct,
   getSellerCategory,
   getSellerProduct,
+  updateSellerDetailProduct,
 } from '../../data/slices/sellerSlice';
 import { launchCamera, launchImageLibrary } from 'react-native-image-picker';
 import ScreenStatusBar from '../../widgets/screen_status_bar_widget';
-import { getUser } from '../../data/slices/userSlice';
+import LoadingWidget from '../../widgets/loading_widget';
 
-const EditProdukScreen = () => {
+const EditProdukScreen = ({ route }) => {
   const { category } = useSelector(state => state.seller);
   const { access_token } = useSelector(state => state.user);
   const { isLoading } = useSelector(state => state.global);
+  const { id, name, price, loc, desc, image } = route.params;
 
   const navigation = useNavigation();
   const dispatch = useDispatch();
@@ -60,10 +61,8 @@ const EditProdukScreen = () => {
 
   useEffect(() => {
     dispatch(getSellerCategory());
-    dispatch(getSellerProduct(access_token));
     onDestroyCategories();
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [dispatch, onDestroyCategories]);
+  }, [access_token, dispatch, onDestroyCategories]);
 
   const onDestroyCategories = useCallback(() => {
     setUsedCat(
@@ -76,29 +75,38 @@ const EditProdukScreen = () => {
     );
   }, [category]);
 
-  const onPostProduct = (name, lokasi, desc, price, catID, imageFile) => {
-    if (imageFile === null) {
-      Alert.alert('Error', 'Lengkapi Form terlebih dahulu!');
-    } else {
-      const formData = new FormData();
-      formData.append('name', name);
-      formData.append('base_price', price);
-      formData.append('category_ids', catID);
-      formData.append('description', desc);
-      formData.append('location', lokasi);
-      formData.append('image', {
-        uri: imageFile.uri,
-        name: imageFile.fileName,
-        type: imageFile.type,
-      });
-      dispatch(
-        createSellerProduct({
-          token: access_token,
-          data: formData,
-        }),
-      );
-      setFile(null);
-    }
+  const onPostProduct = (
+    prodId,
+    name,
+    lokasi,
+    desc,
+    price,
+    catID,
+    imageFile,
+  ) => {
+    const formData = new FormData();
+    formData.append('name', name);
+    formData.append('base_price', price);
+    formData.append('category_ids', catID);
+    formData.append('description', desc);
+    formData.append('location', lokasi);
+    imageFile === null
+      ? formData.append('image', '')
+      : formData.append('image', {
+          uri: imageFile.uri,
+          name: imageFile.fileName,
+          type: imageFile.type,
+        });
+    dispatch(
+      updateSellerDetailProduct({
+        id: prodId,
+        token: access_token,
+        data: formData,
+      }),
+    );
+    dispatch(getSellerProduct(access_token));
+    navigation.navigate('DaftarJual');
+    setFile(null);
   };
 
   const requestCameraPermission = async () => {
@@ -182,175 +190,154 @@ const EditProdukScreen = () => {
     }
   };
 
-  return (
-    <Formik
-      initialValues={{
-        name: '',
-        harga: '',
-        kategori: '',
-        deskripsi: '',
-        lokasi: '',
-      }}
-      validateOnMount={true}
-      validationSchema={FormValidationSchema}>
-      {({
-        handleChange,
-        handleBlur,
-        values,
-        touched,
-        errors,
-        isValid,
-        setFieldValue,
-      }) => (
-        <ScrollView
-          refreshControl={
-            <RefreshControl onRefresh={onRefresh} refreshing={staticLoad} />
-          }
-          showsVerticalScrollIndicator={false}
-          style={styles.container}>
-          <ScreenStatusBar />
-          <View style={styles.top}>
-            <Text style={styles.title}>Lengkapi Detail Produk</Text>
-          </View>
-          <View>
-            <Text style={styles.label}>Nama Produk</Text>
-            <TextInput
-              style={styles.input}
-              placeholder="Nama Produk"
-              onChangeText={handleChange('name')}
-              onBlur={handleBlur('name')}
-              value={values.name}
-            />
-            {errors.name && touched.name && (
-              <Text style={styles.errors}>{errors.name}</Text>
-            )}
-            <Text style={styles.label}>Harga Produk</Text>
-            <TextInput
-              style={styles.input}
-              placeholder="Rp 0,00"
-              onChangeText={handleChange('harga')}
-              onBlur={handleBlur('harga')}
-              value={values.harga}
-            />
-            {errors.harga && touched.harga && (
-              <Text style={styles.errors}>{errors.harga}</Text>
-            )}
-            <Text style={styles.label}>Lokasi</Text>
-            <TextInput
-              style={styles.input}
-              placeholder="Lokasi Produk"
-              onChangeText={handleChange('lokasi')}
-              onBlur={handleBlur('lokasi')}
-              value={values.lokasi}
-            />
-            {errors.lokasi && touched.lokasi && (
-              <Text style={styles.errors}>{errors.lokasi}</Text>
-            )}
-            <Text style={styles.label}>Kategori</Text>
-            <DropDownPicker
-              open={open}
-              value={value}
-              items={usedCat}
-              setOpen={setOpen}
-              setValue={setValue}
-              setItems={setUsedCat}
-              listMode="SCROLLVIEW"
-              style={styles.input}
-              textStyle={styles.dropdownText}
-              onChangeValue={itemValue => setFieldValue('kategori', itemValue)}
-              placeholder="Pilih Kategori"
-            />
-            <Text style={styles.label}>Deskripsi</Text>
-            <TextInput
-              style={styles.inputBig}
-              placeholder="Contoh: Jalan Ikan Hiu 33"
-              onChangeText={handleChange('deskripsi')}
-              onBlur={handleBlur('deskripsi')}
-              value={values.deskripsi}
-            />
-            {errors.deskripsi && touched.deskripsi && (
-              <Text style={styles.errors}>{errors.deskripsi}</Text>
-            )}
-            <Text style={styles.label}>Foto Produk</Text>
-            <TouchableOpacity style={styles.fotoProduk} onPress={onUploadImage}>
-              {file === null ? (
-                <Image
-                  source={Icons.Plus}
-                  style={[styles.icon, { tintColor: COLORS.neutral2 }]}
-                />
-              ) : (
-                <Image source={{ uri: file.uri }} style={styles.image} />
+  if (isLoading) {
+    return <LoadingWidget />;
+  } else {
+    return (
+      <Formik
+        initialValues={{
+          name: name,
+          harga: String(price),
+          kategori: '',
+          deskripsi: desc,
+          lokasi: loc,
+        }}
+        validateOnMount={true}
+        validationSchema={FormValidationSchema}>
+        {({
+          handleChange,
+          handleBlur,
+          values,
+          touched,
+          errors,
+          isValid,
+          setFieldValue,
+        }) => (
+          <ScrollView
+            refreshControl={
+              <RefreshControl onRefresh={onRefresh} refreshing={staticLoad} />
+            }
+            showsVerticalScrollIndicator={false}
+            style={styles.container}>
+            <ScreenStatusBar />
+            <View style={styles.top}>
+              <TouchableOpacity
+                onPress={() => {
+                  navigation.goBack();
+                }}>
+                <Image source={Icons.ArrowLeft} style={styles.iconBack} />
+              </TouchableOpacity>
+              <Text style={styles.title}>Edit Produk</Text>
+            </View>
+            <View>
+              <Text style={styles.label}>Nama Produk</Text>
+              <TextInput
+                style={styles.input}
+                placeholder="Nama Produk"
+                onChangeText={handleChange('name')}
+                onBlur={handleBlur('name')}
+                value={values.name}
+              />
+              {errors.name && touched.name && (
+                <Text style={styles.errors}>{errors.name}</Text>
               )}
-            </TouchableOpacity>
-          </View>
-          <View style={styles.buttonContainer}>
-            <TouchableOpacity
-              onPress={() => {
-                dispatch(getUser(access_token));
-                if (file === null) {
-                  Alert.alert('Error', 'Lengkapi Form terlebih dahulu!');
-                } else {
-                  navigation.navigate('Terbitkan', {
-                    image: file,
-                    name: values.name,
-                    kategori: value,
-                    harga: values.harga,
-                    deskripsi: values.deskripsi,
-                    lokasi: values.lokasi,
-                  });
+              <Text style={styles.label}>Harga Produk</Text>
+              <TextInput
+                style={styles.input}
+                placeholder="Rp 0,00"
+                onChangeText={handleChange('harga')}
+                onBlur={handleBlur('harga')}
+                value={values.harga}
+              />
+              {errors.harga && touched.harga && (
+                <Text style={styles.errors}>{errors.harga}</Text>
+              )}
+              <Text style={styles.label}>Lokasi</Text>
+              <TextInput
+                style={styles.input}
+                placeholder="Lokasi Produk"
+                onChangeText={handleChange('lokasi')}
+                onBlur={handleBlur('lokasi')}
+                value={values.lokasi}
+              />
+              {errors.lokasi && touched.lokasi && (
+                <Text style={styles.errors}>{errors.lokasi}</Text>
+              )}
+              <Text style={styles.label}>Kategori</Text>
+              <DropDownPicker
+                open={open}
+                value={value}
+                items={usedCat}
+                setOpen={setOpen}
+                setValue={setValue}
+                setItems={setUsedCat}
+                listMode="SCROLLVIEW"
+                style={styles.input}
+                textStyle={styles.dropdownText}
+                onChangeValue={itemValue =>
+                  setFieldValue('kategori', itemValue)
                 }
-              }}
-              style={[
-                styles.buttonPreview,
-                {
-                  borderColor: isValid
-                    ? COLORS.primaryPurple4
-                    : COLORS.neutral2,
-                },
-              ]}
-              disabled={!isValid}>
-              <Text
-                style={[
-                  styles.txtButton,
-                  { color: isValid ? COLORS.black : COLORS.neutral2 },
-                ]}>
-                Preview
-              </Text>
-            </TouchableOpacity>
-            <TouchableOpacity
-              style={[
-                styles.button,
-                {
-                  backgroundColor: isValid
-                    ? COLORS.primaryPurple4
-                    : COLORS.neutral2,
-                },
-              ]}
-              onPress={() => {
-                onPostProduct(
-                  values.name,
-                  values.lokasi,
-                  values.deskripsi,
-                  values.harga,
-                  values.kategori,
-                  file,
-                );
-              }}
-              disabled={!isValid}>
-              {isLoading ? (
-                <ActivityIndicator
-                  color="white"
-                  style={{ marginVertical: ms(14) }}
-                />
-              ) : (
-                <Text style={styles.txtButton}>Terbitkan</Text>
+                placeholder="Pilih Kategori"
+              />
+              <Text style={styles.label}>Deskripsi</Text>
+              <TextInput
+                style={styles.inputBig}
+                placeholder="Taruh deskripsi produk disini"
+                onChangeText={handleChange('deskripsi')}
+                onBlur={handleBlur('deskripsi')}
+                value={values.deskripsi}
+              />
+              {errors.deskripsi && touched.deskripsi && (
+                <Text style={styles.errors}>{errors.deskripsi}</Text>
               )}
-            </TouchableOpacity>
-          </View>
-        </ScrollView>
-      )}
-    </Formik>
-  );
+              <Text style={styles.label}>Foto Produk</Text>
+              <TouchableOpacity
+                style={styles.fotoProduk}
+                onPress={onUploadImage}>
+                {file === null ? (
+                  <Image source={{ uri: image }} style={styles.image} />
+                ) : (
+                  <Image source={{ uri: file.uri }} style={styles.image} />
+                )}
+              </TouchableOpacity>
+            </View>
+            <View style={styles.buttonContainer}>
+              <TouchableOpacity
+                style={[
+                  styles.button,
+                  {
+                    backgroundColor: isValid
+                      ? COLORS.primaryPurple4
+                      : COLORS.neutral2,
+                  },
+                ]}
+                onPress={() => {
+                  onPostProduct(
+                    id,
+                    values.name,
+                    values.lokasi,
+                    values.deskripsi,
+                    values.harga,
+                    values.kategori,
+                    file,
+                  );
+                }}
+                disabled={!isValid}>
+                {isLoading ? (
+                  <ActivityIndicator
+                    color="white"
+                    style={{ marginVertical: ms(14) }}
+                  />
+                ) : (
+                  <Text style={styles.txtButton}>Terbitkan</Text>
+                )}
+              </TouchableOpacity>
+            </View>
+          </ScrollView>
+        )}
+      </Formik>
+    );
+  }
 };
 
 export default EditProdukScreen;
@@ -433,8 +420,7 @@ const styles = StyleSheet.create({
     fontFamily: 'Poppins-Regular',
   },
   buttonContainer: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
+    alignItems: 'center',
     marginTop: ms(24),
     marginBottom: ms(24),
   },
@@ -444,6 +430,7 @@ const styles = StyleSheet.create({
     height: ms(48),
     justifyContent: 'center',
     alignItems: 'center',
+    marginBottom: ms(12),
   },
   buttonPreview: {
     backgroundColor: COLORS.neutral1,
@@ -459,5 +446,10 @@ const styles = StyleSheet.create({
     color: COLORS.neutral1,
     fontSize: ms(14),
     fontWeight: '400',
+  },
+  iconBack: {
+    height: ms(24),
+    width: ms(24),
+    tintColor: COLORS.neutral5,
   },
 });

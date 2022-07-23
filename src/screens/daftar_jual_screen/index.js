@@ -78,7 +78,17 @@ const ProdukCard = ({ item, token }) => {
             </Text>
           </View>
           <View style={styles.produkControlContainer}>
-            <TouchableOpacity onPress={() => navigation.navigate('EditProduk')}>
+            <TouchableOpacity
+              onPress={() => {
+                navigation.navigate('EditProduk', {
+                  id: item.id,
+                  name: item.name,
+                  price: item.base_price,
+                  loc: item.location,
+                  desc: item.description,
+                  image: item.image_url,
+                });
+              }}>
               <Image source={Icons.Edit} style={styles.iconSizeController} />
             </TouchableOpacity>
             <TouchableOpacity

@@ -10,6 +10,8 @@ import FilterScreen from './filter_screen';
 import DetailProductScreen from './detail_product_screen';
 import InfoPenawarScreen from './info_penawar_screen';
 import TerbitkanScreen from './terbitkan_screen';
+import EditProdukScreen from './edit_produk_screen';
+import HistoryScreen from './history_screen';
 
 export {
   LoginScreen,
@@ -24,4 +26,6 @@ export {
   DetailProductScreen,
   InfoPenawarScreen,
   TerbitkanScreen,
+  EditProdukScreen,
+  HistoryScreen,
 };

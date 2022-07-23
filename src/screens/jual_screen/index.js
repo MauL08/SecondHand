@@ -263,7 +263,7 @@ const JualScreen = () => {
             <Text style={styles.label}>Deskripsi</Text>
             <TextInput
               style={styles.inputBig}
-              placeholder="Contoh: Jalan Ikan Hiu 33"
+              placeholder="Taruh deskripsi produk disini"
               onChangeText={handleChange('deskripsi')}
               onBlur={handleBlur('deskripsi')}
               value={values.deskripsi}

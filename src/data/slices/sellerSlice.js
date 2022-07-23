@@ -32,6 +32,14 @@ const showDoneUpdateToast = () => {
   });
 };
 
+const showDoneEditToast = () => {
+  Toast.show({
+    type: 'success',
+    text1: 'Sukses!',
+    text2: 'Produk berhasil terupdate',
+  });
+};
+
 // Seller Banner
 export const getAllSellerBanner = createAsyncThunk(
   'seller/getAllSellerBanner',
@@ -300,9 +308,16 @@ export const updateSellerDetailProduct = createAsyncThunk(
         {
           headers: {
             access_token: credentials.token,
+            'Content-Type': 'multipart/form-data',
           },
         },
       );
+      if (response.status <= 201) {
+        showDoneEditToast();
+      } else {
+        showFailedToast(response.data);
+      }
+      console.log(response.data);
       return response.data;
     } catch (error) {
       return rejectWithValue(error.response.data);
@@ -498,6 +513,12 @@ const sellerSlice = createSlice({
         sellerOrder: [],
       };
     },
+    resetSellerProductDetail: state => {
+      return {
+        ...state,
+        sellerProductDetail: {},
+      };
+    },
   },
   extraReducers: {
     [getAllSellerBanner.fulfilled]: (state, action) => {
@@ -566,6 +587,11 @@ const sellerSlice = createSlice({
         ...state,
       };
     },
+    [updateSellerDetailProduct.fulfilled]: state => {
+      return {
+        ...state,
+      };
+    },
     [deleteSellerProduct.fulfilled]: state => {
       return {
         ...state,
@@ -609,5 +635,6 @@ const sellerSlice = createSlice({
   },
 });
 
-export const { resetSellerData } = sellerSlice.actions;
+export const { resetSellerData, resetSellerProductDetail } =
+  sellerSlice.actions;
 export default sellerSlice.reducer;

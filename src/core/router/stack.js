@@ -9,6 +9,8 @@ import {
   RegisterScreen,
   InfoPenawarScreen,
   TerbitkanScreen,
+  EditProdukScreen,
+  HistoryScreen,
 } from '../../screens';
 import MainTabs from './bottom_navigator';
 import { COLORS } from '../../assets/colors';
@@ -31,6 +33,8 @@ const Router = () => {
       <Stack.Screen name="DetailProduct" component={DetailProductScreen} />
       <Stack.Screen name="InfoPenawar" component={InfoPenawarScreen} />
       <Stack.Screen name="Terbitkan" component={TerbitkanScreen} />
+      <Stack.Screen name="EditProduk" component={EditProdukScreen} />
+      <Stack.Screen name="History" component={HistoryScreen} />
     </Stack.Navigator>
   );
 };
