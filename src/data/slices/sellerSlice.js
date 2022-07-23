@@ -28,7 +28,7 @@ const showDoneUpdateToast = () => {
   Toast.show({
     type: 'success',
     text1: 'Sukses!',
-    text2: 'Produk Sukses Diterbitkan',
+    text2: 'Produk berhasil mendapatkan harga yang sesuai',
   });
 };
 
@@ -253,7 +253,7 @@ export const getSellerProductByID = createAsyncThunk(
         `${BASE_URL}/seller/product/${credentials.id}`,
         {
           headers: {
-            Authorization: `Bearer ${credentials.token}`,
+            access_token: credentials.token,
           },
         },
       );
@@ -268,6 +268,29 @@ export const getSellerProductByID = createAsyncThunk(
 
 export const updateSellerProduct = createAsyncThunk(
   'seller/updateSellerProduct',
+  async (credentials, { rejectWithValue, dispatch }) => {
+    try {
+      dispatch(setLoading(true));
+      const response = await axios.patch(
+        `${BASE_URL}/seller/product/${credentials.id}`,
+        credentials.data,
+        {
+          headers: {
+            access_token: credentials.token,
+          },
+        },
+      );
+      return response.data;
+    } catch (error) {
+      return rejectWithValue(error.response.data);
+    } finally {
+      dispatch(setLoading(false));
+    }
+  },
+);
+
+export const updateSellerDetailProduct = createAsyncThunk(
+  'seller/updateSellerDetailProduct',
   async (credentials, { rejectWithValue, dispatch }) => {
     try {
       dispatch(setLoading(true));
@@ -298,7 +321,7 @@ export const deleteSellerProduct = createAsyncThunk(
         `${BASE_URL}/seller/product/${credentials.id}`,
         {
           headers: {
-            Authorization: `Bearer ${credentials.token}`,
+            access_token: credentials.token,
           },
         },
       );
@@ -456,6 +479,7 @@ const initialState = {
   category: [],
   detailCategory: {},
   sellerProduct: [],
+  sellerProductDetail: {},
   sellerOrder: [],
   sellerOrderDetail: {},
   sellerAcceptedOrder: [],
@@ -529,7 +553,7 @@ const sellerSlice = createSlice({
     [getSellerProductByID.fulfilled]: (state, action) => {
       return {
         ...state,
-        data: action.payload,
+        sellerProductDetail: action.payload,
       };
     },
     [createSellerProduct.fulfilled]: state => {

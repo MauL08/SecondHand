@@ -7,6 +7,7 @@ import {
   FlatList,
   ScrollView,
   RefreshControl,
+  Alert,
 } from 'react-native';
 import React, { useState, useEffect } from 'react';
 import { COLORS } from '../../assets/colors';
@@ -45,29 +46,101 @@ const dateConvert = date => {
   return `${theDate[2]}-${theDate[1]}-${theDate[0]}`;
 };
 
-const ProdukCard = ({ item }) => {
-  return (
-    <TouchableOpacity style={styles.produkContainer}>
-      <Image style={styles.imageProduk} source={{ uri: item.image_url }} />
-      <Text style={[styles.regularText2, { paddingVertical: ms(4) }]}>
-        {item.name}
-      </Text>
-      <Text style={styles.regularSubText}>
-        {onCategoryProductCheck(item.Categories)}
-      </Text>
-      <NumberFormat
-        value={item.base_price}
-        displayType={'text'}
-        thousandSeparator={true}
-        prefix={'Rp'}
-        renderText={value => (
-          <Text style={[styles.titleText, { paddingVertical: ms(4) }]}>
-            {value}
-          </Text>
-        )}
-      />
-    </TouchableOpacity>
+const onDeleteProduct = () => {
+  Alert.alert(
+    'Apakah anda yakin?',
+    'Produk yang sudah dihapus tidak dapat dikembalikan!',
+    [
+      {
+        text: 'Hapus!',
+        onPress: () => {
+          console.log('HAPUS');
+        },
+      },
+      {
+        text: 'Batalkan',
+        onPress: () => {
+          console.log('Cancel');
+        },
+      },
+    ],
   );
+};
+
+const ProdukCard = ({ item }) => {
+  const navigation = useNavigation();
+  if (item.status === 'available') {
+    return (
+      <View style={styles.mainProdukContainer}>
+        <View style={styles.produkContainer}>
+          <Image style={styles.imageProduk} source={{ uri: item.image_url }} />
+          <Text style={[styles.regularText2, { paddingVertical: ms(4) }]}>
+            {item.name}
+          </Text>
+          <Text style={styles.regularSubText}>
+            {onCategoryProductCheck(item.Categories)}
+          </Text>
+          <NumberFormat
+            value={item.base_price}
+            displayType={'text'}
+            thousandSeparator={true}
+            prefix={'Rp'}
+            renderText={value => (
+              <Text style={[styles.titleText, { paddingVertical: ms(4) }]}>
+                {value}
+              </Text>
+            )}
+          />
+          <View style={styles.statusTextContainer(item.status)}>
+            <Text style={{ color: 'white', fontWeight: '700' }}>
+              {item.status}
+            </Text>
+          </View>
+          <View style={styles.produkControlContainer}>
+            <TouchableOpacity onPress={() => navigation.navigate('EditProduk')}>
+              <Image source={Icons.Edit} style={styles.iconSizeController} />
+            </TouchableOpacity>
+            <TouchableOpacity onPress={onDeleteProduct}>
+              <Image source={Icons.Trash} style={styles.iconSizeController} />
+            </TouchableOpacity>
+          </View>
+        </View>
+      </View>
+    );
+  } else {
+    return (
+      <View style={styles.mainProdukContainer}>
+        <View style={styles.produkContainer}>
+          <Image style={styles.imageProduk} source={{ uri: item.image_url }} />
+          <Text style={[styles.regularText2, { paddingVertical: ms(4) }]}>
+            {item.name}
+          </Text>
+          <Text style={styles.regularSubText}>
+            {onCategoryProductCheck(item.Categories)}
+          </Text>
+          <NumberFormat
+            value={item.base_price}
+            displayType={'text'}
+            thousandSeparator={true}
+            prefix={'Rp'}
+            renderText={value => (
+              <Text style={[styles.titleText, { paddingVertical: ms(4) }]}>
+                {value}
+              </Text>
+            )}
+          />
+          <View style={styles.statusTextContainer(item.status)}>
+            <Text style={{ color: 'white', fontWeight: '700' }}>
+              {item.status}
+            </Text>
+          </View>
+          <TouchableOpacity style={styles.deleteButton}>
+            <Image source={Icons.Trash} style={styles.iconSizeController} />
+          </TouchableOpacity>
+        </View>
+      </View>
+    );
+  }
 };
 
 const ProdukYangDitawarCard = ({ item }) => {
@@ -460,7 +533,6 @@ const styles = StyleSheet.create({
     flex: 1,
   },
   produkContainer: {
-    height: ms(206),
     marginBottom: ms(14),
     marginHorizontal: ms(8),
     marginTop: ms(2),
@@ -554,5 +626,29 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     alignItems: 'center',
     backgroundColor: COLORS.primaryPurple4,
+  },
+  mainProdukContainer: {
+    flexShrink: 1,
+    alignItems: 'center',
+  },
+  statusTextContainer: status => ({
+    backgroundColor: status === 'sold' ? 'red' : 'green',
+    padding: ms(8),
+    borderRadius: ms(6),
+    width: ms(140),
+    alignItems: 'center',
+    marginVertical: ms(10),
+  }),
+  produkControlContainer: {
+    flexDirection: 'row',
+    justifyContent: 'space-evenly',
+    alignItems: 'center',
+  },
+  deleteButton: {
+    alignSelf: 'center',
+  },
+  iconSizeController: {
+    height: ms(26),
+    width: ms(24),
   },
 });

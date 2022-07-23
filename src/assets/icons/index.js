@@ -14,6 +14,8 @@ import Bell from './icon_bell.png';
 import Home from './icon_home.png';
 import User from './icon_user.png';
 import Box from './icon_box.png';
+import Edit from './icon_edit.png';
+import Trash from './icon_trash.png';
 
 export const Icons = {
   ArrowLeft,
@@ -32,4 +34,6 @@ export const Icons = {
   Home,
   User,
   Box,
+  Edit,
+  Trash,
 };
