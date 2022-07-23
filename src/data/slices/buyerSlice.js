@@ -3,6 +3,7 @@ import { BASE_URL } from '../baseAPI';
 import { createSlice, createAsyncThunk } from '@reduxjs/toolkit';
 import { setLoading, setSecondLoading } from './globalSlice';
 import Toast from 'react-native-toast-message';
+import { navigate } from '../../core/router/navigator';
 
 axios.defaults.validateStatus = status => {
   return status < 500;
@@ -24,6 +25,15 @@ const showFailedToast = mes => {
   });
 };
 
+const showUnauthorizeAcc = mes => {
+  Toast.show({
+    type: 'error',
+    text1: 'Error, Aksi Gagal!',
+    text2: `${mes.message.split('/')[0]}`,
+  });
+  navigate('Login');
+};
+
 // Buyer Product
 export const getAllBuyerProduct = createAsyncThunk(
   'buyer/getBuyerProduct',
@@ -33,6 +43,9 @@ export const getAllBuyerProduct = createAsyncThunk(
       const response = await axios.get(
         `${BASE_URL}/buyer/product?status=${credentials.status}&category_id=${credentials.category_id}&search=${credentials.search}&page=${credentials.page}&per_page=${credentials.per_page}`,
       );
+      if (response.status >= 400) {
+        showUnauthorizeAcc(response.data);
+      }
       return response.data;
     } catch (error) {
       return rejectWithValue(error.response.data);
@@ -50,6 +63,9 @@ export const getNextPageProduct = createAsyncThunk(
       const response = await axios.get(
         `${BASE_URL}/buyer/product?status=${credentials.status}&category_id=${credentials.category_id}&search=${credentials.search}&page=${credentials.page}&per_page=${credentials.per_page}`,
       );
+      if (response.status >= 400) {
+        showUnauthorizeAcc(response.data);
+      }
       return response.data;
     } catch (error) {
       return rejectWithValue(error.response.data);
@@ -65,6 +81,9 @@ export const getBuyerProductByID = createAsyncThunk(
     try {
       dispatch(setLoading(true));
       const response = await axios.get(`${BASE_URL}/buyer/product/${id}`);
+      if (response.status >= 400) {
+        showUnauthorizeAcc(response.data);
+      }
       return response.data;
     } catch (error) {
       return rejectWithValue(error.response.data);
@@ -85,6 +104,9 @@ export const getAllBuyerOrder = createAsyncThunk(
           access_token: token,
         },
       });
+      if (response.status >= 400) {
+        showUnauthorizeAcc(response.data);
+      }
       return response.data;
     } catch (error) {
       return rejectWithValue(error.response.data);
@@ -107,6 +129,9 @@ export const getBuyerOrderByID = createAsyncThunk(
           },
         },
       );
+      if (response.status >= 400) {
+        showUnauthorizeAcc(response.data);
+      }
       return response.data;
     } catch (error) {
       return rejectWithValue(error.response.data);
@@ -132,6 +157,9 @@ export const createBuyerOrder = createAsyncThunk(
       );
       if (response.status <= 201) {
         showDoneToast();
+      }
+      if (response.status >= 400) {
+        showUnauthorizeAcc(response.data);
       } else {
         showFailedToast(response.data);
       }
@@ -158,6 +186,9 @@ export const updateBuyerOrder = createAsyncThunk(
           },
         },
       );
+      if (response.status >= 400) {
+        showUnauthorizeAcc(response.data);
+      }
       return response.data;
     } catch (error) {
       return rejectWithValue(error.response.data);
@@ -180,6 +211,9 @@ export const deleteBuyerOrder = createAsyncThunk(
           },
         },
       );
+      if (response.status >= 400) {
+        showUnauthorizeAcc(response.data);
+      }
       return response.data;
     } catch (error) {
       return rejectWithValue(error.response.data);

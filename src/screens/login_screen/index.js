@@ -105,7 +105,7 @@ function LoginScreen() {
       {({ values, handleChange, handleBlur, touched, errors, isValid }) => (
         <View style={styles.container}>
           <ScreenStatusBar />
-          <TouchableOpacity>
+          <TouchableOpacity onPress={() => navigation.navigate('Home')}>
             <Image
               style={styles.icon}
               source={require('../../assets/icons/icon_arrow-left.png')}

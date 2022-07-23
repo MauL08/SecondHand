@@ -3,6 +3,7 @@ import { BASE_URL } from '../baseAPI';
 import { createSlice, createAsyncThunk } from '@reduxjs/toolkit';
 import { setLoading } from './globalSlice';
 import Toast from 'react-native-toast-message';
+import { navigate } from '../../core/router/navigator';
 
 axios.defaults.validateStatus = status => {
   return status < 500;
@@ -40,6 +41,15 @@ const showDoneEditToast = () => {
   });
 };
 
+const showUnauthorizeAcc = mes => {
+  Toast.show({
+    type: 'error',
+    text1: 'Error, Aksi Gagal!',
+    text2: `${mes.message.split('/')[0]}`,
+  });
+  navigate('Login');
+};
+
 // Seller Banner
 export const getAllSellerBanner = createAsyncThunk(
   'seller/getAllSellerBanner',
@@ -51,6 +61,9 @@ export const getAllSellerBanner = createAsyncThunk(
           Authorization: `Bearer ${token}`,
         },
       });
+      if (response.status >= 400) {
+        showUnauthorizeAcc(response.data);
+      }
       return response.data;
     } catch (error) {
       return rejectWithValue(error.response.data);
@@ -73,6 +86,9 @@ export const getSellerBannerByID = createAsyncThunk(
           },
         },
       );
+      if (response.status >= 400) {
+        showUnauthorizeAcc(response.data);
+      }
       return response.data;
     } catch (error) {
       return rejectWithValue(error.response.data);
@@ -96,6 +112,9 @@ export const createSellerBanner = createAsyncThunk(
           },
         },
       );
+      if (response.status >= 400) {
+        showUnauthorizeAcc(response.data);
+      }
       return response.data;
     } catch (error) {
       return rejectWithValue(error.response.data);
@@ -118,6 +137,9 @@ export const deleteSellerBanner = createAsyncThunk(
           },
         },
       );
+      if (response.status >= 400) {
+        showUnauthorizeAcc(response.data);
+      }
       return response.data;
     } catch (error) {
       return rejectWithValue(error.response.data);
@@ -142,6 +164,9 @@ export const createSellerCategory = createAsyncThunk(
           // },
         },
       );
+      if (response.status >= 400) {
+        showUnauthorizeAcc(response.data);
+      }
       return response.data;
     } catch (error) {
       return rejectWithValue(error.response.data);
@@ -157,6 +182,9 @@ export const getSellerCategory = createAsyncThunk(
     try {
       dispatch(setLoading(true));
       const response = await axios.get(`${BASE_URL}/seller/category`);
+      if (response.status >= 400) {
+        showUnauthorizeAcc(response.data);
+      }
       return response.data;
     } catch (error) {
       return rejectWithValue(error.response.data);
@@ -172,6 +200,9 @@ export const getSellerCategoryByID = createAsyncThunk(
     try {
       dispatch(setLoading(true));
       const response = await axios.get(`${BASE_URL}/seller/category/${id}`);
+      if (response.status >= 400) {
+        showUnauthorizeAcc(response.data);
+      }
       return response.data;
     } catch (error) {
       return rejectWithValue(error.response.data);
@@ -194,6 +225,9 @@ export const deleteSellerCategory = createAsyncThunk(
           // },
         },
       );
+      if (response.status >= 400) {
+        showUnauthorizeAcc(response.data);
+      }
       return response.data;
     } catch (error) {
       return rejectWithValue(error.response.data);
@@ -221,6 +255,9 @@ export const createSellerProduct = createAsyncThunk(
       );
       if (response.status <= 201) {
         showDoneToast();
+      }
+      if (response.status >= 400) {
+        showUnauthorizeAcc(response.data);
       } else {
         showFailedToast(response.data);
       }
@@ -243,6 +280,9 @@ export const getSellerProduct = createAsyncThunk(
           access_token: token,
         },
       });
+      if (response.status >= 400) {
+        showUnauthorizeAcc(response.data);
+      }
       return response.data;
     } catch (error) {
       return rejectWithValue(error.response.data);
@@ -265,6 +305,9 @@ export const getSellerProductByID = createAsyncThunk(
           },
         },
       );
+      if (response.status >= 400) {
+        showUnauthorizeAcc(response.data);
+      }
       return response.data;
     } catch (error) {
       return rejectWithValue(error.response.data);
@@ -288,6 +331,9 @@ export const updateSellerProduct = createAsyncThunk(
           },
         },
       );
+      if (response.status >= 400) {
+        showUnauthorizeAcc(response.data);
+      }
       return response.data;
     } catch (error) {
       return rejectWithValue(error.response.data);
@@ -314,6 +360,9 @@ export const updateSellerDetailProduct = createAsyncThunk(
       );
       if (response.status <= 201) {
         showDoneEditToast();
+      }
+      if (response.status >= 400) {
+        showUnauthorizeAcc(response.data);
       } else {
         showFailedToast(response.data);
       }
@@ -340,6 +389,9 @@ export const deleteSellerProduct = createAsyncThunk(
           },
         },
       );
+      if (response.status >= 400) {
+        showUnauthorizeAcc(response.data);
+      }
       return response.data;
     } catch (error) {
       return rejectWithValue(error.response.data);
@@ -363,6 +415,9 @@ export const getSellerOrder = createAsyncThunk(
           },
         },
       );
+      if (response.status >= 400) {
+        showUnauthorizeAcc(response.data);
+      }
       return response.data;
     } catch (error) {
       return rejectWithValue(error.response.data);
@@ -385,6 +440,9 @@ export const getSellerPendingOrder = createAsyncThunk(
           },
         },
       );
+      if (response.status >= 400) {
+        showUnauthorizeAcc(response.data);
+      }
       return response.data;
     } catch (error) {
       return rejectWithValue(error.response.data);
@@ -407,6 +465,9 @@ export const getSellerAcceptedOrder = createAsyncThunk(
           },
         },
       );
+      if (response.status >= 400) {
+        showUnauthorizeAcc(response.data);
+      }
       return response.data;
     } catch (error) {
       return rejectWithValue(error.response.data);
@@ -429,6 +490,9 @@ export const getSellerOrderByID = createAsyncThunk(
           },
         },
       );
+      if (response.status >= 400) {
+        showUnauthorizeAcc(response.data);
+      }
       return response.data;
     } catch (error) {
       return rejectWithValue(error.response.data);
@@ -455,6 +519,9 @@ export const updateSellerOrder = createAsyncThunk(
       );
       if (response.status <= 201) {
         showDoneUpdateToast();
+      }
+      if (response.status >= 400) {
+        showUnauthorizeAcc(response.data);
       } else {
         showFailedToast();
       }
@@ -480,6 +547,9 @@ export const getSellerOrderProduct = createAsyncThunk(
           },
         },
       );
+      if (response.status >= 400) {
+        showUnauthorizeAcc(response.data);
+      }
       return response.data;
     } catch (error) {
       return rejectWithValue(error.response.data);

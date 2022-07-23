@@ -1,12 +1,21 @@
-// import { Alert } from 'react-native';
 import axios from 'axios';
 import { BASE_URL } from '../baseAPI';
 import { createSlice, createAsyncThunk } from '@reduxjs/toolkit';
-// import { navigate } from '../../core/router/navigator';
+import { navigate } from '../../core/router/navigator';
+import Toast from 'react-native-toast-message';
 import { setLoading } from './globalSlice';
 
 axios.defaults.validateStatus = status => {
   return status < 500;
+};
+
+const showUnauthorizeAcc = mes => {
+  Toast.show({
+    type: 'error',
+    text1: 'Error, Aksi Gagal!',
+    text2: `${mes.message.split('/')[0]}`,
+  });
+  navigate('Login');
 };
 
 export const getAllNotification = createAsyncThunk(
@@ -22,6 +31,9 @@ export const getAllNotification = createAsyncThunk(
           },
         },
       );
+      if (response.status >= 400) {
+        showUnauthorizeAcc(response.data);
+      }
       return response.data;
     } catch (error) {
       return rejectWithValue(error.response.data);
@@ -44,6 +56,9 @@ export const getNotificationByID = createAsyncThunk(
           },
         },
       );
+      if (response.status >= 400) {
+        showUnauthorizeAcc(response.data);
+      }
       return response.data;
     } catch (error) {
       return rejectWithValue(error.response.data);
@@ -66,6 +81,9 @@ export const updateNotification = createAsyncThunk(
           },
         },
       );
+      if (response.status >= 400) {
+        showUnauthorizeAcc(response.data);
+      }
       return response.data;
     } catch (error) {
       return rejectWithValue(error.response.data);

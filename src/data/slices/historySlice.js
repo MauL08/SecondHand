@@ -2,9 +2,20 @@ import axios from 'axios';
 import { createSlice, createAsyncThunk } from '@reduxjs/toolkit';
 import { BASE_URL } from '../baseAPI';
 import { setLoading } from './globalSlice';
+import { navigate } from '../../core/router/navigator';
+import Toast from 'react-native-toast-message';
 
 axios.defaults.validateStatus = status => {
   return status < 500;
+};
+
+const showUnauthorizeAcc = mes => {
+  Toast.show({
+    type: 'error',
+    text1: 'Error, Aksi Gagal!',
+    text2: `${mes.message.split('/')[0]}`,
+  });
+  navigate('Login');
 };
 
 export const getAllHistory = createAsyncThunk(
@@ -17,6 +28,9 @@ export const getAllHistory = createAsyncThunk(
           access_token: token,
         },
       });
+      if (response.status >= 400) {
+        showUnauthorizeAcc(response.data);
+      }
       return response.data;
     } catch (error) {
       return rejectWithValue(error.response.data);
@@ -39,6 +53,9 @@ export const getHistoryByID = createAsyncThunk(
           },
         },
       );
+      if (response.status >= 400) {
+        showUnauthorizeAcc(response.data);
+      }
       return response.data;
     } catch (error) {
       return rejectWithValue(error.response.data);

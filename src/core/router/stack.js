@@ -19,7 +19,7 @@ const Stack = createNativeStackNavigator();
 const Router = () => {
   return (
     <Stack.Navigator
-      initialRouteName="Login"
+      initialRouteName="Main"
       screenOptions={{
         headerShown: false,
         cardStyle: { backgroundColor: COLORS.neutral1 },
