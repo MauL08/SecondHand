@@ -31,22 +31,34 @@ const ProdukCard = ({ item }) => {
     return (
       <View style={styles.produkDitawarContainer}>
         <View style={styles.productRowContainer}>
-          <Image
-            style={[styles.imageUser, { marginRight: ms(16) }]}
-            source={{ uri: item?.Product?.image_url }}
-          />
+          {item?.Product === null ? (
+            <Image
+              style={[styles.imageUser, { marginRight: ms(16) }]}
+              source={require('../../assets/images/img_no_image.png')}
+            />
+          ) : (
+            <Image
+              style={[styles.imageUser, { marginRight: ms(16) }]}
+              source={{ uri: item?.Product?.image_url }}
+            />
+          )}
+
           <View>
             <Text style={styles.regularSubTextDone}>Berhasil Ditawar</Text>
             <Text style={styles.regularText2}>{item.product_name}</Text>
-            <NumberFormat
-              value={item.Product.base_price}
-              displayType={'text'}
-              thousandSeparator={true}
-              prefix={'Rp'}
-              renderText={value => (
-                <Text style={styles.regularText2}>{value}</Text>
-              )}
-            />
+            {item?.Product === null ? (
+              <Text style={styles.regularText2}>-</Text>
+            ) : (
+              <NumberFormat
+                value={item?.Product?.base_price}
+                displayType={'text'}
+                thousandSeparator={true}
+                prefix={'Rp'}
+                renderText={value => (
+                  <Text style={styles.regularText2}>{value}</Text>
+                )}
+              />
+            )}
             <NumberFormat
               value={item.price}
               displayType={'text'}
@@ -67,22 +79,33 @@ const ProdukCard = ({ item }) => {
     return (
       <View style={styles.produkDitawarContainer}>
         <View style={styles.productRowContainer}>
-          <Image
-            style={[styles.imageUser, { marginRight: ms(16) }]}
-            source={{ uri: item?.Product?.image_url }}
-          />
+          {item?.Product === null ? (
+            <Image
+              style={[styles.imageUser, { marginRight: ms(16) }]}
+              source={require('../../assets/images/img_no_image.png')}
+            />
+          ) : (
+            <Image
+              style={[styles.imageUser, { marginRight: ms(16) }]}
+              source={{ uri: item?.Product?.image_url }}
+            />
+          )}
           <View>
             <Text style={styles.regularSubTextFail}>Gagal Ditawar</Text>
             <Text style={styles.regularText2}>{item.product_name}</Text>
-            <NumberFormat
-              value={item.Product.base_price}
-              displayType={'text'}
-              thousandSeparator={true}
-              prefix={'Rp'}
-              renderText={value => (
-                <Text style={styles.regularText2}>{value}</Text>
-              )}
-            />
+            {item?.Product === null ? (
+              <Text style={styles.regularText2}>-</Text>
+            ) : (
+              <NumberFormat
+                value={item?.Product?.base_price}
+                displayType={'text'}
+                thousandSeparator={true}
+                prefix={'Rp'}
+                renderText={value => (
+                  <Text style={styles.regularText2}>{value}</Text>
+                )}
+              />
+            )}
             <NumberFormat
               value={item.price}
               displayType={'text'}

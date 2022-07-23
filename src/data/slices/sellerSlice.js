@@ -50,6 +50,14 @@ const showUnauthorizeAcc = mes => {
   navigate('Login');
 };
 
+const showDoneDeleteToast = () => {
+  Toast.show({
+    type: 'success',
+    text1: 'Sukses!',
+    text2: 'Produk berhasil dihapus',
+  });
+};
+
 // Seller Banner
 export const getAllSellerBanner = createAsyncThunk(
   'seller/getAllSellerBanner',
@@ -378,8 +386,10 @@ export const deleteSellerProduct = createAsyncThunk(
           },
         },
       );
-      if (response.status >= 400) {
-        showUnauthorizeAcc(response.data);
+      if (response.status <= 201) {
+        showDoneDeleteToast();
+      } else {
+        showFailedToast(response.data);
       }
       return response.data;
     } catch (error) {

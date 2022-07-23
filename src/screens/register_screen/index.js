@@ -12,7 +12,7 @@ import { COLORS } from '../../assets/colors';
 import { Icons } from '../../assets/icons';
 import * as yup from 'yup';
 import { Formik } from 'formik';
-import { moderateScale, ms } from 'react-native-size-matters';
+import { moderateScale } from 'react-native-size-matters';
 import { useNavigation } from '@react-navigation/native';
 import { useDispatch, useSelector } from 'react-redux';
 import { postRegister } from '../../data/slices/userSlice';
@@ -91,7 +91,7 @@ const Register = () => {
             <Text style={styles.label}>Buat Password</Text>
             <View style={styles.inputFrame}>
               <TextInput
-                style={styles.input}
+                style={styles.inputPW}
                 placeholder="Buat Password"
                 placeholderTextColor="grey"
                 secureTextEntry={showPassword}
@@ -171,6 +171,7 @@ const styles = StyleSheet.create({
     borderColor: COLORS.neutral2,
     paddingHorizontal: 16,
     fontFamily: 'Poppins-Regular',
+    color: 'black',
   },
   label: {
     fontFamily: 'Poppins-Regular',
@@ -219,12 +220,27 @@ const styles = StyleSheet.create({
     fontFamily: 'Poppins-Medium',
   },
   eye: {
-    width: ms(24),
-    height: ms(24),
-    marginRight: ms(16),
+    width: moderateScale(24),
+    height: moderateScale(24),
+    marginRight: moderateScale(16),
     tintColor: COLORS.neutral3,
-    flexGrow: 0,
-    marginTop: ms(-38),
-    marginLeft: ms(308),
+  },
+  inputFrame: {
+    marginTop: moderateScale(4),
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    borderWidth: 1,
+    borderColor: COLORS.neutral2,
+    borderRadius: moderateScale(16),
+  },
+  inputPW: {
+    paddingLeft: moderateScale(16),
+    fontSize: moderateScale(14),
+    color: 'black',
+    fontWeight: '400',
+    lineHeight: moderateScale(20),
+    fontFamily: 'Poppins-Regular',
+    width: '75%',
   },
 });

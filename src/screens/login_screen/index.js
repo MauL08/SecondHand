@@ -238,7 +238,7 @@ const styles = StyleSheet.create({
     borderColor: COLORS.neutral2,
     borderRadius: moderateScale(16),
     fontSize: moderateScale(14),
-    color: COLORS.neutral5,
+    color: 'black',
     fontWeight: '400',
     lineHeight: moderateScale(20),
     fontFamily: 'Poppins-Regular',
@@ -246,7 +246,7 @@ const styles = StyleSheet.create({
   input2: {
     paddingLeft: moderateScale(16),
     fontSize: moderateScale(14),
-    color: COLORS.neutral5,
+    color: 'black',
     fontWeight: '400',
     lineHeight: moderateScale(20),
     fontFamily: 'Poppins-Regular',

@@ -400,16 +400,11 @@ const DaftarJualScreen = () => {
                 <RefreshControl refreshing={refresh} onRefresh={onRefresh} />
               }
               key={'Produk'}
-              data={sellerProduct}
+              data={sellerProduct === null ? [] : sellerProduct}
               numColumns={2}
               showsVerticalScrollIndicator={false}
               renderItem={({ item }) => (
-                <ProdukCard
-                  name={item.name}
-                  icon={item.icon}
-                  item={item}
-                  token={access_token}
-                />
+                <ProdukCard item={item} token={access_token} />
               )}
             />
           )}
