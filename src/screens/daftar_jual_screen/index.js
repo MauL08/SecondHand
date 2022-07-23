@@ -17,6 +17,7 @@ import { Icons } from '../../assets/icons';
 import { useDispatch, useSelector } from 'react-redux';
 import { useNavigation } from '@react-navigation/native';
 import {
+  deleteSellerProduct,
   getSellerAcceptedOrder,
   getSellerPendingOrder,
   getSellerProduct,
@@ -46,29 +47,9 @@ const dateConvert = date => {
   return `${theDate[2]}-${theDate[1]}-${theDate[0]}`;
 };
 
-const onDeleteProduct = () => {
-  Alert.alert(
-    'Apakah anda yakin?',
-    'Produk yang sudah dihapus tidak dapat dikembalikan!',
-    [
-      {
-        text: 'Hapus!',
-        onPress: () => {
-          console.log('HAPUS');
-        },
-      },
-      {
-        text: 'Batalkan',
-        onPress: () => {
-          console.log('Cancel');
-        },
-      },
-    ],
-  );
-};
-
-const ProdukCard = ({ item }) => {
+const ProdukCard = ({ item, token }) => {
   const navigation = useNavigation();
+  const dispatch = useDispatch();
   if (item.status === 'available') {
     return (
       <View style={styles.mainProdukContainer}>
@@ -100,7 +81,31 @@ const ProdukCard = ({ item }) => {
             <TouchableOpacity onPress={() => navigation.navigate('EditProduk')}>
               <Image source={Icons.Edit} style={styles.iconSizeController} />
             </TouchableOpacity>
-            <TouchableOpacity onPress={onDeleteProduct}>
+            <TouchableOpacity
+              onPress={() =>
+                Alert.alert(
+                  'Apakah anda yakin?',
+                  'Produk yang sudah dihapus tidak dapat dikembalikan!',
+                  [
+                    {
+                      text: 'Hapus!',
+                      onPress: () => {
+                        dispatch(
+                          deleteSellerProduct({
+                            id: item.id,
+                            token,
+                          }),
+                        );
+                        dispatch(getSellerProduct(token));
+                      },
+                    },
+                    {
+                      text: 'Batalkan',
+                      onPress: () => {},
+                    },
+                  ],
+                )
+              }>
               <Image source={Icons.Trash} style={styles.iconSizeController} />
             </TouchableOpacity>
           </View>
@@ -134,7 +139,32 @@ const ProdukCard = ({ item }) => {
               {item.status}
             </Text>
           </View>
-          <TouchableOpacity style={styles.deleteButton}>
+          <TouchableOpacity
+            style={styles.deleteButton}
+            onPress={() =>
+              Alert.alert(
+                'Apakah anda yakin?',
+                'Produk yang sudah dihapus tidak dapat dikembalikan!',
+                [
+                  {
+                    text: 'Hapus!',
+                    onPress: () => {
+                      dispatch(
+                        deleteSellerProduct({
+                          id: item.id,
+                          token,
+                        }),
+                      );
+                      dispatch(getSellerProduct(token));
+                    },
+                  },
+                  {
+                    text: 'Batalkan',
+                    onPress: () => {},
+                  },
+                ],
+              )
+            }>
             <Image source={Icons.Trash} style={styles.iconSizeController} />
           </TouchableOpacity>
         </View>
@@ -368,7 +398,12 @@ const DaftarJualScreen = () => {
               numColumns={2}
               showsVerticalScrollIndicator={false}
               renderItem={({ item }) => (
-                <ProdukCard name={item.name} icon={item.icon} item={item} />
+                <ProdukCard
+                  name={item.name}
+                  icon={item.icon}
+                  item={item}
+                  token={access_token}
+                />
               )}
             />
           )}
