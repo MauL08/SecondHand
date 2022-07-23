@@ -59,6 +59,11 @@ const HomeScreen = () => {
         per_page: 15,
       }),
     );
+    fetchNextProduct();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [currCategory, dispatch]);
+
+  useEffect(() => {
     setAllCategory([
       {
         id: '',
@@ -66,9 +71,7 @@ const HomeScreen = () => {
       },
       ...category,
     ]);
-    fetchNextProduct();
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [currCategory, dispatch]);
+  }, [category]);
 
   const fetchNextProduct = () => {
     dispatch(
@@ -154,12 +157,10 @@ const HomeScreen = () => {
               </View>
               <View style={styles.bannerWrapper}>
                 {isLoading ? (
-                  <View style={styles.onLoadBannerImageContainer}>
-                    <Image
-                      source={require('../../assets/images/img_no_image.png')}
-                      style={styles.onLoadBannerImage}
-                    />
-                  </View>
+                  <Image
+                    source={require('../../assets/images/img_no_image.png')}
+                    style={styles.onLoadBannerImage}
+                  />
                 ) : (
                   <Carousel
                     layout={'default'}
@@ -319,10 +320,6 @@ const styles = StyleSheet.create({
     height: ms(24),
     tintColor: COLORS.neutral3,
   },
-  bannerWrapper: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-  },
   gift: {
     width: width - 100,
     height: ms(150),
@@ -464,9 +461,10 @@ const styles = StyleSheet.create({
     fontWeight: '700',
   },
   onLoadBannerImage: {
+    alignSelf: 'center',
     width: width - 100,
     height: ms(150),
-    marginVertical: ms(30),
+    marginVertical: ms(38),
     tintColor: 'grey',
   },
 });

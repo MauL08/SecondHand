@@ -58,7 +58,7 @@ const Register = () => {
       {({ handleChange, handleBlur, values, touched, errors, isValid }) => (
         <View style={styles.container}>
           <ScreenStatusBar />
-          <TouchableOpacity onPress={() => navigation.navigate('Main')}>
+          <TouchableOpacity onPress={() => navigation.goBack()}>
             <Image source={Icons.ArrowLeft} style={styles.iconBack} />
           </TouchableOpacity>
           <Text style={styles.textTitle}>Daftar</Text>

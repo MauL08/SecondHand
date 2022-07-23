@@ -56,11 +56,7 @@ export const getAllSellerBanner = createAsyncThunk(
   async (token, { rejectWithValue, dispatch }) => {
     try {
       dispatch(setLoading(true));
-      const response = await axios.get(`${BASE_URL}/seller/banner`, {
-        headers: {
-          Authorization: `Bearer ${token}`,
-        },
-      });
+      const response = await axios.get(`${BASE_URL}/seller/banner`);
       if (response.status >= 400) {
         showUnauthorizeAcc(response.data);
       }
