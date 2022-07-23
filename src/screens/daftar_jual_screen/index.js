@@ -701,4 +701,5 @@ const styles = StyleSheet.create({
   },
   dateContainer: { alignItems: 'center' },
   allListProductContainer: { marginTop: ms(8), flex: 1 },
+  bo: { color: 'black' },
 });

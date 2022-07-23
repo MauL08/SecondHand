@@ -82,7 +82,7 @@ const NotifikasiScreen = () => {
                 <View style={styles.circle(read)} />
               </View>
             </View>
-            <Text style={styles.regularText2}>{name}</Text>
+            <Text style={styles.regularText2Title}>{name}</Text>
             <NumberFormat
               value={product_price}
               displayType={'text'}
@@ -99,7 +99,7 @@ const NotifikasiScreen = () => {
                 thousandSeparator={true}
                 prefix={'Rp'}
                 renderText={txt => (
-                  <Text style={styles.regularText2}>Ditawar {txt}</Text>
+                  <Text style={styles.regularText2Title}>Ditawar {txt}</Text>
                 )}
               />
             ) : status === 'accepted' ? (
@@ -109,7 +109,7 @@ const NotifikasiScreen = () => {
                 thousandSeparator={true}
                 prefix={'Rp'}
                 renderText={txt => (
-                  <Text style={styles.regularText2}>
+                  <Text style={styles.regularText2Title}>
                     Berhasil ditawar {txt}
                   </Text>
                 )}
@@ -121,7 +121,9 @@ const NotifikasiScreen = () => {
                 thousandSeparator={true}
                 prefix={'Rp'}
                 renderText={txt => (
-                  <Text style={styles.regularText2}>Gagal ditawar {txt}</Text>
+                  <Text style={styles.regularText2Title}>
+                    Gagal ditawar {txt}
+                  </Text>
                 )}
               />
             ) : null}
@@ -241,6 +243,13 @@ const styles = StyleSheet.create({
     marginTop: ms(4),
     textDecorationLine: status === 'accepted' ? 'line-through' : null,
   }),
+  regularText2Title: {
+    fontSize: ms(14),
+    color: COLORS.neutral4,
+    lineHeight: ms(20),
+    fontFamily: 'Poppins-Regular',
+    marginTop: ms(4),
+  },
   textContainer: {
     marginLeft: ms(16),
   },

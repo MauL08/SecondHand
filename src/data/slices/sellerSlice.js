@@ -29,7 +29,7 @@ const showDoneUpdateToast = () => {
   Toast.show({
     type: 'success',
     text1: 'Sukses!',
-    text2: 'Produk berhasil mendapatkan harga yang sesuai',
+    text2: 'Produk berhasil dikonfirmasi',
   });
 };
 
@@ -251,9 +251,6 @@ export const createSellerProduct = createAsyncThunk(
       );
       if (response.status <= 201) {
         showDoneToast();
-      }
-      if (response.status >= 400) {
-        showUnauthorizeAcc(response.data);
       } else {
         showFailedToast(response.data);
       }
@@ -356,9 +353,6 @@ export const updateSellerDetailProduct = createAsyncThunk(
       );
       if (response.status <= 201) {
         showDoneEditToast();
-      }
-      if (response.status >= 400) {
-        showUnauthorizeAcc(response.data);
       } else {
         showFailedToast(response.data);
       }
@@ -515,9 +509,6 @@ export const updateSellerOrder = createAsyncThunk(
       );
       if (response.status <= 201) {
         showDoneUpdateToast();
-      }
-      if (response.status >= 400) {
-        showUnauthorizeAcc(response.data);
       } else {
         showFailedToast();
       }

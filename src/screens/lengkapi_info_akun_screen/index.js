@@ -207,6 +207,7 @@ const LengkapiInfoAkunScreen = () => {
               <Text style={styles.label}>Nama*</Text>
               <TextInput
                 style={styles.input}
+                placeholderTextColor="grey"
                 placeholder="Nama"
                 onChangeText={handleChange('name')}
                 onBlur={handleBlur('name')}
@@ -218,6 +219,7 @@ const LengkapiInfoAkunScreen = () => {
               <Text style={styles.label}>Kota*</Text>
               <TextInput
                 style={styles.input}
+                placeholderTextColor="grey"
                 placeholder="Kota"
                 onChangeText={handleChange('kota')}
                 onBlur={handleBlur('kota')}
@@ -229,6 +231,7 @@ const LengkapiInfoAkunScreen = () => {
               <Text style={styles.label}>Alamat*</Text>
               <TextInput
                 style={styles.inputBig}
+                placeholderTextColor="grey"
                 placeholder="Alamat"
                 onChangeText={handleChange('alamat')}
                 onBlur={handleBlur('alamat')}
@@ -241,7 +244,8 @@ const LengkapiInfoAkunScreen = () => {
               <View style={styles.numberPhoneInputContainer}>
                 <Text style={styles.prefix}>+62</Text>
                 <TextInput
-                  style={{ width: ms(180) }}
+                  placeholderTextColor="grey"
+                  style={styles.textInputNumStyle}
                   onChangeText={handleChange('nomor')}
                   onBlur={handleBlur('nomor')}
                   value={values.nomor}
@@ -324,6 +328,7 @@ const styles = StyleSheet.create({
     marginTop: ms(40),
   },
   input: {
+    color: 'black',
     borderWidth: 1,
     borderRadius: ms(16),
     borderColor: COLORS.neutral2,
@@ -331,6 +336,7 @@ const styles = StyleSheet.create({
     fontFamily: 'Poppins-Regular',
   },
   inputBig: {
+    color: 'black',
     borderWidth: 1,
     borderRadius: ms(16),
     borderColor: COLORS.neutral2,
@@ -395,5 +401,12 @@ const styles = StyleSheet.create({
     paddingHorizontal: 10,
     fontWeight: 'bold',
     color: 'black',
+  },
+  textInputStyle: {
+    color: 'black',
+  },
+  textInputNumStyle: {
+    color: 'black',
+    width: ms(180),
   },
 });

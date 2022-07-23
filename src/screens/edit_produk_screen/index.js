@@ -232,6 +232,7 @@ const EditProdukScreen = ({ route }) => {
             <View>
               <Text style={styles.label}>Nama Produk</Text>
               <TextInput
+                placeholderTextColor="grey"
                 style={styles.input}
                 placeholder="Nama Produk"
                 onChangeText={handleChange('name')}
@@ -244,7 +245,9 @@ const EditProdukScreen = ({ route }) => {
               <Text style={styles.label}>Harga Produk</Text>
               <TextInput
                 style={styles.input}
+                placeholderTextColor="grey"
                 placeholder="Rp 0,00"
+                keyboardType="number-pad"
                 onChangeText={handleChange('harga')}
                 onBlur={handleBlur('harga')}
                 value={values.harga}
@@ -255,6 +258,7 @@ const EditProdukScreen = ({ route }) => {
               <Text style={styles.label}>Lokasi</Text>
               <TextInput
                 style={styles.input}
+                placeholderTextColor="grey"
                 placeholder="Lokasi Produk"
                 onChangeText={handleChange('lokasi')}
                 onBlur={handleBlur('lokasi')}
@@ -282,6 +286,7 @@ const EditProdukScreen = ({ route }) => {
               <Text style={styles.label}>Deskripsi</Text>
               <TextInput
                 style={styles.inputBig}
+                placeholderTextColor="grey"
                 placeholder="Taruh deskripsi produk disini"
                 onChangeText={handleChange('deskripsi')}
                 onBlur={handleBlur('deskripsi')}
@@ -382,6 +387,7 @@ const styles = StyleSheet.create({
     marginTop: ms(16),
   },
   input: {
+    color: 'black',
     borderWidth: 1,
     borderRadius: ms(16),
     borderColor: COLORS.neutral2,
@@ -397,6 +403,7 @@ const styles = StyleSheet.create({
     color: COLORS.neutral3,
   },
   inputBig: {
+    color: 'black',
     borderWidth: 1,
     borderRadius: ms(16),
     borderColor: COLORS.neutral2,

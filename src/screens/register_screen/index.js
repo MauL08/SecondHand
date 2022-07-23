@@ -67,6 +67,7 @@ const Register = () => {
             <TextInput
               style={styles.input}
               placeholder="Nama Lengkap"
+              placeholderTextColor="grey"
               onChangeText={handleChange('name')}
               onBlur={handleBlur('name')}
               value={values.name}
@@ -78,6 +79,7 @@ const Register = () => {
             <TextInput
               style={styles.input}
               placeholder="Contoh: johndee@gmail.com"
+              placeholderTextColor="grey"
               keyboardType="email-address"
               onChangeText={handleChange('email')}
               onBlur={handleBlur('email')}
@@ -91,6 +93,7 @@ const Register = () => {
               <TextInput
                 style={styles.input}
                 placeholder="Buat Password"
+                placeholderTextColor="grey"
                 secureTextEntry={showPassword}
                 onChangeText={handleChange('password')}
                 onBlur={handleBlur('password')}

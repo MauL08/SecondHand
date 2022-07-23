@@ -138,6 +138,7 @@ const HomeScreen = () => {
                 <TextInput
                   style={styles.input}
                   placeholder="Cari di Second Hand"
+                  placeholderTextColor="grey"
                   onChangeText={text => setSearchText(text)}
                 />
                 <TouchableOpacity
@@ -314,6 +315,7 @@ const styles = StyleSheet.create({
     backgroundColor: COLORS.neutral1,
     fontSize: ms(14),
     width: ms(270),
+    color: 'black',
   },
   search: {
     width: ms(24),

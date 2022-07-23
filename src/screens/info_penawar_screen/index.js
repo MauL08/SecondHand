@@ -300,10 +300,6 @@ const InfoPenawarScreen = ({ route }) => {
     setIsOpen(true);
   }, []);
 
-  const handleSheetChanges = useCallback(index => {
-    console.log('handleSheetChanges', index);
-  }, []);
-
   const renderBackdrop = useCallback(
     props => (
       <BottomSheetBackdrop
@@ -373,7 +369,6 @@ const InfoPenawarScreen = ({ route }) => {
             handleIndicatorStyle={styles.handleIndicatorStyle}
             enablePanDownToClose={true}
             backdropComponent={renderBackdrop}
-            onChange={handleSheetChanges}
             onClose={() => setIsOpen(false)}>
             <RenderTerimaBsView item={sellerOrderDetail} />
           </BottomSheet>

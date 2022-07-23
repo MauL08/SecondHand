@@ -116,6 +116,7 @@ function LoginScreen() {
           <TextInput
             style={styles.input1}
             placeholder="Contoh: johndee@gmail.com"
+            placeholderTextColor="grey"
             autoCapitalize="none"
             autoCorrect={false}
             keyboardType="email-address"
@@ -134,6 +135,7 @@ function LoginScreen() {
             <TextInput
               style={styles.input2}
               placeholder="Masukkan password"
+              placeholderTextColor="grey"
               autoCapitalize="none"
               autoCorrect={false}
               value={values.password}

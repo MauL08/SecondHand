@@ -155,11 +155,9 @@ export const createBuyerOrder = createAsyncThunk(
           },
         },
       );
+      console.log(response.status);
       if (response.status <= 201) {
         showDoneToast();
-      }
-      if (response.status >= 400) {
-        showUnauthorizeAcc(response.data);
       } else {
         showFailedToast(response.data);
       }

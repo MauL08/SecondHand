@@ -47,10 +47,6 @@ const DetailProductScreen = () => {
     setIsOpen(true);
   }, []);
 
-  const handleSheetChanges = useCallback(index => {
-    console.log('handleSheetChanges', index);
-  }, []);
-
   const renderBackdrop = useCallback(
     props => (
       <BottomSheetBackdrop
@@ -168,7 +164,6 @@ const DetailProductScreen = () => {
             handleIndicatorStyle={styles.handleIndicatorStyle}
             enablePanDownToClose={true}
             backdropComponent={renderBackdrop}
-            onChange={handleSheetChanges}
             onClose={() => setIsOpen(false)}>
             <Formik
               initialValues={{ bid_price: '' }}
@@ -211,7 +206,9 @@ const DetailProductScreen = () => {
                   <Text style={styles.label}>Harga Tawar</Text>
                   <TextInput
                     style={styles.input}
+                    placeholderTextColor="grey"
                     placeholder="Rp 0,00"
+                    keyboardType="number-pad"
                     onChangeText={handleChange('bid_price')}
                     onBlur={handleBlur('bid_price')}
                     value={values.bid_price}
@@ -242,7 +239,7 @@ const DetailProductScreen = () => {
                     }}>
                     {isSecondLoading ? (
                       <ActivityIndicator
-                        color={COLORS.primaryPurple4}
+                        color="white"
                         style={{ marginVertical: ms(18) }}
                       />
                     ) : (
@@ -397,6 +394,7 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
   },
   input: {
+    color: 'black',
     borderWidth: ms(1),
     borderRadius: ms(16),
     borderColor: COLORS.neutral2,

@@ -17,11 +17,11 @@ const showDoneToast = () => {
   });
 };
 
-const showFailedToast = () => {
+const showFailedToast = mes => {
   Toast.show({
     type: 'error',
     text1: 'Update Profil Gagal!',
-    text2: 'Silahkan cek kembali dan coba lagi',
+    text2: `${mes.message}`,
   });
 };
 
@@ -115,9 +115,7 @@ export const getUser = createAsyncThunk(
       });
       if (response.status >= 400) {
         showUnauthorizeAcc(response.data);
-        return response.data;
       }
-      console.log(response.status);
       return response.data;
     } catch (error) {
       return rejectWithValue(error.response.data);
@@ -144,11 +142,8 @@ export const updateUser = createAsyncThunk(
       );
       if (response.status <= 201) {
         showDoneToast();
-      }
-      if (response.status >= 400) {
-        showUnauthorizeAcc(response.data);
       } else {
-        showFailedToast();
+        showFailedToast(response.data);
       }
       return response.data;
     } catch (error) {

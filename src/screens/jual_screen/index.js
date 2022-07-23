@@ -23,7 +23,6 @@ import { useDispatch, useSelector } from 'react-redux';
 import {
   createSellerProduct,
   getSellerCategory,
-  getSellerProduct,
 } from '../../data/slices/sellerSlice';
 import { launchCamera, launchImageLibrary } from 'react-native-image-picker';
 import ScreenStatusBar from '../../widgets/screen_status_bar_widget';
@@ -55,14 +54,14 @@ const JualScreen = () => {
   const onRefresh = () => {
     setStaticLoad(true);
     setFile(null);
+    dispatch(getSellerCategory());
+    onDestroyCategories();
     setStaticLoad(false);
   };
 
   useEffect(() => {
     dispatch(getSellerCategory());
-    dispatch(getSellerProduct(access_token));
     onDestroyCategories();
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [dispatch, onDestroyCategories]);
 
   const onDestroyCategories = useCallback(() => {
@@ -216,6 +215,7 @@ const JualScreen = () => {
             <Text style={styles.label}>Nama Produk</Text>
             <TextInput
               style={styles.input}
+              placeholderTextColor="grey"
               placeholder="Nama Produk"
               onChangeText={handleChange('name')}
               onBlur={handleBlur('name')}
@@ -228,6 +228,8 @@ const JualScreen = () => {
             <TextInput
               style={styles.input}
               placeholder="Rp 0,00"
+              placeholderTextColor="grey"
+              keyboardType="number-pad"
               onChangeText={handleChange('harga')}
               onBlur={handleBlur('harga')}
               value={values.harga}
@@ -238,6 +240,7 @@ const JualScreen = () => {
             <Text style={styles.label}>Lokasi</Text>
             <TextInput
               style={styles.input}
+              placeholderTextColor="grey"
               placeholder="Lokasi Produk"
               onChangeText={handleChange('lokasi')}
               onBlur={handleBlur('lokasi')}
@@ -262,6 +265,7 @@ const JualScreen = () => {
             />
             <Text style={styles.label}>Deskripsi</Text>
             <TextInput
+              placeholderTextColor="grey"
               style={styles.inputBig}
               placeholder="Taruh deskripsi produk disini"
               onChangeText={handleChange('deskripsi')}
@@ -403,6 +407,7 @@ const styles = StyleSheet.create({
     fontSize: ms(14),
     fontWeight: '400',
     lineHeight: ms(20),
+    color: 'black',
   },
   dropdownText: {
     fontFamily: 'Poppins-Regular',
@@ -416,6 +421,7 @@ const styles = StyleSheet.create({
     paddingLeft: ms(16),
     fontFamily: 'Poppins-Regular',
     height: ms(80),
+    color: 'black',
   },
   fotoProduk: {
     width: ms(96),
