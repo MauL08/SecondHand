@@ -356,7 +356,6 @@ export const updateSellerDetailProduct = createAsyncThunk(
       } else {
         showFailedToast(response.data);
       }
-      console.log(response.data);
       return response.data;
     } catch (error) {
       return rejectWithValue(error.response.data);
