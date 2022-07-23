@@ -16,6 +16,7 @@ import User from './icon_user.png';
 import Box from './icon_box.png';
 import Edit from './icon_edit.png';
 import Trash from './icon_trash.png';
+import History from './icon_history.png';
 
 export const Icons = {
   ArrowLeft,
@@ -36,4 +37,5 @@ export const Icons = {
   Box,
   Edit,
   Trash,
+  History,
 };
