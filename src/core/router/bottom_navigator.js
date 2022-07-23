@@ -21,6 +21,7 @@ const MainTabs = () => {
       screenOptions={({ route }) => ({
         headerShown: false,
         tabBarActiveTintColor: COLORS.primaryPurple4,
+        // eslint-disable-next-line react/no-unstable-nested-components
         tabBarIcon: ({ focused }) => {
           let iconName;
           if (route.name === 'Home') {
@@ -46,19 +47,9 @@ const MainTabs = () => {
             />
           );
         },
+        // eslint-disable-next-line react/no-unstable-nested-components
         tabBarLabel: ({ focused }) => {
-          return (
-            <Text
-              style={[
-                styles.label,
-                {
-                  color: focused ? COLORS.primaryPurple4 : COLORS.neutral3,
-                  fontFamily: focused ? 'Poppins-Bold' : 'Poppins-Regular',
-                },
-              ]}>
-              {route.name}
-            </Text>
-          );
+          return <Text style={styles.label(focused)}>{route.name}</Text>;
         },
         tabBarStyle: { height: ms(60) },
       })}>
@@ -79,8 +70,10 @@ const styles = StyleSheet.create({
     width: ms(24),
     marginTop: ms(10),
   },
-  label: {
+  label: focused => ({
     fontSize: ms(10),
     marginBottom: ms(5),
-  },
+    color: focused ? COLORS.primaryPurple4 : COLORS.neutral3,
+    fontFamily: focused ? 'Poppins-Bold' : 'Poppins-Regular',
+  }),
 });
