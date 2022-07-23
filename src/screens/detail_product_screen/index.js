@@ -74,84 +74,6 @@ const DetailProductScreen = () => {
     bid_price: yup.string().required('Masukkan harga yang ditawarkan'),
   });
 
-  const RenderBsView = ({ loading }) => (
-    <Formik
-      initialValues={{ bid_price: '' }}
-      validateOnMount={true}
-      validationSchema={validationSchema}>
-      {({ handleChange, handleBlur, values, touched, errors, isValid }) => (
-        <BottomSheetView style={styles.bsContainer}>
-          <Text style={styles.cardName}>Masukkan Harga Tawarmu</Text>
-          <Text style={styles.txtDesc}>
-            Harga tawaranmu akan diketahui penjual, jika penjual cocok kamu akan
-            segera dihubungi penjual.
-          </Text>
-          <View style={styles.bsProduct}>
-            <Image
-              style={styles.userImg}
-              source={{
-                uri: detailProduct.image_url,
-              }}
-            />
-            <View style={styles.bsProductText}>
-              <Text style={styles.cardName}>{detailProduct.name}</Text>
-              <NumberFormat
-                value={detailProduct?.base_price}
-                displayType={'text'}
-                thousandSeparator={true}
-                prefix={'Rp'}
-                renderText={value => (
-                  <Text style={styles.txtPrice}>{value}</Text>
-                )}
-              />
-            </View>
-          </View>
-          <Text style={styles.label}>Harga Tawar</Text>
-          <TextInput
-            style={styles.input}
-            placeholder="Rp 0,00"
-            onChangeText={handleChange('bid_price')}
-            onBlur={handleBlur('bid_price')}
-            value={values.bid_price}
-          />
-          {errors.bid_price && touched.bid_price && (
-            <Text style={styles.errors}>{errors.bid_price}</Text>
-          )}
-          <TouchableOpacity
-            style={[
-              styles.btnKirim,
-              {
-                backgroundColor: isValid
-                  ? COLORS.primaryPurple4
-                  : COLORS.neutral2,
-              },
-            ]}
-            disabled={!isValid}
-            onPress={() => {
-              dispatch(
-                createBuyerOrder({
-                  data: {
-                    product_id: detailProduct.id,
-                    bid_price: Number(values.bid_price),
-                  },
-                  token: access_token,
-                }),
-              );
-            }}>
-            {loading ? (
-              <ActivityIndicator
-                color={COLORS.primaryPurple4}
-                style={{ marginVertical: ms(18) }}
-              />
-            ) : (
-              <Text style={styles.txtBtn}>Kirim</Text>
-            )}
-          </TouchableOpacity>
-        </BottomSheetView>
-      )}
-    </Formik>
-  );
-
   if (isLoading) {
     return <LoadingWidget />;
   } else {
@@ -228,12 +150,6 @@ const DetailProductScreen = () => {
             onPress={
               btnActive
                 ? () => {
-                    // if (access_token === '') {
-                    //   navigation.navigate('Login');
-                    // } else {
-                    //   handleSnapPress(0);
-                    // }
-
                     handleSnapPress(0);
                   }
                 : null
@@ -254,7 +170,88 @@ const DetailProductScreen = () => {
             backdropComponent={renderBackdrop}
             onChange={handleSheetChanges}
             onClose={() => setIsOpen(false)}>
-            <RenderBsView loading={isSecondLoading} />
+            <Formik
+              initialValues={{ bid_price: '' }}
+              validateOnMount={true}
+              validationSchema={validationSchema}>
+              {({
+                handleChange,
+                handleBlur,
+                values,
+                touched,
+                errors,
+                isValid,
+              }) => (
+                <BottomSheetView style={styles.bsContainer}>
+                  <Text style={styles.cardName}>Masukkan Harga Tawarmu</Text>
+                  <Text style={styles.txtDesc}>
+                    Harga tawaranmu akan diketahui penjual, jika penjual cocok
+                    kamu akan segera dihubungi penjual.
+                  </Text>
+                  <View style={styles.bsProduct}>
+                    <Image
+                      style={styles.userImg}
+                      source={{
+                        uri: detailProduct.image_url,
+                      }}
+                    />
+                    <View style={styles.bsProductText}>
+                      <Text style={styles.cardName}>{detailProduct.name}</Text>
+                      <NumberFormat
+                        value={detailProduct?.base_price}
+                        displayType={'text'}
+                        thousandSeparator={true}
+                        prefix={'Rp'}
+                        renderText={value => (
+                          <Text style={styles.txtPrice}>{value}</Text>
+                        )}
+                      />
+                    </View>
+                  </View>
+                  <Text style={styles.label}>Harga Tawar</Text>
+                  <TextInput
+                    style={styles.input}
+                    placeholder="Rp 0,00"
+                    onChangeText={handleChange('bid_price')}
+                    onBlur={handleBlur('bid_price')}
+                    value={values.bid_price}
+                  />
+                  {errors.bid_price && touched.bid_price && (
+                    <Text style={styles.errors}>{errors.bid_price}</Text>
+                  )}
+                  <TouchableOpacity
+                    style={[
+                      styles.btnKirim,
+                      {
+                        backgroundColor: isValid
+                          ? COLORS.primaryPurple4
+                          : COLORS.neutral2,
+                      },
+                    ]}
+                    disabled={!isValid}
+                    onPress={() => {
+                      dispatch(
+                        createBuyerOrder({
+                          data: {
+                            product_id: detailProduct.id,
+                            bid_price: Number(values.bid_price),
+                          },
+                          token: access_token,
+                        }),
+                      );
+                    }}>
+                    {isSecondLoading ? (
+                      <ActivityIndicator
+                        color={COLORS.primaryPurple4}
+                        style={{ marginVertical: ms(18) }}
+                      />
+                    ) : (
+                      <Text style={styles.txtBtn}>Kirim</Text>
+                    )}
+                  </TouchableOpacity>
+                </BottomSheetView>
+              )}
+            </Formik>
           </BottomSheet>
         ) : null}
       </GestureHandlerRootView>

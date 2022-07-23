@@ -3,7 +3,6 @@ import { createNativeStackNavigator } from '@react-navigation/native-stack';
 
 import {
   DetailProductScreen,
-  FilterScreen,
   LengkapiInfoAkunScreen,
   LoginScreen,
   RegisterScreen,
@@ -29,7 +28,6 @@ const Router = () => {
       <Stack.Screen name="Register" component={RegisterScreen} />
       <Stack.Screen name="Main" component={MainTabs} />
       <Stack.Screen name="LengkapiAkun" component={LengkapiInfoAkunScreen} />
-      <Stack.Screen name="Filter" component={FilterScreen} />
       <Stack.Screen name="DetailProduct" component={DetailProductScreen} />
       <Stack.Screen name="InfoPenawar" component={InfoPenawarScreen} />
       <Stack.Screen name="Terbitkan" component={TerbitkanScreen} />

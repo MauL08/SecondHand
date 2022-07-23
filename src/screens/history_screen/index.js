@@ -30,7 +30,7 @@ const ProdukCard = ({ item }) => {
   if (item.status === 'accepted') {
     return (
       <View style={styles.produkDitawarContainer}>
-        <View style={{ flexDirection: 'row' }}>
+        <View style={styles.productRowContainer}>
           <Image
             style={[styles.imageUser, { marginRight: ms(16) }]}
             source={{ uri: item?.Product?.image_url }}
@@ -66,7 +66,7 @@ const ProdukCard = ({ item }) => {
   } else {
     return (
       <View style={styles.produkDitawarContainer}>
-        <View style={{ flexDirection: 'row' }}>
+        <View style={styles.productRowContainer}>
           <Image
             style={[styles.imageUser, { marginRight: ms(16) }]}
             source={{ uri: item?.Product?.image_url }}
@@ -386,5 +386,8 @@ const styles = StyleSheet.create({
   iconSizeController: {
     height: ms(26),
     width: ms(24),
+  },
+  productRowContainer: {
+    flexDirection: 'row',
   },
 });

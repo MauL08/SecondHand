@@ -71,7 +71,6 @@ const HomeScreen = () => {
   }, [currCategory, dispatch]);
 
   const fetchNextProduct = () => {
-    // setPages(currState => currState + 1);
     dispatch(
       getNextPageProduct({
         status: '',
@@ -82,7 +81,6 @@ const HomeScreen = () => {
       }),
     );
     setPages(currState => currState + 1);
-    // setDataProduct(currState => [...currState, product]);
   };
 
   const onCategoryProductCheck = cat => {
@@ -114,56 +112,6 @@ const HomeScreen = () => {
     ]);
     setRefreshing(false);
   };
-
-  const FilterRender = ({ id, name }) => (
-    <TouchableOpacity
-      style={styles.btnFilter(currCategory, id)}
-      onPress={() => setCurrCategory(id)}>
-      <Image
-        source={Icons.Search}
-        style={styles.searchFilter(currCategory, id)}
-      />
-      <Text style={styles.txtFilter(currCategory, id)}>{name}</Text>
-    </TouchableOpacity>
-  );
-
-  // eslint-disable-next-line react/no-unstable-nested-components
-  const ProductRender = ({ index, name, category, harga, image_url }) => (
-    <TouchableOpacity
-      style={styles.btnProduct}
-      onPress={() => {
-        dispatch(getBuyerProductByID(index));
-        navigation.navigate('DetailProduct');
-      }}>
-      {image_url === null || image_url === '' ? (
-        <Image
-          source={require('../../assets/images/img_no_image.png')}
-          style={styles.productImg}
-        />
-      ) : (
-        <Image source={{ uri: image_url }} style={styles.productImg} />
-      )}
-      <Text numberOfLines={1} style={styles.txtProduct1}>
-        {name}
-      </Text>
-      <Text style={styles.txtProduct2}>{category}</Text>
-      <NumberFormat
-        value={harga}
-        displayType={'text'}
-        thousandSeparator={true}
-        prefix={'Rp'}
-        renderText={value => <Text style={styles.txtProduct1}>{value}</Text>}
-      />
-    </TouchableOpacity>
-  );
-
-  // eslint-disable-next-line react/no-unstable-nested-components
-  const BannerRender = ({ image, nama }) => (
-    <View style={styles.bannerContainer}>
-      <Image source={{ uri: image }} style={styles.gift} />
-      <Text style={styles.txtTop1}>{nama}</Text>
-    </View>
-  );
 
   return (
     <SafeAreaView style={styles.mainContainer}>
@@ -219,7 +167,13 @@ const HomeScreen = () => {
                     itemWidth={width - 100}
                     data={banner}
                     renderItem={({ item }) => (
-                      <BannerRender image={item.image_url} nama={item.name} />
+                      <View style={styles.bannerContainer}>
+                        <Image
+                          source={{ uri: item.image_url }}
+                          style={styles.gift}
+                        />
+                        <Text style={styles.txtTop1}>{item.name}</Text>
+                      </View>
                     )}
                   />
                 )}
@@ -230,17 +184,25 @@ const HomeScreen = () => {
               {isLoading ? (
                 <Text style={styles.loadKategoriText}>Memuat Kategori...</Text>
               ) : (
-                <>
-                  <FlatList
-                    data={allCategory}
-                    renderItem={({ item }) => (
-                      <FilterRender name={item.name} id={item.id} />
-                    )}
-                    keyExtractor={item => item.id}
-                    horizontal={true}
-                    showsHorizontalScrollIndicator={false}
-                  />
-                </>
+                <FlatList
+                  data={allCategory}
+                  renderItem={({ item }) => (
+                    <TouchableOpacity
+                      style={styles.btnFilter(currCategory, item.id)}
+                      onPress={() => setCurrCategory(item.id)}>
+                      <Image
+                        source={Icons.Search}
+                        style={styles.searchFilter(currCategory, item.id)}
+                      />
+                      <Text style={styles.txtFilter(currCategory, item.id)}>
+                        {item.name}
+                      </Text>
+                    </TouchableOpacity>
+                  )}
+                  keyExtractor={item => item.id}
+                  horizontal={true}
+                  showsHorizontalScrollIndicator={false}
+                />
               )}
             </View>
             {isLoading ? (
@@ -259,13 +221,39 @@ const HomeScreen = () => {
                   numColumns={2}
                   columnWrapperStyle={styles.columnWrapperStyle}
                   renderItem={({ item }) => (
-                    <ProductRender
-                      index={item.id}
-                      name={item.name}
-                      category={onCategoryProductCheck(item.Categories)}
-                      harga={item.base_price}
-                      image_url={item.image_url}
-                    />
+                    <TouchableOpacity
+                      style={styles.btnProduct}
+                      onPress={() => {
+                        dispatch(getBuyerProductByID(item.id));
+                        navigation.navigate('DetailProduct');
+                      }}>
+                      {item.image_url === null || item.image_url === '' ? (
+                        <Image
+                          source={require('../../assets/images/img_no_image.png')}
+                          style={styles.productImg}
+                        />
+                      ) : (
+                        <Image
+                          source={{ uri: item.image_url }}
+                          style={styles.productImg}
+                        />
+                      )}
+                      <Text numberOfLines={1} style={styles.txtProduct1}>
+                        {item.name}
+                      </Text>
+                      <Text style={styles.txtProduct2}>
+                        {onCategoryProductCheck(item.Categories)}
+                      </Text>
+                      <NumberFormat
+                        value={item.base_price}
+                        displayType={'text'}
+                        thousandSeparator={true}
+                        prefix={'Rp'}
+                        renderText={value => (
+                          <Text style={styles.txtProduct1}>{value}</Text>
+                        )}
+                      />
+                    </TouchableOpacity>
                   )}
                   keyExtractor={item => String(item.id)}
                   showsVerticalScrollIndicator={false}

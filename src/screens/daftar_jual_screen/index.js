@@ -73,9 +73,7 @@ const ProdukCard = ({ item, token }) => {
             )}
           />
           <View style={styles.statusTextContainer(item.status)}>
-            <Text style={{ color: 'white', fontWeight: '700' }}>
-              {item.status}
-            </Text>
+            <Text style={styles.statusProductText}>{item.status}</Text>
           </View>
           <View style={styles.produkControlContainer}>
             <TouchableOpacity
@@ -145,9 +143,7 @@ const ProdukCard = ({ item, token }) => {
             )}
           />
           <View style={styles.statusTextContainer(item.status)}>
-            <Text style={{ color: 'white', fontWeight: '700' }}>
-              {item.status}
-            </Text>
+            <Text style={styles.statusProductText}>{item.status}</Text>
           </View>
           <TouchableOpacity
             style={styles.deleteButton}
@@ -193,7 +189,7 @@ const ProdukYangDitawarCard = ({ item }) => {
           id: item.id,
         })
       }>
-      <View style={{ flexDirection: 'row' }}>
+      <View style={styles.productRowContainer}>
         <Image
           style={[styles.imageUser, { marginRight: ms(16) }]}
           source={{ uri: item?.Product?.image_url }}
@@ -232,7 +228,7 @@ const SoldProduct = ({ item }) => {
   return (
     <View style={styles.produkTerjualContainer}>
       <View style={styles.row}>
-        <View style={{ flexDirection: 'row' }}>
+        <View style={styles.productRowContainer}>
           <Image
             style={[styles.imageUser, { marginRight: ms(16) }]}
             source={{ uri: item?.Product?.image_url }}
@@ -251,7 +247,7 @@ const SoldProduct = ({ item }) => {
             />
           </View>
         </View>
-        <View style={{ alignItems: 'center' }}>
+        <View style={styles.dateContainer}>
           <Text style={styles.regularSubText}>
             {dateConvert(item?.transaction_date)}
           </Text>
@@ -419,7 +415,7 @@ const DaftarJualScreen = () => {
           )}
         </View>
       ) : selectedCategory === 'Diminati' ? (
-        <View style={{ marginTop: ms(8), flex: 1 }}>
+        <View style={styles.allListProductContainer}>
           {isLoading ? (
             <LoadingWidget />
           ) : sellerPendingOrder.length === 0 ? (
@@ -449,7 +445,7 @@ const DaftarJualScreen = () => {
           )}
         </View>
       ) : selectedCategory === 'Terjual' ? (
-        <View style={{ marginTop: ms(8), flex: 1 }}>
+        <View style={styles.allListProductContainer}>
           {isLoading ? (
             <LoadingWidget />
           ) : sellerAcceptedOrder.length === 0 ? (
@@ -693,7 +689,16 @@ const styles = StyleSheet.create({
     alignSelf: 'center',
   },
   iconSizeController: {
-    height: ms(26),
-    width: ms(24),
+    height: ms(20),
+    width: ms(17),
   },
+  statusProductText: {
+    color: 'white',
+    fontWeight: '700',
+  },
+  productRowContainer: {
+    flexDirection: 'row',
+  },
+  dateContainer: { alignItems: 'center' },
+  allListProductContainer: { marginTop: ms(8), flex: 1 },
 });

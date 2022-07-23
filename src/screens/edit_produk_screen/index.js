@@ -77,18 +77,18 @@ const EditProdukScreen = ({ route }) => {
 
   const onPostProduct = (
     prodId,
-    name,
+    postName,
     lokasi,
-    desc,
-    price,
+    postDesc,
+    postPrice,
     catID,
     imageFile,
   ) => {
     const formData = new FormData();
-    formData.append('name', name);
-    formData.append('base_price', price);
+    formData.append('name', postName);
+    formData.append('base_price', postPrice);
     formData.append('category_ids', catID);
-    formData.append('description', desc);
+    formData.append('description', postDesc);
     formData.append('location', lokasi);
     imageFile === null
       ? formData.append('image', '')

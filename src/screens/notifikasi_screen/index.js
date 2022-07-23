@@ -48,6 +48,7 @@ const NotifikasiScreen = () => {
     return `${theDate[2]}-${theDate[1]}-${theDate[0]}`;
   };
 
+  // eslint-disable-next-line react/no-unstable-nested-components
   const NotifCard = ({
     name,
     product_price,
@@ -87,17 +88,8 @@ const NotifikasiScreen = () => {
               displayType={'text'}
               thousandSeparator={true}
               prefix={'Rp'}
-              renderText={value => (
-                <Text
-                  style={[
-                    styles.regularText2,
-                    {
-                      textDecorationLine:
-                        status === 'accepted' ? 'line-through' : null,
-                    },
-                  ]}>
-                  {value}
-                </Text>
+              renderText={txt => (
+                <Text style={styles.regularText2(status)}>{txt}</Text>
               )}
             />
             {status === 'bid' ? (
@@ -106,8 +98,8 @@ const NotifikasiScreen = () => {
                 displayType={'text'}
                 thousandSeparator={true}
                 prefix={'Rp'}
-                renderText={value => (
-                  <Text style={styles.regularText2}>Ditawar {value}</Text>
+                renderText={txt => (
+                  <Text style={styles.regularText2}>Ditawar {txt}</Text>
                 )}
               />
             ) : status === 'accepted' ? (
@@ -116,9 +108,9 @@ const NotifikasiScreen = () => {
                 displayType={'text'}
                 thousandSeparator={true}
                 prefix={'Rp'}
-                renderText={value => (
+                renderText={txt => (
                   <Text style={styles.regularText2}>
-                    Berhasil ditawar {value}
+                    Berhasil ditawar {txt}
                   </Text>
                 )}
               />
@@ -128,8 +120,8 @@ const NotifikasiScreen = () => {
                 displayType={'text'}
                 thousandSeparator={true}
                 prefix={'Rp'}
-                renderText={value => (
-                  <Text style={styles.regularText2}>Gagal ditawar {value}</Text>
+                renderText={txt => (
+                  <Text style={styles.regularText2}>Gagal ditawar {txt}</Text>
                 )}
               />
             ) : null}
@@ -241,13 +233,14 @@ const styles = StyleSheet.create({
     lineHeight: ms(14),
     fontFamily: 'Poppins-Regular',
   },
-  regularText2: {
+  regularText2: status => ({
     fontSize: ms(14),
     color: COLORS.neutral4,
     lineHeight: ms(20),
     fontFamily: 'Poppins-Regular',
     marginTop: ms(4),
-  },
+    textDecorationLine: status === 'accepted' ? 'line-through' : null,
+  }),
   textContainer: {
     marginLeft: ms(16),
   },
