@@ -1,5 +1,11 @@
 import { Image, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
-import React, { useState, useCallback, useRef, useMemo } from 'react';
+import React, {
+  useState,
+  useCallback,
+  useRef,
+  useMemo,
+  useEffect,
+} from 'react';
 import { COLORS } from '../../assets/colors';
 import { Icons } from '../../assets/icons';
 import { useNavigation } from '@react-navigation/native';
@@ -9,126 +15,113 @@ import BottomSheet, {
   BottomSheetBackdrop,
   BottomSheetView,
 } from '@gorhom/bottom-sheet';
-
 import { GestureHandlerRootView } from 'react-native-gesture-handler';
+import { useDispatch, useSelector } from 'react-redux';
+import {
+  getSellerOrderByID,
+  updateSellerOrder,
+} from '../../data/slices/sellerSlice';
+import NumberFormat from 'react-number-format';
+import LoadingWidget from '../../widgets/loading_widget';
 
-// const dataProdukYangDitawar = [
-//   {
-//     id: 1,
-//     name: 'Jam Tangan Casio',
-//     price: 'Rp 250.000',
-//     ditawar: 'Rp 200.000',
-//     image: require('../../assets/images/image_produk_temporary.png'),
-//     date: '20 Apr',
-//     time: '14:04',
-//   },
-// ];
+const dateConvert = date => {
+  if (!date) {
+    return '-';
+  }
+  const theDate = date.split('T')[0].split('-');
+  return `${theDate[2]}-${theDate[1]}-${theDate[0]}`;
+};
 
-const ProdukYangDitawarCard = () => {
+const ProdukYangDitawarCard = ({ item }) => {
   return (
-    <TouchableOpacity style={styles.produkCard}>
+    <View style={styles.produkCard}>
       <View style={styles.row}>
         <Image
           style={[styles.imageUser, { marginRight: ms(16) }]}
-          source={require('../../assets/images/image_produk_temporary.png')}
+          source={{ uri: item?.Product?.image_url }}
         />
 
         <View>
           <Text style={styles.regularSubText}>Penawaran produk</Text>
-          <Text style={styles.regularText2}>Jam Tangan Casio</Text>
-          <Text style={styles.regularText2}>Rp 250.000</Text>
-          <Text style={styles.regularText2}>Ditawar Rp 200.000</Text>
+          <Text style={styles.regularText2}>{item?.Product?.name}</Text>
+          <NumberFormat
+            value={item?.Product?.base_price}
+            displayType={'text'}
+            thousandSeparator={true}
+            prefix={'Rp'}
+            renderText={value => (
+              <Text style={styles.regularText2}>{value}</Text>
+            )}
+          />
+          <NumberFormat
+            value={item?.price}
+            displayType={'text'}
+            thousandSeparator={true}
+            prefix={'Rp'}
+            renderText={value => (
+              <Text style={styles.regularText2}>Ditawar {value}</Text>
+            )}
+          />
         </View>
       </View>
-
-      <Text style={styles.regularSubText}>20 Apr, 14:04</Text>
-    </TouchableOpacity>
+      <Text style={styles.regularSubText}>
+        {dateConvert(item?.transaction_date)}
+      </Text>
+    </View>
   );
 };
 
-// const ProductMatchCard = () => {
-//   return (
-//     <View style={styles.productMatchContainer}>
-//       <Text style={styles.titleProductMatch}>Product Match</Text>
-//       <View style={styles.itemProductMatch}>
-//         <Image
-//           style={styles.imageUser}
-//           source={require('../../assets/images/image_user_temporary.png')}
-//         />
-//         <View style={{ marginLeft: ms(16) }}>
-//           <Text style={styles.regularText}>Nama Pembeli</Text>
-//           <Text style={styles.regularSubText}>Kota</Text>
-//         </View>
-//       </View>
+const ProductMatchCard = ({ item }) => {
+  return (
+    <View style={styles.productMatchContainer}>
+      <Text style={styles.titleProductMatch}>Product Match</Text>
+      <View style={styles.itemProductMatch}>
+        {item?.User?.image_url === null ? (
+          <Image
+            source={require('../../assets/images/img_no_image.png')}
+            style={styles.imageUser}
+          />
+        ) : (
+          <Image
+            style={styles.imageUser}
+            source={{ uri: item?.User?.image_url }}
+          />
+        )}
+        <View style={{ marginLeft: ms(16) }}>
+          <Text style={styles.regularText}>{item?.User?.full_name}</Text>
+          <Text style={styles.regularSubText}>{item?.User?.city}</Text>
+        </View>
+      </View>
+      <View style={styles.itemProductMatch}>
+        <Image
+          style={styles.imageUser}
+          source={{ uri: item?.Product?.image_url }}
+        />
+        <View style={{ marginLeft: ms(16) }}>
+          <Text style={styles.regularText2}>{item?.Product?.name}</Text>
+          <NumberFormat
+            value={item?.Product?.base_price}
+            displayType={'text'}
+            thousandSeparator={true}
+            prefix={'Rp'}
+            renderText={value => <Text style={styles.oldPrice}>{value}</Text>}
+          />
+          <NumberFormat
+            value={item?.price}
+            displayType={'text'}
+            thousandSeparator={true}
+            prefix={'Rp'}
+            renderText={value => (
+              <Text style={styles.regularText2}>Ditawar {value}</Text>
+            )}
+          />
+        </View>
+      </View>
+    </View>
+  );
+};
 
-//       <View style={styles.itemProductMatch}>
-//         <Image
-//           style={styles.imageUser}
-//           source={require('../../assets/images/image_produk_temporary.png')}
-//         />
-//         <View style={{ marginLeft: ms(16) }}>
-//           <Text style={styles.regularText2}>Jam Tangan Casio</Text>
-//           <Text style={styles.oldPrice}>Rp 250.000</Text>
-//           <Text style={styles.regularText2}>Ditawar Rp 200.000</Text>
-//         </View>
-//       </View>
-//     </View>
-//   );
-// };
-
-// const RenderTerimaBsView = () => {
-//   const sheetRef = useRef(null);
-
-//   const handleClose = useCallback(index => {
-//     sheetRef.current?.snapToIndex(index);
-//   }, []);
-
-//   return (
-//     <BottomSheetView style={styles.bsContainer}>
-//       <View>
-//         <Text style={styles.regularText}>
-//           Yeay kamu berhasil mendapat harga yang sesuai
-//         </Text>
-//         <Text
-//           style={[
-//             styles.regularSubText,
-//             { fontSize: ms(14), lineHeight: ms(20), marginTop: ms(8) },
-//           ]}>
-//           Segera hubungi pembeli melalui whatsapp untuk transaksi selanjutnya
-//         </Text>
-//       </View>
-//       <ProductMatchCard />
-
-//       <TouchableOpacity style={styles.button} onPress={() => handleClose(-1)}>
-//         <Text style={styles.txtButton}>Hubungi via Whatsapp</Text>
-//         <Image
-//           style={{
-//             width: ms(13.33),
-//             height: ms(13.33),
-//             tintColor: COLORS.neutral1,
-//           }}
-//           source={Icons.Whatsapp}
-//         />
-//       </TouchableOpacity>
-//     </BottomSheetView>
-//   );
-// };
-
-const statuses = [
-  {
-    id: 1,
-    title: 'Berhasil terjual',
-    subtitle: 'Kamu telah sepakat menjual produk ini kepada pembeli',
-  },
-  {
-    id: 2,
-    title: 'Batalkan transaksi',
-    subtitle: 'Kamu membatalkan transaksi produk ini dengan pembeli',
-  },
-];
-
-const RenderStatusBsView = () => {
-  const [selectStatus, setSelectStatus] = useState(false);
+const RenderTerimaBsView = ({ item }) => {
   const sheetRef = useRef(null);
 
   const handleClose = useCallback(index => {
@@ -137,72 +130,174 @@ const RenderStatusBsView = () => {
 
   return (
     <BottomSheetView style={styles.bsContainer}>
-      <Text style={styles.regularText}>Perbarui status penjualan produkmu</Text>
-      {statuses.map(status => (
-        <View style={styles.statusContainer}>
-          <TouchableOpacity
-            key={status.title}
-            style={{
-              width: ms(16),
-              height: ms(16),
-              borderRadius: ms(8),
-              backgroundColor:
-                selectStatus === status.title
-                  ? COLORS.primaryPurple4
-                  : COLORS.neutral2,
-              borderWidth: selectStatus === status.title ? ms(3) : ms(0),
-              borderColor:
-                selectStatus === status.title
-                  ? COLORS.neutral2
-                  : COLORS.primaryPurple2,
-              marginRight: ms(16),
-            }}
-            onPress={() => setSelectStatus(status.title)}
-          />
-          <View>
-            <Text style={styles.regularText2}>{status.title}</Text>
-            <Text
-              style={[
-                styles.regularSubText,
-                { fontSize: ms(14), lineHeight: ms(20), marginTop: ms(8) },
-              ]}>
-              {status.subtitle}
-            </Text>
-          </View>
-        </View>
-      ))}
-
-      <TouchableOpacity
-        style={[
-          styles.button,
-          {
-            marginTop: ms(40),
-            backgroundColor: selectStatus
-              ? COLORS.primaryPurple4
-              : COLORS.neutral2,
-          },
-        ]}
-        onPress={() => handleClose(-1)}>
-        <Text style={styles.txtButton}>Kirim</Text>
+      <View>
+        <Text style={styles.regularText}>
+          Yeay kamu berhasil mendapat harga yang sesuai
+        </Text>
+        <Text
+          style={[
+            styles.regularSubText,
+            { fontSize: ms(14), lineHeight: ms(20), marginTop: ms(8) },
+          ]}>
+          Segera hubungi pembeli melalui whatsapp untuk transaksi selanjutnya
+        </Text>
+      </View>
+      <ProductMatchCard item={item} />
+      <TouchableOpacity style={styles.button} onPress={() => handleClose(-1)}>
+        <Text style={styles.txtButton}>Hubungi via Whatsapp</Text>
+        <Image
+          style={{
+            width: ms(13.33),
+            height: ms(13.33),
+            tintColor: COLORS.neutral1,
+            marginLeft: ms(8),
+          }}
+          source={Icons.Whatsapp}
+        />
       </TouchableOpacity>
     </BottomSheetView>
   );
 };
 
-const InfoPenawarScreen = () => {
+const RenderProductList = ({ item, handleBsFunc }) => {
+  const dispatch = useDispatch();
+  const { access_token } = useSelector(state => state.user);
+
+  if (item.status === 'pending') {
+    return (
+      <View style={styles.produkCardContainer}>
+        <ProdukYangDitawarCard item={item} />
+        <View style={styles.buttonContainer}>
+          <TouchableOpacity
+            style={styles.buttonLeft}
+            onPress={() => {
+              const formData = new FormData();
+              formData.append('status', 'declined');
+              dispatch(
+                updateSellerOrder({
+                  id: item.id,
+                  token: access_token,
+                  data: formData,
+                }),
+              );
+              dispatch(
+                getSellerOrderByID({
+                  token: access_token,
+                  id: item.id,
+                }),
+              );
+            }}>
+            <Text style={[styles.txtButton, { color: COLORS.black }]}>
+              Tolak
+            </Text>
+          </TouchableOpacity>
+          <TouchableOpacity
+            style={styles.buttonRight}
+            onPress={() => {
+              handleBsFunc(0);
+              const formData = new FormData();
+              formData.append('status', 'accepted');
+              dispatch(
+                updateSellerOrder({
+                  id: item.id,
+                  token: access_token,
+                  data: formData,
+                }),
+              );
+              dispatch(
+                getSellerOrderByID({
+                  token: access_token,
+                  id: item.id,
+                }),
+              );
+            }}>
+            <Text style={styles.txtButton}>Terima</Text>
+          </TouchableOpacity>
+        </View>
+      </View>
+    );
+  }
+  if (item.status === 'declined') {
+    return (
+      <View style={styles.produkCard}>
+        <View style={styles.row}>
+          <Image
+            style={[styles.imageUser, { marginRight: ms(16) }]}
+            source={{ uri: item?.Product?.image_url }}
+          />
+          <View>
+            <Text style={styles.regularSubText}>Gagal Ditawar</Text>
+            <Text style={styles.regularText2}>{item?.Product?.name}</Text>
+            <NumberFormat
+              value={item?.Product?.base_price}
+              displayType={'text'}
+              thousandSeparator={true}
+              prefix={'Rp'}
+              renderText={value => (
+                <Text style={styles.regularText2}>{value}</Text>
+              )}
+            />
+            <NumberFormat
+              value={item?.price}
+              displayType={'text'}
+              thousandSeparator={true}
+              prefix={'Rp'}
+              renderText={value => (
+                <Text style={styles.regularText2Cancel}>Ditawar {value}</Text>
+              )}
+            />
+          </View>
+        </View>
+        <Text style={styles.regularSubText}>
+          {dateConvert(item?.transaction_date)}
+        </Text>
+      </View>
+    );
+  } else {
+    return (
+      <View style={styles.produkCard}>
+        <View style={styles.row}>
+          <Image
+            style={[styles.imageUser, { marginRight: ms(16) }]}
+            source={{ uri: item?.Product?.image_url }}
+          />
+          <View>
+            <Text style={styles.regularSubText}>Berhasil Terjual</Text>
+            <Text style={styles.regularText2}>{item?.Product?.name}</Text>
+            <NumberFormat
+              value={item?.price}
+              displayType={'text'}
+              thousandSeparator={true}
+              prefix={'Rp'}
+              renderText={value => (
+                <Text style={styles.regularText2}>{value}</Text>
+              )}
+            />
+          </View>
+        </View>
+        <Text style={styles.regularSubText}>
+          {dateConvert(item?.transaction_date)}
+        </Text>
+      </View>
+    );
+  }
+};
+
+const InfoPenawarScreen = ({ route }) => {
   const navigation = useNavigation();
+  const dispatch = useDispatch();
+  const { id } = route.params;
+  const { access_token } = useSelector(state => state.user);
+  const { isLoading } = useSelector(state => state.global);
+  const { sellerOrderDetail } = useSelector(state => state.seller);
+
   const sheetRef = useRef(null);
   const [isOpen, setIsOpen] = useState(false);
-
   const snapPoints = useMemo(() => ['69%', '90%'], []);
 
   const handleSnapPress = useCallback(index => {
     sheetRef.current?.snapToIndex(index);
     setIsOpen(true);
-  }, []);
-
-  const handleSheetChanges = useCallback(index => {
-    console.log('handleSheetChanges', index);
   }, []);
 
   const renderBackdrop = useCallback(
@@ -217,107 +312,70 @@ const InfoPenawarScreen = () => {
     [],
   );
 
-  return (
-    <GestureHandlerRootView style={styles.container}>
-      <SafeAreaView>
-        <View style={styles.top}>
-          <TouchableOpacity onPress={() => navigation.goBack()}>
-            <Image source={Icons.ArrowLeft} style={styles.icon} />
-          </TouchableOpacity>
-          <Text style={styles.title}>Info Penawar</Text>
-        </View>
+  useEffect(() => {
+    dispatch(
+      getSellerOrderByID({
+        token: access_token,
+        id: id,
+      }),
+    );
+  }, [access_token, dispatch, id]);
 
-        <View style={styles.infoBuyerContainer}>
-          <Image
-            style={styles.imageUser}
-            source={require('../../assets/images/image_user_temporary.png')}
-          />
-          <View style={{ marginLeft: ms(16) }}>
-            <Text style={styles.regularText}>Nama Pembeli</Text>
-            <Text style={styles.regularSubText}>Kota</Text>
+  if (isLoading) {
+    return <LoadingWidget />;
+  } else {
+    return (
+      <GestureHandlerRootView style={styles.container}>
+        <SafeAreaView>
+          <View style={styles.top}>
+            <TouchableOpacity onPress={() => navigation.goBack()}>
+              <Image source={Icons.ArrowLeft} style={styles.icon} />
+            </TouchableOpacity>
+            <Text style={styles.title}>Info Penawar</Text>
           </View>
-        </View>
-
-        <Text style={[styles.regularText, { marginVertical: ms(8) }]}>
-          Daftar Produkmu yang Ditawar
-        </Text>
-
-        {/* <View style={styles.produkCardContainer}>
-          <ProdukYangDitawarCard />
-        </View> */}
-
-        {/* <View style={styles.produkCardContainer}>
-          <ProdukYangDitawarCard />
-
-          <View style={styles.buttonContainer}>
-            <TouchableOpacity style={styles.buttonLeft}>
-              <Text style={[styles.txtButton, { color: COLORS.black }]}>
-                Tolak
-              </Text>
-            </TouchableOpacity>
-            <TouchableOpacity
-              style={styles.buttonRight}
-              onPress={() => handleSnapPress(0)}>
-              <Text style={styles.txtButton}>Terima</Text>
-            </TouchableOpacity>
-          </View>
-        </View> */}
-
-        <View style={styles.produkCardContainer}>
-          <ProdukYangDitawarCard />
-
-          <View style={styles.buttonContainer}>
-            <TouchableOpacity
-              style={styles.buttonLeft}
-              onPress={() => handleSnapPress(0)}>
-              <Text style={[styles.txtButton, { color: COLORS.black }]}>
-                Status
-              </Text>
-            </TouchableOpacity>
-            <TouchableOpacity style={styles.buttonHubungi}>
-              <Text style={[styles.txtButton, { marginRight: ms(16) }]}>
-                Hubungi
-              </Text>
+          <View style={styles.infoBuyerContainer}>
+            {sellerOrderDetail?.User?.image_url === null ? (
               <Image
-                style={{
-                  width: ms(11.67),
-                  height: ms(11.67),
-                  tintColor: COLORS.neutral1,
-                }}
-                source={Icons.Whatsapp}
+                style={styles.imageUser}
+                source={require('../../assets/images/img_no_image.png')}
               />
-            </TouchableOpacity>
+            ) : (
+              <Image
+                style={styles.imageUser}
+                source={{ uri: sellerOrderDetail?.User?.image_url }}
+              />
+            )}
+            <View style={{ marginLeft: ms(16) }}>
+              <Text style={styles.regularText}>
+                {sellerOrderDetail?.User?.full_name}
+              </Text>
+              <Text style={styles.regularSubText}>
+                {sellerOrderDetail?.User?.city}
+              </Text>
+            </View>
           </View>
-        </View>
-      </SafeAreaView>
-
-      {/* {isOpen ? (
-        <BottomSheet
-          ref={sheetRef}
-          snapPoints={snapPoints}
-          handleIndicatorStyle={styles.handleIndicatorStyle}
-          enablePanDownToClose={true}
-          backdropComponent={renderBackdrop}
-          onChange={handleSheetChanges}
-          onClose={() => setIsOpen(false)}>
-          <RenderTerimaBsView />
-        </BottomSheet>
-      ) : null} */}
-
-      {isOpen ? (
-        <BottomSheet
-          ref={sheetRef}
-          snapPoints={snapPoints}
-          handleIndicatorStyle={styles.handleIndicatorStyle}
-          enablePanDownToClose={true}
-          backdropComponent={renderBackdrop}
-          onChange={handleSheetChanges}
-          onClose={() => setIsOpen(false)}>
-          <RenderStatusBsView />
-        </BottomSheet>
-      ) : null}
-    </GestureHandlerRootView>
-  );
+          <Text style={[styles.regularText, { marginVertical: ms(8) }]}>
+            Daftar Produkmu yang Ditawar
+          </Text>
+          <RenderProductList
+            item={sellerOrderDetail}
+            handleBsFunc={handleSnapPress}
+          />
+        </SafeAreaView>
+        {isOpen ? (
+          <BottomSheet
+            ref={sheetRef}
+            snapPoints={snapPoints}
+            handleIndicatorStyle={styles.handleIndicatorStyle}
+            enablePanDownToClose={true}
+            backdropComponent={renderBackdrop}
+            onClose={() => setIsOpen(false)}>
+            <RenderTerimaBsView item={sellerOrderDetail} />
+          </BottomSheet>
+        ) : null}
+      </GestureHandlerRootView>
+    );
+  }
 };
 
 export default InfoPenawarScreen;
@@ -389,6 +447,14 @@ const styles = StyleSheet.create({
     fontWeight: '400',
     lineHeight: ms(20),
     fontFamily: 'Poppins-Regular',
+  },
+  regularText2Cancel: {
+    fontSize: ms(14),
+    color: COLORS.neutral5,
+    fontWeight: '400',
+    lineHeight: ms(20),
+    fontFamily: 'Poppins-Regular',
+    textDecorationLine: 'line-through',
   },
   produkCardContainer: {
     borderBottomWidth: ms(1),
@@ -496,6 +562,7 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     justifyContent: 'center',
     alignItems: 'center',
+    backgroundColor: COLORS.primaryPurple4,
   },
   statusContainer: { flexDirection: 'row', marginTop: ms(24) },
 });

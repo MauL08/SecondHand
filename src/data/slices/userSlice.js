@@ -1,12 +1,53 @@
-import { Alert } from 'react-native';
 import axios from 'axios';
 import { BASE_URL } from '../baseAPI';
 import { createSlice, createAsyncThunk } from '@reduxjs/toolkit';
 import { navigate } from '../../core/router/navigator';
 import { setLoading } from './globalSlice';
+import Toast from 'react-native-toast-message';
 
 axios.defaults.validateStatus = status => {
   return status < 500;
+};
+
+const showDoneToast = () => {
+  Toast.show({
+    type: 'success',
+    text1: 'Update Profil Sukses!',
+    text2: 'Silahkan refresh halaman ini untuk melihat perubahan',
+  });
+};
+
+const showFailedToast = mes => {
+  Toast.show({
+    type: 'error',
+    text1: 'Update Profil Gagal!',
+    text2: `${mes.message}`,
+  });
+};
+
+const showRegisterSuccess = () => {
+  Toast.show({
+    type: 'success',
+    text1: 'Registrasi Sukses!',
+    text2: 'Registrasi Akun Sukses',
+  });
+};
+
+const showRegisterFail = mes => {
+  Toast.show({
+    type: 'error',
+    text1: 'Registrasi Gagal!',
+    text2: `${mes.message}`,
+  });
+};
+
+const showUnauthorizeAcc = mes => {
+  Toast.show({
+    type: 'error',
+    text1: 'Error, Aksi Gagal!',
+    text2: `${mes.message.split('/')[0]}`,
+  });
+  navigate('Login');
 };
 
 export const postRegister = createAsyncThunk(
@@ -22,10 +63,9 @@ export const postRegister = createAsyncThunk(
       if (response.status <= 201) {
         dispatch(setLoading(false));
         navigate('Login');
-        Alert.alert('Success', 'Register Success!');
-      }
-      if (response.status === 400) {
-        Alert.alert('Error', response.data.message);
+        showRegisterSuccess();
+      } else {
+        showRegisterFail(response.data);
         dispatch(setLoading(false));
       }
       return response.data;
@@ -41,18 +81,11 @@ export const postLogin = createAsyncThunk(
     try {
       dispatch(setLoading(true));
       const response = await axios.post(`${BASE_URL}/auth/login`, data);
-      if (response.status <= 201) {
-        dispatch(setLoading(false));
-        navigate('Main');
-      }
-      if (response.status === 401) {
-        const logErr = response.data.message;
-        Alert.alert('Error', logErr);
-        dispatch(setLoading(false));
-      }
       return response.data;
     } catch (error) {
       return rejectWithValue(error.response.data);
+    } finally {
+      dispatch(setLoading(false));
     }
   },
 );
@@ -67,12 +100,14 @@ export const getUser = createAsyncThunk(
           access_token: token,
         },
       });
-      if (response.status <= 201) {
-        dispatch(setLoading(false));
-        return response.data;
+      if (response.status >= 400) {
+        showUnauthorizeAcc(response.data);
       }
+      return response.data;
     } catch (error) {
       return rejectWithValue(error.response.data);
+    } finally {
+      dispatch(setLoading(false));
     }
   },
 );
@@ -93,19 +128,15 @@ export const updateUser = createAsyncThunk(
         },
       );
       if (response.status <= 201) {
-        dispatch(setLoading(false));
-        Alert.alert(
-          'User Diperbarui!',
-          'Refresh halaman ini untuk melihat perubahan',
-        );
-      }
-      if (response.status === 400) {
-        Alert.alert('Error', response.data.message);
-        dispatch(setLoading(false));
+        showDoneToast();
+      } else {
+        showFailedToast(response.data);
       }
       return response.data;
     } catch (error) {
       return rejectWithValue(error.response.data);
+    } finally {
+      dispatch(setLoading(false));
     }
   },
 );
@@ -145,10 +176,9 @@ const userSlice = createSlice({
         userDetail: action.payload,
       };
     },
-    [updateUser.fulfilled]: (state, action) => {
+    [updateUser.fulfilled]: state => {
       return {
         ...state,
-        userDetail: action.payload,
       };
     },
   },

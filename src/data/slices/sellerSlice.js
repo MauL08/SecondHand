@@ -1,10 +1,61 @@
 import axios from 'axios';
 import { BASE_URL } from '../baseAPI';
 import { createSlice, createAsyncThunk } from '@reduxjs/toolkit';
-import { setLoading, setSecondLoading } from './globalSlice';
+import { setLoading } from './globalSlice';
+import Toast from 'react-native-toast-message';
+import { navigate } from '../../core/router/navigator';
 
 axios.defaults.validateStatus = status => {
   return status < 500;
+};
+
+const showDoneToast = () => {
+  Toast.show({
+    type: 'success',
+    text1: 'Sukses!',
+    text2: 'Produk Sukses Diterbitkan',
+  });
+};
+
+const showFailedToast = mes => {
+  Toast.show({
+    type: 'error',
+    text1: 'Gagal!',
+    text2: `${mes.message}`,
+  });
+};
+
+const showDoneUpdateToast = () => {
+  Toast.show({
+    type: 'success',
+    text1: 'Sukses!',
+    text2: 'Produk berhasil dikonfirmasi',
+  });
+};
+
+const showDoneEditToast = () => {
+  Toast.show({
+    type: 'success',
+    text1: 'Sukses!',
+    text2: 'Produk berhasil terupdate',
+  });
+};
+
+const showUnauthorizeAcc = mes => {
+  Toast.show({
+    type: 'error',
+    text1: 'Error, Aksi Gagal!',
+    text2: `${mes.message.split('/')[0]}`,
+  });
+  navigate('Login');
+};
+
+const showDoneDeleteToast = () => {
+  Toast.show({
+    type: 'success',
+    text1: 'Sukses!',
+    text2: 'Produk berhasil dihapus',
+  });
 };
 
 // Seller Banner
@@ -13,11 +64,10 @@ export const getAllSellerBanner = createAsyncThunk(
   async (token, { rejectWithValue, dispatch }) => {
     try {
       dispatch(setLoading(true));
-      const response = await axios.get(`${BASE_URL}/seller/banner`, {
-        headers: {
-          Authorization: `Bearer ${token}`,
-        },
-      });
+      const response = await axios.get(`${BASE_URL}/seller/banner`);
+      if (response.status >= 400) {
+        showUnauthorizeAcc(response.data);
+      }
       return response.data;
     } catch (error) {
       return rejectWithValue(error.response.data);
@@ -40,6 +90,9 @@ export const getSellerBannerByID = createAsyncThunk(
           },
         },
       );
+      if (response.status >= 400) {
+        showUnauthorizeAcc(response.data);
+      }
       return response.data;
     } catch (error) {
       return rejectWithValue(error.response.data);
@@ -63,6 +116,9 @@ export const createSellerBanner = createAsyncThunk(
           },
         },
       );
+      if (response.status >= 400) {
+        showUnauthorizeAcc(response.data);
+      }
       return response.data;
     } catch (error) {
       return rejectWithValue(error.response.data);
@@ -85,6 +141,9 @@ export const deleteSellerBanner = createAsyncThunk(
           },
         },
       );
+      if (response.status >= 400) {
+        showUnauthorizeAcc(response.data);
+      }
       return response.data;
     } catch (error) {
       return rejectWithValue(error.response.data);
@@ -109,6 +168,9 @@ export const createSellerCategory = createAsyncThunk(
           // },
         },
       );
+      if (response.status >= 400) {
+        showUnauthorizeAcc(response.data);
+      }
       return response.data;
     } catch (error) {
       return rejectWithValue(error.response.data);
@@ -122,13 +184,16 @@ export const getSellerCategory = createAsyncThunk(
   'seller/getSellerCategory',
   async (credentials, { rejectWithValue, dispatch }) => {
     try {
-      dispatch(setSecondLoading(true));
+      dispatch(setLoading(true));
       const response = await axios.get(`${BASE_URL}/seller/category`);
+      if (response.status >= 400) {
+        showUnauthorizeAcc(response.data);
+      }
       return response.data;
     } catch (error) {
       return rejectWithValue(error.response.data);
     } finally {
-      dispatch(setSecondLoading(false));
+      dispatch(setLoading(false));
     }
   },
 );
@@ -139,6 +204,9 @@ export const getSellerCategoryByID = createAsyncThunk(
     try {
       dispatch(setLoading(true));
       const response = await axios.get(`${BASE_URL}/seller/category/${id}`);
+      if (response.status >= 400) {
+        showUnauthorizeAcc(response.data);
+      }
       return response.data;
     } catch (error) {
       return rejectWithValue(error.response.data);
@@ -161,6 +229,9 @@ export const deleteSellerCategory = createAsyncThunk(
           // },
         },
       );
+      if (response.status >= 400) {
+        showUnauthorizeAcc(response.data);
+      }
       return response.data;
     } catch (error) {
       return rejectWithValue(error.response.data);
@@ -181,10 +252,16 @@ export const createSellerProduct = createAsyncThunk(
         credentials.data,
         {
           headers: {
-            Authorization: `Bearer ${credentials.token}`,
+            access_token: credentials.token,
+            'Content-Type': 'multipart/form-data',
           },
         },
       );
+      if (response.status <= 201) {
+        showDoneToast();
+      } else {
+        showFailedToast(response.data);
+      }
       return response.data;
     } catch (error) {
       return rejectWithValue(error.response.data);
@@ -196,18 +273,17 @@ export const createSellerProduct = createAsyncThunk(
 
 export const getSellerProduct = createAsyncThunk(
   'seller/getSellerProduct',
-  async (credentials, { rejectWithValue, dispatch }) => {
+  async (token, { rejectWithValue, dispatch }) => {
     try {
       dispatch(setLoading(true));
-      const response = await axios.get(
-        `${BASE_URL}/seller/product`,
-
-        {
-          headers: {
-            Authorization: `Bearer ${credentials.token}`,
-          },
+      const response = await axios.get(`${BASE_URL}/seller/product`, {
+        headers: {
+          access_token: token,
         },
-      );
+      });
+      if (response.status >= 400) {
+        showUnauthorizeAcc(response.data);
+      }
       return response.data;
     } catch (error) {
       return rejectWithValue(error.response.data);
@@ -226,10 +302,13 @@ export const getSellerProductByID = createAsyncThunk(
         `${BASE_URL}/seller/product/${credentials.id}`,
         {
           headers: {
-            Authorization: `Bearer ${credentials.token}`,
+            access_token: credentials.token,
           },
         },
       );
+      if (response.status >= 400) {
+        showUnauthorizeAcc(response.data);
+      }
       return response.data;
     } catch (error) {
       return rejectWithValue(error.response.data);
@@ -244,15 +323,47 @@ export const updateSellerProduct = createAsyncThunk(
   async (credentials, { rejectWithValue, dispatch }) => {
     try {
       dispatch(setLoading(true));
+      const response = await axios.patch(
+        `${BASE_URL}/seller/product/${credentials.id}`,
+        credentials.data,
+        {
+          headers: {
+            access_token: credentials.token,
+          },
+        },
+      );
+      if (response.status >= 400) {
+        showUnauthorizeAcc(response.data);
+      }
+      return response.data;
+    } catch (error) {
+      return rejectWithValue(error.response.data);
+    } finally {
+      dispatch(setLoading(false));
+    }
+  },
+);
+
+export const updateSellerDetailProduct = createAsyncThunk(
+  'seller/updateSellerDetailProduct',
+  async (credentials, { rejectWithValue, dispatch }) => {
+    try {
+      dispatch(setLoading(true));
       const response = await axios.put(
         `${BASE_URL}/seller/product/${credentials.id}`,
         credentials.data,
         {
           headers: {
-            Authorization: `Bearer ${credentials.token}`,
+            access_token: credentials.token,
+            'Content-Type': 'multipart/form-data',
           },
         },
       );
+      if (response.status <= 201) {
+        showDoneEditToast();
+      } else {
+        showFailedToast(response.data);
+      }
       return response.data;
     } catch (error) {
       return rejectWithValue(error.response.data);
@@ -271,10 +382,15 @@ export const deleteSellerProduct = createAsyncThunk(
         `${BASE_URL}/seller/product/${credentials.id}`,
         {
           headers: {
-            Authorization: `Bearer ${credentials.token}`,
+            access_token: credentials.token,
           },
         },
       );
+      if (response.status <= 201) {
+        showDoneDeleteToast();
+      } else {
+        showFailedToast(response.data);
+      }
       return response.data;
     } catch (error) {
       return rejectWithValue(error.response.data);
@@ -290,11 +406,67 @@ export const getSellerOrder = createAsyncThunk(
   async (credentials, { rejectWithValue, dispatch }) => {
     try {
       dispatch(setLoading(true));
-      const response = await axios.get(`${BASE_URL}/seller/order`, {
-        headers: {
-          Authorization: `Bearer ${credentials.token}`,
+      const response = await axios.get(
+        `${BASE_URL}/seller/order?status=${credentials.type}`,
+        {
+          headers: {
+            access_token: credentials.token,
+          },
         },
-      });
+      );
+      if (response.status >= 400) {
+        showUnauthorizeAcc(response.data);
+      }
+      return response.data;
+    } catch (error) {
+      return rejectWithValue(error.response.data);
+    } finally {
+      dispatch(setLoading(false));
+    }
+  },
+);
+
+export const getSellerPendingOrder = createAsyncThunk(
+  'seller/getSellerPendingOrder',
+  async (token, { rejectWithValue, dispatch }) => {
+    try {
+      dispatch(setLoading(true));
+      const response = await axios.get(
+        `${BASE_URL}/seller/order?status=pending`,
+        {
+          headers: {
+            access_token: token,
+          },
+        },
+      );
+      if (response.status >= 400) {
+        showUnauthorizeAcc(response.data);
+      }
+      return response.data;
+    } catch (error) {
+      return rejectWithValue(error.response.data);
+    } finally {
+      dispatch(setLoading(false));
+    }
+  },
+);
+
+export const getSellerAcceptedOrder = createAsyncThunk(
+  'seller/getSellerAcceptedOrder',
+  async (token, { rejectWithValue, dispatch }) => {
+    try {
+      dispatch(setLoading(true));
+      const response = await axios.get(
+        `${BASE_URL}/seller/order?status=accepted`,
+        {
+          headers: {
+            access_token: token,
+          },
+        },
+      );
+      if (response.status >= 400) {
+        showUnauthorizeAcc(response.data);
+      }
       return response.data;
     } catch (error) {
       return rejectWithValue(error.response.data);
@@ -313,10 +485,13 @@ export const getSellerOrderByID = createAsyncThunk(
         `${BASE_URL}/seller/order/${credentials.id}`,
         {
           headers: {
-            Authorization: `Bearer ${credentials.token}`,
+            access_token: credentials.token,
           },
         },
       );
+      if (response.status >= 400) {
+        showUnauthorizeAcc(response.data);
+      }
       return response.data;
     } catch (error) {
       return rejectWithValue(error.response.data);
@@ -336,10 +511,16 @@ export const updateSellerOrder = createAsyncThunk(
         credentials.data,
         {
           headers: {
-            Authorization: `Bearer ${credentials.token}`,
+            access_token: credentials.token,
+            'Content-Type': 'multipart/form-data',
           },
         },
       );
+      if (response.status <= 201) {
+        showDoneUpdateToast();
+      } else {
+        showFailedToast();
+      }
       return response.data;
     } catch (error) {
       return rejectWithValue(error.response.data);
@@ -362,6 +543,9 @@ export const getSellerOrderProduct = createAsyncThunk(
           },
         },
       );
+      if (response.status >= 400) {
+        showUnauthorizeAcc(response.data);
+      }
       return response.data;
     } catch (error) {
       return rejectWithValue(error.response.data);
@@ -372,19 +556,41 @@ export const getSellerOrderProduct = createAsyncThunk(
 );
 
 const initialState = {
+  banner: [],
   category: [],
   detailCategory: {},
+  sellerProduct: [],
+  sellerProductDetail: {},
+  sellerOrder: [],
+  sellerOrderDetail: {},
+  sellerAcceptedOrder: [],
+  sellerPendingOrder: [],
   data: [],
 };
 
 const sellerSlice = createSlice({
   name: 'seller',
   initialState,
+  reducers: {
+    resetSellerData: state => {
+      return {
+        ...state,
+        sellerProduct: [],
+        sellerOrder: [],
+      };
+    },
+    resetSellerProductDetail: state => {
+      return {
+        ...state,
+        sellerProductDetail: {},
+      };
+    },
+  },
   extraReducers: {
     [getAllSellerBanner.fulfilled]: (state, action) => {
       return {
         ...state,
-        data: action.payload,
+        banner: action.payload,
       };
     },
     [getSellerBannerByID.fulfilled]: (state, action) => {
@@ -428,13 +634,13 @@ const sellerSlice = createSlice({
     [getSellerProduct.fulfilled]: (state, action) => {
       return {
         ...state,
-        data: action.payload,
+        sellerProduct: action.payload,
       };
     },
     [getSellerProductByID.fulfilled]: (state, action) => {
       return {
         ...state,
-        data: action.payload,
+        sellerProductDetail: action.payload,
       };
     },
     [createSellerProduct.fulfilled]: state => {
@@ -447,6 +653,11 @@ const sellerSlice = createSlice({
         ...state,
       };
     },
+    [updateSellerDetailProduct.fulfilled]: state => {
+      return {
+        ...state,
+      };
+    },
     [deleteSellerProduct.fulfilled]: state => {
       return {
         ...state,
@@ -455,13 +666,25 @@ const sellerSlice = createSlice({
     [getSellerOrder.fulfilled]: (state, action) => {
       return {
         ...state,
-        data: action.payload,
+        sellerOrder: action.payload,
+      };
+    },
+    [getSellerAcceptedOrder.fulfilled]: (state, action) => {
+      return {
+        ...state,
+        sellerAcceptedOrder: action.payload,
+      };
+    },
+    [getSellerPendingOrder.fulfilled]: (state, action) => {
+      return {
+        ...state,
+        sellerPendingOrder: action.payload,
       };
     },
     [getSellerOrderByID.fulfilled]: (state, action) => {
       return {
         ...state,
-        data: action.payload,
+        sellerOrderDetail: action.payload,
       };
     },
     [updateSellerOrder.fulfilled]: state => {
@@ -478,4 +701,6 @@ const sellerSlice = createSlice({
   },
 });
 
+export const { resetSellerData, resetSellerProductDetail } =
+  sellerSlice.actions;
 export default sellerSlice.reducer;

@@ -3,16 +3,16 @@ import {
   Image,
   StyleSheet,
   Text,
-  TouchableOpacity,
   View,
   ActivityIndicator,
   Dimensions,
 } from 'react-native';
-import React, { useEffect } from 'react';
+import React, { useEffect, useState } from 'react';
 import { COLORS } from '../../assets/colors';
 import { ms } from 'react-native-size-matters';
 import { useDispatch, useSelector } from 'react-redux';
 import { getAllNotification } from '../../data/slices/notificationSlice';
+import DropDownPicker from 'react-native-dropdown-picker';
 import NumberFormat from 'react-number-format';
 
 const { width } = Dimensions.get('screen');
@@ -23,9 +23,22 @@ const NotifikasiScreen = () => {
   const { allNotif } = useSelector(state => state.notification);
   const { isLoading } = useSelector(state => state.global);
 
+  const [type, setType] = useState('buyer');
+  const [open, setOpen] = useState(false);
+  const [value, setValue] = useState(null);
+  const [items, setItems] = useState([
+    { label: 'Sebagai Pembeli', value: 'buyer' },
+    { label: 'Sebagai Penjual', value: 'seller' },
+  ]);
+
   useEffect(() => {
-    dispatch(getAllNotification(access_token));
-  }, [access_token, dispatch]);
+    dispatch(
+      getAllNotification({
+        token: access_token,
+        type,
+      }),
+    );
+  }, [access_token, dispatch, type]);
 
   const dateConvert = date => {
     if (!date) {
@@ -35,6 +48,7 @@ const NotifikasiScreen = () => {
     return `${theDate[2]}-${theDate[1]}-${theDate[0]}`;
   };
 
+  // eslint-disable-next-line react/no-unstable-nested-components
   const NotifCard = ({
     name,
     product_price,
@@ -45,7 +59,8 @@ const NotifikasiScreen = () => {
     read,
   }) => {
     return (
-      <TouchableOpacity style={styles.cardContainer}>
+      <View
+        style={styles.cardContainer(allNotif.length === allNotif.length - 1)}>
         <View style={styles.row}>
           {image_url === null || image_url === '' ? (
             <Image
@@ -58,7 +73,6 @@ const NotifikasiScreen = () => {
           <View style={styles.textContainer}>
             <View style={styles.regularContainer}>
               <Text style={styles.regularSubText}>
-                {' '}
                 {status === 'terbit'
                   ? 'Berhasil diterbitkan'
                   : 'Penawaran produk'}
@@ -68,23 +82,14 @@ const NotifikasiScreen = () => {
                 <View style={styles.circle(read)} />
               </View>
             </View>
-            <Text style={styles.regularText2}>{name}</Text>
+            <Text style={styles.regularText2Title}>{name}</Text>
             <NumberFormat
               value={product_price}
               displayType={'text'}
               thousandSeparator={true}
               prefix={'Rp'}
-              renderText={value => (
-                <Text
-                  style={[
-                    styles.regularText2,
-                    {
-                      textDecorationLine:
-                        status === 'accepted' ? 'line-through' : null,
-                    },
-                  ]}>
-                  {value}
-                </Text>
+              renderText={txt => (
+                <Text style={styles.regularText2(status)}>{txt}</Text>
               )}
             />
             {status === 'bid' ? (
@@ -93,8 +98,8 @@ const NotifikasiScreen = () => {
                 displayType={'text'}
                 thousandSeparator={true}
                 prefix={'Rp'}
-                renderText={value => (
-                  <Text style={styles.regularText2}>Ditawar {value}</Text>
+                renderText={txt => (
+                  <Text style={styles.regularText2Title}>Ditawar {txt}</Text>
                 )}
               />
             ) : status === 'accepted' ? (
@@ -103,9 +108,9 @@ const NotifikasiScreen = () => {
                 displayType={'text'}
                 thousandSeparator={true}
                 prefix={'Rp'}
-                renderText={value => (
-                  <Text style={styles.regularText2}>
-                    Berhasil ditawar {value}
+                renderText={txt => (
+                  <Text style={styles.regularText2Title}>
+                    Berhasil ditawar {txt}
                   </Text>
                 )}
               />
@@ -115,8 +120,10 @@ const NotifikasiScreen = () => {
                 displayType={'text'}
                 thousandSeparator={true}
                 prefix={'Rp'}
-                renderText={value => (
-                  <Text style={styles.regularText2}>Gagal ditawar {value}</Text>
+                renderText={txt => (
+                  <Text style={styles.regularText2Title}>
+                    Gagal ditawar {txt}
+                  </Text>
                 )}
               />
             ) : null}
@@ -131,13 +138,27 @@ const NotifikasiScreen = () => {
             Penawaran ditolak oleh penjual
           </Text>
         ) : null}
-      </TouchableOpacity>
+      </View>
     );
   };
 
   return (
     <View style={styles.container}>
       <Text style={styles.screenTitle}>Notifikasi</Text>
+      <DropDownPicker
+        open={open}
+        value={value}
+        items={items}
+        setOpen={setOpen}
+        setValue={setValue}
+        setItems={setItems}
+        listMode="SCROLLVIEW"
+        style={styles.input}
+        textStyle={styles.dropdownText}
+        placeholder="Pilih Status"
+        placeholderStyle={styles.placeholderDropdown}
+        onChangeValue={itemValue => setType(itemValue)}
+      />
       <View>
         {isLoading ? (
           <View style={styles.loadingContainer}>
@@ -196,12 +217,12 @@ const styles = StyleSheet.create({
   row: {
     flexDirection: 'row',
   },
-  cardContainer: {
+  cardContainer: lastIndex => ({
     borderBottomWidth: 1,
     borderBottomColor: COLORS.neutral01,
     paddingBottom: ms(16),
-    marginBottom: ms(16),
-  },
+    marginBottom: lastIndex ? ms(30) : ms(16),
+  }),
   regularText: {
     fontSize: ms(14),
     color: COLORS.neutral5,
@@ -214,7 +235,15 @@ const styles = StyleSheet.create({
     lineHeight: ms(14),
     fontFamily: 'Poppins-Regular',
   },
-  regularText2: {
+  regularText2: status => ({
+    fontSize: ms(14),
+    color: COLORS.neutral4,
+    lineHeight: ms(20),
+    fontFamily: 'Poppins-Regular',
+    marginTop: ms(4),
+    textDecorationLine: status === 'accepted' ? 'line-through' : null,
+  }),
+  regularText2Title: {
     fontSize: ms(14),
     color: COLORS.neutral4,
     lineHeight: ms(20),
@@ -260,5 +289,23 @@ const styles = StyleSheet.create({
   },
   loadingContainer: {
     marginTop: ms(50),
+  },
+  input: {
+    borderWidth: 1,
+    borderRadius: ms(16),
+    borderColor: COLORS.neutral2,
+    paddingHorizontal: ms(16),
+    fontFamily: 'Poppins-Regular',
+    marginBottom: ms(18),
+  },
+  dropdownText: {
+    fontFamily: 'Poppins-Regular',
+    fontSize: 14,
+    color: COLORS.neutral5,
+  },
+  placeholderDropdown: {
+    fontFamily: 'Poppins-Regular',
+    fontSize: 14,
+    color: COLORS.neutral3,
   },
 });

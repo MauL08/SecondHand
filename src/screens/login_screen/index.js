@@ -16,9 +16,18 @@ import { useNavigation } from '@react-navigation/native';
 import { Icons } from '../../assets/icons';
 import { useDispatch, useSelector } from 'react-redux';
 import { postLogin } from '../../data/slices/userSlice';
-import { getSellerCategory } from '../../data/slices/sellerSlice';
+import {
+  getAllSellerBanner,
+  getSellerCategory,
+  resetSellerData,
+} from '../../data/slices/sellerSlice';
 import ScreenStatusBar from '../../widgets/screen_status_bar_widget';
 import TouchID from 'react-native-touch-id';
+import {
+  getAllBuyerProduct,
+  resetBuyerData,
+} from '../../data/slices/buyerSlice';
+import crashlytics from '@react-native-firebase/crashlytics';
 
 function LoginScreen() {
   const [showPassword, setShowPassword] = useState(true);
@@ -40,6 +49,17 @@ function LoginScreen() {
       'Put your finger on the fingerprint sensor.',
       optionalConfigObject,
     ).then(() => {
+      dispatch(getSellerCategory());
+      dispatch(getAllSellerBanner());
+      dispatch(
+        getAllBuyerProduct({
+          status: '',
+          category_id: '',
+          search: '',
+          page: 1,
+          per_page: 15,
+        }),
+      );
       navigation.navigate('Main');
     });
   };
@@ -56,13 +76,26 @@ function LoginScreen() {
   });
 
   const onLogin = async (email, password) => {
+    dispatch(resetBuyerData());
+    dispatch(resetSellerData());
     dispatch(getSellerCategory());
+    dispatch(getAllSellerBanner());
+    dispatch(
+      getAllBuyerProduct({
+        status: '',
+        category_id: '',
+        search: '',
+        page: 1,
+        per_page: 15,
+      }),
+    );
     dispatch(
       postLogin({
         email,
         password,
       }),
     );
+    pressHandler();
   };
 
   return (
@@ -73,18 +106,18 @@ function LoginScreen() {
       {({ values, handleChange, handleBlur, touched, errors, isValid }) => (
         <View style={styles.container}>
           <ScreenStatusBar />
-          <TouchableOpacity>
+          <TouchableOpacity onPress={() => navigation.goBack()}>
             <Image
               style={styles.icon}
               source={require('../../assets/icons/icon_arrow-left.png')}
             />
           </TouchableOpacity>
-
           <Text style={styles.title}>Masuk</Text>
           <Text style={styles.label}>Email</Text>
           <TextInput
             style={styles.input1}
             placeholder="Contoh: johndee@gmail.com"
+            placeholderTextColor="grey"
             autoCapitalize="none"
             autoCorrect={false}
             keyboardType="email-address"
@@ -103,6 +136,7 @@ function LoginScreen() {
             <TextInput
               style={styles.input2}
               placeholder="Masukkan password"
+              placeholderTextColor="grey"
               autoCapitalize="none"
               autoCorrect={false}
               value={values.password}
@@ -135,29 +169,34 @@ function LoginScreen() {
                 },
               ]}
               disabled={!isValid}
-              onPress={() => onLogin(values.email, values.password)}>
+              onPress={() => {
+                crashlytics().log('User trying to Login.');
+                onLogin(values.email, values.password);
+              }}>
               {isLoading ? (
                 <ActivityIndicator color="white" />
               ) : (
                 <Text style={styles.buttonText}>Masuk</Text>
               )}
             </TouchableOpacity>
-
-            <TouchableOpacity
-              onPress={() => pressHandler()}
-              style={styles.buttonFingerprint}>
-              <Image
-                source={require('../../assets/images/image_fingerprint.png')}
-                style={{
-                  width: moderateScale(30),
-                  height: moderateScale(30),
-                  marginVertical: moderateScale(16),
-                  tintColor: COLORS.primaryPurple4,
-                }}
-              />
-            </TouchableOpacity>
+            {/* {access_token === '' ? (
+              <View />
+            ) : (
+              <TouchableOpacity
+                onPress={() => }
+                style={styles.buttonFingerprint}>
+                <Image
+                  source={require('../../assets/images/image_fingerprint.png')}
+                  style={{
+                    width: moderateScale(30),
+                    height: moderateScale(30),
+                    marginVertical: moderateScale(16),
+                    tintColor: COLORS.primaryPurple4,
+                  }}
+                />
+              </TouchableOpacity>
+            )} */}
           </View>
-
           <View style={styles.bottomText}>
             <Text style={styles.regularText}>Belum punya akun? </Text>
             <TouchableOpacity onPress={() => navigation.navigate('Register')}>
@@ -203,7 +242,7 @@ const styles = StyleSheet.create({
     borderColor: COLORS.neutral2,
     borderRadius: moderateScale(16),
     fontSize: moderateScale(14),
-    color: COLORS.neutral5,
+    color: 'black',
     fontWeight: '400',
     lineHeight: moderateScale(20),
     fontFamily: 'Poppins-Regular',
@@ -211,7 +250,7 @@ const styles = StyleSheet.create({
   input2: {
     paddingLeft: moderateScale(16),
     fontSize: moderateScale(14),
-    color: COLORS.neutral5,
+    color: 'black',
     fontWeight: '400',
     lineHeight: moderateScale(20),
     fontFamily: 'Poppins-Regular',
@@ -235,7 +274,7 @@ const styles = StyleSheet.create({
   button: {
     borderRadius: moderateScale(16),
     backgroundColor: COLORS.primaryPurple4,
-    width: '80%',
+    width: '100%',
     height: moderateScale(48),
     justifyContent: 'center',
     alignItems: 'center',

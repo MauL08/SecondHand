@@ -6,12 +6,25 @@ import {
   TouchableOpacity,
   FlatList,
   ScrollView,
+  RefreshControl,
+  Alert,
 } from 'react-native';
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { COLORS } from '../../assets/colors';
 import { ms } from 'react-native-size-matters';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { Icons } from '../../assets/icons';
+import { useDispatch, useSelector } from 'react-redux';
+import { useNavigation } from '@react-navigation/native';
+import {
+  deleteSellerProduct,
+  getSellerAcceptedOrder,
+  getSellerPendingOrder,
+  getSellerProduct,
+} from '../../data/slices/sellerSlice';
+import NumberFormat from 'react-number-format';
+import LoadingWidget from '../../widgets/loading_widget';
+import { getUser } from '../../data/slices/userSlice';
 
 const categories = [
   { id: 1, name: 'Produk', icon: Icons.Box },
@@ -19,113 +32,278 @@ const categories = [
   { id: 3, name: 'Terjual', icon: Icons.Dollar },
 ];
 
-const dataProduk = [
-  {
-    id: 1,
-    name: 'Jam Tangan Casio',
-    price: 'Rp 250.000',
-    category: 'Aksesoris',
-    ditawar: 'Rp 200.000',
-    image: require('../../assets/images/image_produk_temporary.png'),
-  },
-  {
-    id: 2,
-    name: 'Jam Tangan Casio',
-    price: 'Rp 250.000',
-    category: 'Aksesoris',
-    ditawar: 'Rp 200.000',
-    image: require('../../assets/images/image_produk_temporary.png'),
-  },
-  {
-    id: 3,
-    name: 'Jam Tangan Casio',
-    price: 'Rp 250.000',
-    category: 'Aksesoris',
-    ditawar: 'Rp 200.000',
-    image: require('../../assets/images/image_produk_temporary.png'),
-  },
-];
+const onCategoryProductCheck = cat => {
+  if (!cat) {
+    return '';
+  }
+  return cat[0]?.name;
+};
 
-const dataProdukDiminati = [
-  {
-    id: 1,
-    name: 'Jam Tangan Casio',
-    price: 'Rp 250.000',
-    category: 'Aksesoris',
-    ditawar: 'Rp 200.000',
-    image: require('../../assets/images/image_produk_temporary.png'),
-  },
-  {
-    id: 2,
-    name: 'Jam Tangan Casio',
-    price: 'Rp 250.000',
-    category: 'Aksesoris',
-    ditawar: 'Rp 200.000',
-    image: require('../../assets/images/image_produk_temporary.png'),
-  },
-];
+const dateConvert = date => {
+  if (!date) {
+    return '-';
+  }
+  const theDate = date.split('T')[0].split('-');
+  return `${theDate[2]}-${theDate[1]}-${theDate[0]}`;
+};
 
-const dataProdukTerjual = [
-  // {
-  //   id: 1,
-  //   name: 'Jam Tangan Casio',
-  //   price: 'Rp 250.000',
-  //   category: 'Aksesoris',
-  //   image: require('../../assets/images/image_produk_temporary.png'),
-  // },
-];
+const ProdukCard = ({ item, token }) => {
+  const navigation = useNavigation();
+  const dispatch = useDispatch();
+  if (item.status === 'available') {
+    return (
+      <View style={styles.mainProdukContainer}>
+        <View style={styles.produkContainer}>
+          <Image style={styles.imageProduk} source={{ uri: item.image_url }} />
+          <Text style={[styles.regularText2, { paddingVertical: ms(4) }]}>
+            {item.name}
+          </Text>
+          <Text style={styles.regularSubText}>
+            {onCategoryProductCheck(item.Categories)}
+          </Text>
+          <NumberFormat
+            value={item.base_price}
+            displayType={'text'}
+            thousandSeparator={true}
+            prefix={'Rp'}
+            renderText={value => (
+              <Text style={[styles.titleText, { paddingVertical: ms(4) }]}>
+                {value}
+              </Text>
+            )}
+          />
+          <View style={styles.statusTextContainer(item.status)}>
+            <Text style={styles.statusProductText}>{item.status}</Text>
+          </View>
+          <View style={styles.produkControlContainer}>
+            <TouchableOpacity
+              onPress={() => {
+                navigation.navigate('EditProduk', {
+                  id: item.id,
+                  name: item.name,
+                  price: item.base_price,
+                  loc: item.location,
+                  desc: item.description,
+                  image: item.image_url,
+                });
+              }}>
+              <Image source={Icons.Edit} style={styles.iconSizeController} />
+            </TouchableOpacity>
+            <TouchableOpacity
+              onPress={() =>
+                Alert.alert(
+                  'Apakah anda yakin?',
+                  'Produk yang sudah dihapus tidak dapat dikembalikan!',
+                  [
+                    {
+                      text: 'Hapus!',
+                      onPress: () => {
+                        dispatch(
+                          deleteSellerProduct({
+                            id: item.id,
+                            token,
+                          }),
+                        );
+                        dispatch(getSellerProduct(token));
+                      },
+                    },
+                    {
+                      text: 'Batalkan',
+                      onPress: () => {},
+                    },
+                  ],
+                )
+              }>
+              <Image source={Icons.Trash} style={styles.iconSizeController} />
+            </TouchableOpacity>
+          </View>
+        </View>
+      </View>
+    );
+  } else {
+    return (
+      <View style={styles.mainProdukContainer}>
+        <View style={styles.produkContainer}>
+          <Image style={styles.imageProduk} source={{ uri: item.image_url }} />
+          <Text style={[styles.regularText2, { paddingVertical: ms(4) }]}>
+            {item.name}
+          </Text>
+          <Text style={styles.regularSubText}>
+            {onCategoryProductCheck(item.Categories)}
+          </Text>
+          <NumberFormat
+            value={item.base_price}
+            displayType={'text'}
+            thousandSeparator={true}
+            prefix={'Rp'}
+            renderText={value => (
+              <Text style={[styles.titleText, { paddingVertical: ms(4) }]}>
+                {value}
+              </Text>
+            )}
+          />
+          <View style={styles.statusTextContainer(item.status)}>
+            <Text style={styles.statusProductText}>{item.status}</Text>
+          </View>
+          <TouchableOpacity
+            style={styles.deleteButton}
+            onPress={() =>
+              Alert.alert(
+                'Apakah anda yakin?',
+                'Produk yang sudah dihapus tidak dapat dikembalikan!',
+                [
+                  {
+                    text: 'Hapus!',
+                    onPress: () => {
+                      dispatch(
+                        deleteSellerProduct({
+                          id: item.id,
+                          token,
+                        }),
+                      );
+                      dispatch(getSellerProduct(token));
+                    },
+                  },
+                  {
+                    text: 'Batalkan',
+                    onPress: () => {},
+                  },
+                ],
+              )
+            }>
+            <Image source={Icons.Trash} style={styles.iconSizeController} />
+          </TouchableOpacity>
+        </View>
+      </View>
+    );
+  }
+};
 
-const ProdukCard = ({ item }) => {
+const ProdukYangDitawarCard = ({ item }) => {
+  const navigation = useNavigation();
   return (
-    <TouchableOpacity style={styles.produkContainer}>
-      <Image style={styles.imageProduk} source={item.image} />
-      <Text style={[styles.regularText2, { paddingVertical: ms(4) }]}>
-        {item.name}
-      </Text>
-      <Text style={styles.regularSubText}>{item.category}</Text>
-      <Text style={[styles.regularText2, { paddingVertical: ms(4) }]}>
-        {item.price}
+    <TouchableOpacity
+      style={styles.produkDitawarContainer}
+      onPress={() =>
+        navigation.navigate('InfoPenawar', {
+          id: item.id,
+        })
+      }>
+      <View style={styles.productRowContainer}>
+        <Image
+          style={[styles.imageUser, { marginRight: ms(16) }]}
+          source={{ uri: item?.Product?.image_url }}
+        />
+        <View>
+          <Text style={styles.regularSubText}>Penawaran produk</Text>
+          <Text style={styles.regularText2}>{item.product_name}</Text>
+          <NumberFormat
+            value={item.base_price}
+            displayType={'text'}
+            thousandSeparator={true}
+            prefix={'Rp'}
+            renderText={value => (
+              <Text style={styles.regularText2}>{value}</Text>
+            )}
+          />
+          <NumberFormat
+            value={item.price}
+            displayType={'text'}
+            thousandSeparator={true}
+            prefix={'Rp'}
+            renderText={value => (
+              <Text style={styles.regularText2}>Ditawar {value}</Text>
+            )}
+          />
+        </View>
+      </View>
+      <Text style={styles.regularSubText}>
+        {dateConvert(item?.transaction_date)}
       </Text>
     </TouchableOpacity>
   );
 };
 
-const ProdukYangDitawarCard = ({ item }) => {
+const SoldProduct = ({ item }) => {
   return (
-    <TouchableOpacity style={styles.produkDitawarContainer}>
+    <View style={styles.produkTerjualContainer}>
       <View style={styles.row}>
-        <Image
-          style={[styles.imageUser, { marginRight: ms(16) }]}
-          source={item.image}
-        />
-        <View>
-          <Text style={styles.regularSubText}>Penawaran produk</Text>
-          <Text style={styles.regularText2}>{item.name}</Text>
-          <Text style={styles.regularText2}>{item.price}</Text>
-          <Text style={styles.regularText2}>Ditawar {item.ditawar}</Text>
+        <View style={styles.productRowContainer}>
+          <Image
+            style={[styles.imageUser, { marginRight: ms(16) }]}
+            source={{ uri: item?.Product?.image_url }}
+          />
+          <View>
+            <Text style={styles.regularSubText}>Berhasil Terjual</Text>
+            <Text style={styles.regularText2}>{item.product_name}</Text>
+            <NumberFormat
+              value={item.price}
+              displayType={'text'}
+              thousandSeparator={true}
+              prefix={'Rp'}
+              renderText={value => (
+                <Text style={styles.regularText2}>{value}</Text>
+              )}
+            />
+          </View>
+        </View>
+        <View style={styles.dateContainer}>
+          <Text style={styles.regularSubText}>
+            {dateConvert(item?.transaction_date)}
+          </Text>
+          <TouchableOpacity style={styles.button}>
+            <Text style={styles.txtButton}>Whatsapp</Text>
+            <Image
+              style={{
+                width: ms(13.33),
+                height: ms(13.33),
+                tintColor: COLORS.neutral1,
+                marginLeft: ms(8),
+              }}
+              source={Icons.Whatsapp}
+            />
+          </TouchableOpacity>
         </View>
       </View>
-    </TouchableOpacity>
+    </View>
   );
 };
 
 const DaftarJualScreen = () => {
   const [selectedCategory, setSelectedCategory] = useState('Produk');
-  const [dataProdukList, setDataProdukList] = useState(dataProduk);
-  const [dataProdukDiminatiList, setDataProdukDiminatiList] =
-    useState(dataProdukDiminati);
-  const [dataProdukTerjualList, setDataProdukTerjualList] =
-    useState(dataProdukTerjual);
+
+  const [refresh, setRefresh] = useState(false);
+
+  const dispatch = useDispatch();
+  const navigation = useNavigation();
+  const { userDetail, access_token } = useSelector(state => state.user);
+  const { isLoading } = useSelector(state => state.global);
+  const { sellerProduct, sellerAcceptedOrder, sellerPendingOrder } =
+    useSelector(state => state.seller);
+
+  const onRefresh = () => {
+    setRefresh(true);
+    dispatch(getSellerProduct(access_token));
+    dispatch(getSellerPendingOrder(access_token));
+    dispatch(getSellerAcceptedOrder(access_token));
+    setRefresh(false);
+  };
+
+  useEffect(() => {
+    dispatch(getUser(access_token));
+    dispatch(getSellerProduct(access_token));
+    dispatch(getSellerPendingOrder(access_token));
+    dispatch(getSellerAcceptedOrder(access_token));
+  }, [access_token, dispatch]);
 
   const setSelectedCategoryFilter = category => {
     setSelectedCategory(category);
     if (category === 'Produk') {
-      // produk
-      setDataProdukList(dataProduk);
+      dispatch(getSellerProduct(access_token));
     } else if (category === 'Diminati') {
-      setDataProdukDiminatiList(dataProdukDiminati); // diminati
+      dispatch(getSellerPendingOrder(access_token));
     } else {
-      setDataProdukTerjualList(dataProdukTerjual); // terjual
+      dispatch(getSellerAcceptedOrder(access_token));
     }
   };
 
@@ -134,16 +312,25 @@ const DaftarJualScreen = () => {
       <Text style={styles.title}>Daftar Jual Saya</Text>
       <View style={styles.infoSellerContainer}>
         <View style={styles.row}>
-          <Image
-            style={styles.imageUser}
-            source={require('../../assets/images/image_user_temporary.png')}
-          />
+          {userDetail.image_url === null ? (
+            <Image
+              style={styles.imageUser}
+              source={require('../../assets/images/img_no_image.png')}
+            />
+          ) : (
+            <Image
+              style={styles.imageUser}
+              source={{ uri: userDetail.image_url }}
+            />
+          )}
           <View style={{ marginLeft: ms(16) }}>
-            <Text style={styles.regularText}>Nama Penjual</Text>
-            <Text style={styles.regularSubText}>Kota</Text>
+            <Text style={styles.regularText}>{userDetail.full_name}</Text>
+            <Text style={styles.regularSubText}>{userDetail.city}</Text>
           </View>
         </View>
-        <TouchableOpacity style={styles.bottonEdit}>
+        <TouchableOpacity
+          style={styles.bottonEdit}
+          onPress={() => navigation.navigate('LengkapiAkun')}>
           <Text style={styles.bo}>Edit</Text>
         </TouchableOpacity>
       </View>
@@ -165,7 +352,6 @@ const DaftarJualScreen = () => {
             ]}
             onPress={() => {
               setSelectedCategoryFilter(category.name);
-              console.log(dataProdukList);
             }}>
             <Image
               style={[
@@ -194,81 +380,95 @@ const DaftarJualScreen = () => {
           </TouchableOpacity>
         ))}
       </ScrollView>
-
-      {selectedCategory === 'Produk' && dataProdukList.length !== 0 ? (
+      {selectedCategory === 'Produk' ? (
         <View style={styles.daftarProdukContainer}>
-          <FlatList
-            key={'Produk'}
-            data={dataProdukList}
-            numColumns={2}
-            showsVerticalScrollIndicator={false}
-            renderItem={({ item }) => (
-              <>
-                {/* <TouchableOpacity style={styles.tambahProduk}>
-                  <Image
-                    source={Icons.Plus}
-                    style={[styles.icon, { tintColor: COLORS.neutral2 }]}
-                  />
-                  <Text style={styles.regularSubText}>Tambah Produk</Text>
-                </TouchableOpacity> */}
-                <ProdukCard name={item.name} icon={item.icon} item={item} />
-              </>
-            )}
-          />
-        </View>
-      ) : selectedCategory === 'Diminati' &&
-        dataProdukDiminatiList.length !== 0 ? (
-        <View style={{ marginTop: ms(8), flex: 1 }}>
-          <FlatList
-            key={'Diminati'}
-            data={dataProdukDiminatiList}
-            numColumns={1}
-            showsVerticalScrollIndicator={false}
-            renderItem={({ item }) => (
-              <ProdukYangDitawarCard
-                name={item.name}
-                icon={item.icon}
-                item={item}
+          {isLoading ? (
+            <LoadingWidget />
+          ) : sellerProduct?.length === 0 ? (
+            <TouchableOpacity
+              style={styles.tambahProduk}
+              onPress={() => navigation.navigate('Jual')}>
+              <Image
+                source={Icons.Plus}
+                style={[styles.icon, { tintColor: COLORS.neutral2 }]}
               />
-            )}
-          />
+              <Text style={styles.regularSubText}>Tambah Produk</Text>
+            </TouchableOpacity>
+          ) : (
+            <FlatList
+              refreshControl={
+                <RefreshControl refreshing={refresh} onRefresh={onRefresh} />
+              }
+              key={'Produk'}
+              data={sellerProduct === null ? [] : sellerProduct}
+              numColumns={2}
+              showsVerticalScrollIndicator={false}
+              renderItem={({ item }) => (
+                <ProdukCard item={item} token={access_token} />
+              )}
+            />
+          )}
         </View>
-      ) : selectedCategory === 'Terjual' &&
-        dataProdukTerjualList.length !== 0 ? (
-        <View style={{ marginTop: ms(8), flex: 1 }}>
-          <FlatList
-            key={'Terjual'}
-            data={dataProdukTerjualList}
-            numColumns={1}
-            showsVerticalScrollIndicator={false}
-            renderItem={({ item }) => (
-              <ProdukYangDitawarCard
-                name={item.name}
-                icon={item.icon}
-                item={item}
+      ) : selectedCategory === 'Diminati' ? (
+        <View style={styles.allListProductContainer}>
+          {isLoading ? (
+            <LoadingWidget />
+          ) : sellerPendingOrder.length === 0 ? (
+            <View>
+              <Image
+                style={styles.nothingSold}
+                source={require('../../assets/images/image_nothing_sold.png')}
               />
-            )}
-          />
+              <Text style={styles.nothingSoldText}>
+                Belum ada produkmu yang diminati nih, sabar ya rejeki nggak
+                kemana kok
+              </Text>
+            </View>
+          ) : (
+            <>
+              <FlatList
+                refreshControl={
+                  <RefreshControl refreshing={refresh} onRefresh={onRefresh} />
+                }
+                key={'Diminati'}
+                data={sellerPendingOrder}
+                numColumns={1}
+                showsVerticalScrollIndicator={false}
+                renderItem={({ item }) => <ProdukYangDitawarCard item={item} />}
+              />
+            </>
+          )}
         </View>
-      ) : dataProdukList.length === 0 ? (
-        <TouchableOpacity style={styles.tambahProduk}>
-          <Image
-            source={Icons.Plus}
-            style={[styles.icon, { tintColor: COLORS.neutral2 }]}
-          />
-          <Text style={styles.regularSubText}>Tambah Produk</Text>
-        </TouchableOpacity>
+      ) : selectedCategory === 'Terjual' ? (
+        <View style={styles.allListProductContainer}>
+          {isLoading ? (
+            <LoadingWidget />
+          ) : sellerAcceptedOrder.length === 0 ? (
+            <View>
+              <Image
+                style={styles.nothingSold}
+                source={require('../../assets/images/image_nothing_sold.png')}
+              />
+              <Text style={styles.nothingSoldText}>
+                Belum ada produkmu yang terjual nih, sabar ya rejeki nggak
+                kemana kok
+              </Text>
+            </View>
+          ) : (
+            <FlatList
+              refreshControl={
+                <RefreshControl refreshing={refresh} onRefresh={onRefresh} />
+              }
+              key={'Terjual'}
+              data={sellerAcceptedOrder}
+              numColumns={1}
+              showsVerticalScrollIndicator={false}
+              renderItem={({ item }) => <SoldProduct item={item} />}
+            />
+          )}
+        </View>
       ) : (
-        <View>
-          <Image
-            style={styles.nothingSold}
-            source={require('../../assets/images/image_nothing_sold.png')}
-          />
-          <Text style={styles.nothingSoldText}>
-            Belum ada produkmu yang diminati nih, sabar ya rejeki nggak kemana
-            kok
-          </Text>
-        </View>
+        <View />
       )}
     </SafeAreaView>
   );
@@ -299,7 +499,7 @@ const styles = StyleSheet.create({
     shadowOpacity: 0.15,
     elevation: ms(4),
   },
-  row: { flexDirection: 'row' },
+  row: { flexDirection: 'row', justifyContent: 'space-between' },
   imageUser: {
     width: ms(48),
     height: ms(48),
@@ -325,6 +525,14 @@ const styles = StyleSheet.create({
     fontWeight: '400',
     lineHeight: ms(20),
     fontFamily: 'Poppins-Regular',
+  },
+  titleText: {
+    fontSize: ms(14),
+    color: COLORS.neutral4,
+    fontWeight: '400',
+    lineHeight: ms(20),
+    fontFamily: 'Poppins-Regular',
+    flexShrink: 1,
   },
   bottonEdit: {
     fontSize: ms(12),
@@ -361,7 +569,6 @@ const styles = StyleSheet.create({
     flex: 1,
   },
   produkContainer: {
-    height: ms(206),
     marginBottom: ms(14),
     marginHorizontal: ms(8),
     marginTop: ms(2),
@@ -371,8 +578,17 @@ const styles = StyleSheet.create({
     backgroundColor: 'white',
     shadowOpacity: 0.15,
     elevation: ms(4),
+    flexShrink: 1,
+  },
+  produkTerjualContainer: {
+    borderBottomWidth: ms(1),
+    borderBottomColor: COLORS.neutral01,
+    paddingBottom: ms(16),
+    marginTop: ms(16),
   },
   produkDitawarContainer: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
     borderBottomWidth: ms(1),
     borderBottomColor: COLORS.neutral01,
     paddingBottom: ms(16),
@@ -405,4 +621,80 @@ const styles = StyleSheet.create({
     lineHeight: ms(20),
     fontFamily: 'Poppins-Regular',
   },
+  input: {
+    borderWidth: 1,
+    borderRadius: ms(16),
+    borderColor: COLORS.neutral2,
+    paddingHorizontal: ms(16),
+    fontFamily: 'Poppins-Regular',
+    marginVertical: ms(4),
+  },
+  dropdownText: {
+    fontFamily: 'Poppins-Regular',
+    fontSize: 14,
+    color: COLORS.neutral5,
+  },
+  placeholderDropdown: {
+    fontFamily: 'Poppins-Regular',
+    fontSize: 14,
+    color: COLORS.neutral3,
+  },
+  regularText2Cancel: {
+    fontSize: ms(14),
+    color: COLORS.neutral5,
+    fontWeight: '400',
+    lineHeight: ms(20),
+    fontFamily: 'Poppins-Regular',
+    textDecorationLine: 'line-through',
+  },
+  txtButton: {
+    fontFamily: 'Poppins-Regular',
+    color: COLORS.neutral1,
+    textAlign: 'center',
+    fontSize: ms(10),
+    fontWeight: '400',
+  },
+  button: {
+    marginTop: ms(10),
+    borderRadius: ms(16),
+    padding: ms(12),
+    flexDirection: 'row',
+    justifyContent: 'center',
+    alignItems: 'center',
+    backgroundColor: COLORS.primaryPurple4,
+  },
+  mainProdukContainer: {
+    flexShrink: 1,
+    alignItems: 'center',
+  },
+  statusTextContainer: status => ({
+    backgroundColor: status === 'sold' ? 'red' : 'green',
+    padding: ms(8),
+    borderRadius: ms(6),
+    width: ms(140),
+    alignItems: 'center',
+    marginVertical: ms(10),
+  }),
+  produkControlContainer: {
+    flexDirection: 'row',
+    justifyContent: 'space-evenly',
+    alignItems: 'center',
+  },
+  deleteButton: {
+    alignSelf: 'center',
+  },
+  iconSizeController: {
+    height: ms(20),
+    width: ms(17),
+  },
+  statusProductText: {
+    color: 'white',
+    fontWeight: '700',
+  },
+  productRowContainer: {
+    flexDirection: 'row',
+  },
+  dateContainer: { alignItems: 'center' },
+  allListProductContainer: { marginTop: ms(8), flex: 1 },
+  bo: { color: 'black' },
 });
