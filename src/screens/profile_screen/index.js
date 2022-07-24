@@ -7,6 +7,8 @@ import { useDispatch, useSelector } from 'react-redux';
 import { getUser, setLogout } from '../../data/slices/userSlice';
 import ScreenStatusBar from '../../widgets/screen_status_bar_widget';
 import LoadingWidget from '../../widgets/loading_widget';
+import { getAllHistory } from '../../data/slices/historySlice';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 
 const styles = StyleSheet.create({
   container: {
@@ -41,6 +43,7 @@ const styles = StyleSheet.create({
   icon: {
     width: moderateScale(24),
     height: moderateScale(24),
+    tintColor: COLORS.primaryPurple4,
     flexGrow: 0,
   },
   image: {
@@ -51,7 +54,8 @@ const styles = StyleSheet.create({
   menuContainer: {
     height: moderateScale(41),
     flexDirection: 'row',
-    alignItems: 'flex-start',
+    alignItems: 'center',
+    justifyContent: 'flex-start',
     marginVertical: moderateScale(16),
     borderBottomWidth: moderateScale(1),
     borderBottomColor: COLORS.neutral01,
@@ -75,6 +79,15 @@ function ProfileScreen() {
   useEffect(() => {
     dispatch(getUser(access_token));
   }, [access_token, dispatch]);
+
+  const clearAppData = async function () {
+    try {
+      const keys = await AsyncStorage.getAllKeys();
+      await AsyncStorage.multiRemove(keys);
+    } catch (error) {
+      console.error('Error clearing app data.');
+    }
+  };
 
   if (isLoading) {
     return <LoadingWidget />;
@@ -111,18 +124,24 @@ function ProfileScreen() {
           <Text style={styles.regularText}>Ubah Akun</Text>
         </TouchableOpacity>
 
-        <TouchableOpacity style={styles.menuContainer}>
+        <TouchableOpacity
+          style={styles.menuContainer}
+          onPress={() => {
+            dispatch(getAllHistory(access_token));
+            navigation.navigate('History');
+          }}>
           <Image
             style={styles.icon}
-            source={require('../../assets/icons/icon_settings.png')}
+            source={require('../../assets/icons/icon_history.png')}
           />
-          <Text style={styles.regularText}>Pengaturan Akun</Text>
+          <Text style={styles.regularText}>Riwayat Pembelian</Text>
         </TouchableOpacity>
 
         <TouchableOpacity
           style={styles.menuContainer}
           onPress={() => {
             dispatch(setLogout());
+            clearAppData();
             navigation.navigate('Login');
           }}>
           <Image

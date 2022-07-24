@@ -12,11 +12,12 @@ import { COLORS } from '../../assets/colors';
 import { Icons } from '../../assets/icons';
 import * as yup from 'yup';
 import { Formik } from 'formik';
-import { moderateScale, ms } from 'react-native-size-matters';
+import { moderateScale } from 'react-native-size-matters';
 import { useNavigation } from '@react-navigation/native';
 import { useDispatch, useSelector } from 'react-redux';
 import { postRegister } from '../../data/slices/userSlice';
 import ScreenStatusBar from '../../widgets/screen_status_bar_widget';
+import crashlytics from '@react-native-firebase/crashlytics';
 
 const Register = () => {
   const [showPassword, setShowPassword] = useState(true);
@@ -58,7 +59,7 @@ const Register = () => {
       {({ handleChange, handleBlur, values, touched, errors, isValid }) => (
         <View style={styles.container}>
           <ScreenStatusBar />
-          <TouchableOpacity>
+          <TouchableOpacity onPress={() => navigation.goBack()}>
             <Image source={Icons.ArrowLeft} style={styles.iconBack} />
           </TouchableOpacity>
           <Text style={styles.textTitle}>Daftar</Text>
@@ -67,6 +68,7 @@ const Register = () => {
             <TextInput
               style={styles.input}
               placeholder="Nama Lengkap"
+              placeholderTextColor="grey"
               onChangeText={handleChange('name')}
               onBlur={handleBlur('name')}
               value={values.name}
@@ -78,6 +80,7 @@ const Register = () => {
             <TextInput
               style={styles.input}
               placeholder="Contoh: johndee@gmail.com"
+              placeholderTextColor="grey"
               keyboardType="email-address"
               onChangeText={handleChange('email')}
               onBlur={handleBlur('email')}
@@ -89,8 +92,9 @@ const Register = () => {
             <Text style={styles.label}>Buat Password</Text>
             <View style={styles.inputFrame}>
               <TextInput
-                style={styles.input}
+                style={styles.inputPW}
                 placeholder="Buat Password"
+                placeholderTextColor="grey"
                 secureTextEntry={showPassword}
                 onChangeText={handleChange('password')}
                 onBlur={handleBlur('password')}
@@ -120,9 +124,10 @@ const Register = () => {
               },
             ]}
             disabled={!isValid}
-            onPress={() =>
-              onRegister(values.name, values.email, values.password)
-            }>
+            onPress={() => {
+              crashlytics().log('User trying to Register.');
+              onRegister(values.name, values.email, values.password);
+            }}>
             {isLoading ? (
               <ActivityIndicator color="white" />
             ) : (
@@ -145,7 +150,9 @@ export default Register;
 
 const styles = StyleSheet.create({
   container: {
-    marginHorizontal: 16,
+    flex: 1,
+    backgroundColor: COLORS.neutral1,
+    paddingHorizontal: moderateScale(16),
   },
   iconBack: {
     height: 24,
@@ -166,6 +173,7 @@ const styles = StyleSheet.create({
     borderColor: COLORS.neutral2,
     paddingHorizontal: 16,
     fontFamily: 'Poppins-Regular',
+    color: 'black',
   },
   label: {
     fontFamily: 'Poppins-Regular',
@@ -214,12 +222,27 @@ const styles = StyleSheet.create({
     fontFamily: 'Poppins-Medium',
   },
   eye: {
-    width: ms(24),
-    height: ms(24),
-    marginRight: ms(16),
+    width: moderateScale(24),
+    height: moderateScale(24),
+    marginRight: moderateScale(16),
     tintColor: COLORS.neutral3,
-    flexGrow: 0,
-    marginTop: ms(-38),
-    marginLeft: ms(308),
+  },
+  inputFrame: {
+    marginTop: moderateScale(4),
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    borderWidth: 1,
+    borderColor: COLORS.neutral2,
+    borderRadius: moderateScale(16),
+  },
+  inputPW: {
+    paddingLeft: moderateScale(16),
+    fontSize: moderateScale(14),
+    color: 'black',
+    fontWeight: '400',
+    lineHeight: moderateScale(20),
+    fontFamily: 'Poppins-Regular',
+    width: '75%',
   },
 });

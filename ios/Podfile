@@ -23,6 +23,10 @@ target 'secondhand' do
 
   pod 'react-native-image-picker', :path => '../node_modules/react-native-image-picker'
 
+  pod 'RNFBCrashlytics', :path => '../node_modules/@react-native-firebase/crashlytics'
+
+  pod 'RNFBApp', :path => '../node_modules/@react-native-firebase/app'
+
   target 'secondhandTests' do
     inherit! :complete
     # Pods for testing

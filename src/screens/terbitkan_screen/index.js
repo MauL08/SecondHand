@@ -7,51 +7,67 @@ import {
   View,
   Image,
   TouchableOpacity,
+  ActivityIndicator,
 } from 'react-native';
-import React, { useState } from 'react';
+import React from 'react';
 import { ms } from 'react-native-size-matters';
 import { COLORS } from '../../assets/colors';
 import { Icons } from '../../assets/icons';
 import { useNavigation } from '@react-navigation/native';
+import { useDispatch, useSelector } from 'react-redux';
+import { useState } from 'react';
+import { useEffect } from 'react';
+import { useCallback } from 'react';
+import { createSellerProduct } from '../../data/slices/sellerSlice';
+import NumberFormat from 'react-number-format';
+
 const WIDTH = Dimensions.get('window').width;
 
-const DetailProductScreen = () => {
+const DetailProductScreen = ({ route }) => {
   const navigation = useNavigation();
-  const [imgActive, setImgActive] = useState(0);
+  const dispatch = useDispatch();
 
-  const onChange = nativeEvent => {
-    if (nativeEvent) {
-      const slide = Math.floor(
-        nativeEvent.contentOffset.x / nativeEvent.layoutMeasurement.width,
-      );
-      if (slide !== imgActive) {
-        setImgActive(slide);
-      }
-    }
+  const { image, name, kategori, harga, deskripsi, lokasi } = route.params;
+  const { userDetail, access_token } = useSelector(state => state.user);
+  const { category } = useSelector(state => state.seller);
+  const { isLoading } = useSelector(state => state.global);
+
+  const [showCategory, setShowCategory] = useState('');
+
+  const onShowCategory = useCallback(
+    catID => {
+      category.map(val => {
+        if (val.id === catID) {
+          setShowCategory(val.name);
+        }
+      });
+    },
+    [category],
+  );
+
+  const onPostProduct = () => {
+    const formData = new FormData();
+    formData.append('name', name);
+    formData.append('base_price', harga);
+    formData.append('category_ids', kategori);
+    formData.append('description', deskripsi);
+    formData.append('location', lokasi);
+    formData.append('image', {
+      uri: image.uri,
+      name: image.fileName,
+      type: image.type,
+    });
+    dispatch(
+      createSellerProduct({
+        token: access_token,
+        data: formData,
+      }),
+    );
   };
 
-  const imageList = [
-    {
-      id: 1,
-      image_url:
-        'https://www.utileincasa.it/wp-content/uploads/2021/10/6oM-lgd-olia-nayda-dB3pkARCxHI-unsplash-scaled-e1629735546986.jpg',
-    },
-    {
-      id: 2,
-      image_url:
-        'https://assets.website-files.com/5b749aeb30c2321291cb4485/5e543b78c56f7a4b3e961205_Screen%20Shot%202020-02-24%20at%2012.32.24%20PM.png',
-    },
-    {
-      id: 3,
-      image_url:
-        'https://www.utileincasa.it/wp-content/uploads/2021/10/6oM-lgd-olia-nayda-dB3pkARCxHI-unsplash-scaled-e1629735546986.jpg',
-    },
-    {
-      id: 4,
-      image_url:
-        'https://assets.website-files.com/5b749aeb30c2321291cb4485/5e543b78c56f7a4b3e961205_Screen%20Shot%202020-02-24%20at%2012.32.24%20PM.png',
-    },
-  ];
+  useEffect(() => {
+    onShowCategory(kategori);
+  }, [category, kategori, onShowCategory]);
 
   return (
     <SafeAreaView style={styles.container}>
@@ -61,68 +77,60 @@ const DetailProductScreen = () => {
           style={styles.btnBack}>
           <Image source={Icons.ArrowLeft} style={styles.iconBack} />
         </TouchableOpacity>
-        <ScrollView
-          onScroll={({ nativeEvent }) => onChange(nativeEvent)}
-          showsHorizontalScrollIndicator={false}
-          pagingEnabled={true}
-          horizontal={true}
-          style={styles.wrap}>
-          {imageList.map(item => (
-            <Image
-              key={item.id}
-              resizeMode="stretch"
-              style={styles.wrap}
-              source={{ uri: item.image_url }}
-            />
-          ))}
-        </ScrollView>
-        <View style={styles.wrapDot}>
-          {imageList.map((item, index) => (
-            <Text
-              key={item.id}
-              style={imgActive === index ? styles.dotActive : styles.dot}>
-              ●
-            </Text>
-          ))}
-        </View>
+        <Image
+          resizeMode="stretch"
+          style={styles.wrap}
+          source={{ uri: image.uri }}
+        />
       </View>
-
       <ScrollView
         style={styles.scrollCointainer}
         showsVerticalScrollIndicator={false}>
         <View style={styles.productContainer}>
-          <Text style={styles.cardName}>Jam Tangan Casio</Text>
-          <Text style={styles.txtSecondary}>Aksesoris</Text>
-          <Text style={styles.txtPrice}>Rp 250.000</Text>
-        </View>
-
-        <View style={styles.cardUser}>
-          <Image
-            source={require('../../assets/images/image_user_temporary.png')}
-            style={styles.userImg}
+          <Text style={styles.cardName}>{name}</Text>
+          <Text style={styles.txtSecondary}>{showCategory}</Text>
+          <NumberFormat
+            value={harga}
+            displayType={'text'}
+            thousandSeparator={true}
+            prefix={'Rp'}
+            renderText={value => <Text style={styles.txtPrice}>{value}</Text>}
           />
+        </View>
+        <View style={styles.cardUser}>
+          {userDetail.image_url === null ? (
+            <Image
+              style={styles.userImg}
+              source={require('../../assets/images/img_no_image.png')}
+            />
+          ) : (
+            <Image
+              source={{ uri: userDetail.image_url }}
+              style={styles.userImg}
+            />
+          )}
           <View style={styles.userContainer}>
-            <Text style={styles.cardName}>Nama Penjual</Text>
-            <Text style={styles.txtSecondary}>Kota</Text>
+            <Text style={styles.cardName}>{userDetail.full_name}</Text>
+            <Text style={styles.txtSecondary}>{userDetail.city}</Text>
           </View>
         </View>
 
         <View style={styles.cardDesc}>
           <Text style={styles.cardName}>Deskripsi</Text>
-          <Text style={styles.txtDesc}>
-            Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do
-            eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim
-            ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut
-            aliquip ex ea commodo consequat. Duis aute irure dolor in
-            reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla
-            pariatur. Excepteur sint occaecat cupidatat non proident, sunt in
-            culpa qui officia deserunt mollit anim id est laborum.
-          </Text>
+          <Text style={styles.txtDesc}>{deskripsi}</Text>
         </View>
       </ScrollView>
 
-      <TouchableOpacity style={styles.btnTerbitkan}>
-        <Text style={styles.txtBtn}>Terbitkan</Text>
+      <TouchableOpacity
+        style={styles.btnTerbitkan}
+        onPress={() => {
+          onPostProduct();
+        }}>
+        {isLoading ? (
+          <ActivityIndicator color="white" style={{ marginVertical: ms(14) }} />
+        ) : (
+          <Text style={styles.txtBtn}>Terbitkan</Text>
+        )}
       </TouchableOpacity>
     </SafeAreaView>
   );
