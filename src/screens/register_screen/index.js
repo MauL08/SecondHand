@@ -17,6 +17,7 @@ import { useNavigation } from '@react-navigation/native';
 import { useDispatch, useSelector } from 'react-redux';
 import { postRegister } from '../../data/slices/userSlice';
 import ScreenStatusBar from '../../widgets/screen_status_bar_widget';
+import crashlytics from '@react-native-firebase/crashlytics';
 
 const Register = () => {
   const [showPassword, setShowPassword] = useState(true);
@@ -123,9 +124,10 @@ const Register = () => {
               },
             ]}
             disabled={!isValid}
-            onPress={() =>
-              onRegister(values.name, values.email, values.password)
-            }>
+            onPress={() => {
+              crashlytics().log('User trying to Register.');
+              onRegister(values.name, values.email, values.password);
+            }}>
             {isLoading ? (
               <ActivityIndicator color="white" />
             ) : (

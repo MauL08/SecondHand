@@ -244,7 +244,7 @@ const styles = StyleSheet.create({
   },
   regularText2: {
     fontSize: ms(14),
-    color: COLORS.neutral4,
+    color: 'black',
     fontWeight: '400',
     lineHeight: ms(20),
     fontFamily: 'Poppins-Regular',

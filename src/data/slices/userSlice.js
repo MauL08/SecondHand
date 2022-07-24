@@ -41,14 +41,6 @@ const showRegisterFail = mes => {
   });
 };
 
-const showLoginFail = mes => {
-  Toast.show({
-    type: 'error',
-    text1: 'Login Gagal!',
-    text2: `${mes.message}`,
-  });
-};
-
 const showUnauthorizeAcc = mes => {
   Toast.show({
     type: 'error',
@@ -89,16 +81,11 @@ export const postLogin = createAsyncThunk(
     try {
       dispatch(setLoading(true));
       const response = await axios.post(`${BASE_URL}/auth/login`, data);
-      if (response.status <= 201) {
-        dispatch(setLoading(false));
-        navigate('Main');
-      } else {
-        showLoginFail(response.data);
-        dispatch(setLoading(false));
-      }
       return response.data;
     } catch (error) {
       return rejectWithValue(error.response.data);
+    } finally {
+      dispatch(setLoading(false));
     }
   },
 );

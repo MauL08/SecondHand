@@ -27,13 +27,13 @@ import {
   getAllBuyerProduct,
   resetBuyerData,
 } from '../../data/slices/buyerSlice';
+import crashlytics from '@react-native-firebase/crashlytics';
 
 function LoginScreen() {
   const [showPassword, setShowPassword] = useState(true);
   const navigation = useNavigation();
   const dispatch = useDispatch();
   const { isLoading } = useSelector(state => state.global);
-  const { access_token } = useSelector(state => state.user);
 
   const optionalConfigObject = {
     title: 'SECOND HAND',
@@ -95,6 +95,7 @@ function LoginScreen() {
         password,
       }),
     );
+    pressHandler();
   };
 
   return (
@@ -160,7 +161,7 @@ function LoginScreen() {
           <View style={styles.buttonFingerprintContainer}>
             <TouchableOpacity
               style={[
-                styles.button(access_token),
+                styles.button,
                 {
                   backgroundColor: isValid
                     ? COLORS.primaryPurple4
@@ -168,18 +169,21 @@ function LoginScreen() {
                 },
               ]}
               disabled={!isValid}
-              onPress={() => onLogin(values.email, values.password)}>
+              onPress={() => {
+                crashlytics().log('User trying to Login.');
+                onLogin(values.email, values.password);
+              }}>
               {isLoading ? (
                 <ActivityIndicator color="white" />
               ) : (
                 <Text style={styles.buttonText}>Masuk</Text>
               )}
             </TouchableOpacity>
-            {access_token === '' ? (
+            {/* {access_token === '' ? (
               <View />
             ) : (
               <TouchableOpacity
-                onPress={() => pressHandler()}
+                onPress={() => }
                 style={styles.buttonFingerprint}>
                 <Image
                   source={require('../../assets/images/image_fingerprint.png')}
@@ -191,7 +195,7 @@ function LoginScreen() {
                   }}
                 />
               </TouchableOpacity>
-            )}
+            )} */}
           </View>
           <View style={styles.bottomText}>
             <Text style={styles.regularText}>Belum punya akun? </Text>
@@ -267,14 +271,14 @@ const styles = StyleSheet.create({
     marginRight: moderateScale(16),
     tintColor: COLORS.neutral3,
   },
-  button: token => ({
+  button: {
     borderRadius: moderateScale(16),
     backgroundColor: COLORS.primaryPurple4,
-    width: token === '' ? '100%' : '80%',
+    width: '100%',
     height: moderateScale(48),
     justifyContent: 'center',
     alignItems: 'center',
-  }),
+  },
   buttonText: {
     fontSize: moderateScale(14),
     lineHeight: moderateScale(20),

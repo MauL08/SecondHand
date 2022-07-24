@@ -8,6 +8,7 @@ import { getUser, setLogout } from '../../data/slices/userSlice';
 import ScreenStatusBar from '../../widgets/screen_status_bar_widget';
 import LoadingWidget from '../../widgets/loading_widget';
 import { getAllHistory } from '../../data/slices/historySlice';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 
 const styles = StyleSheet.create({
   container: {
@@ -79,6 +80,15 @@ function ProfileScreen() {
     dispatch(getUser(access_token));
   }, [access_token, dispatch]);
 
+  const clearAppData = async function () {
+    try {
+      const keys = await AsyncStorage.getAllKeys();
+      await AsyncStorage.multiRemove(keys);
+    } catch (error) {
+      console.error('Error clearing app data.');
+    }
+  };
+
   if (isLoading) {
     return <LoadingWidget />;
   } else {
@@ -131,6 +141,7 @@ function ProfileScreen() {
           style={styles.menuContainer}
           onPress={() => {
             dispatch(setLogout());
+            clearAppData();
             navigation.navigate('Login');
           }}>
           <Image
