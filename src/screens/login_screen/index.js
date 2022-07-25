@@ -179,23 +179,6 @@ function LoginScreen() {
                 <Text style={styles.buttonText}>Masuk</Text>
               )}
             </TouchableOpacity>
-            {/* {access_token === '' ? (
-              <View />
-            ) : (
-              <TouchableOpacity
-                onPress={() => }
-                style={styles.buttonFingerprint}>
-                <Image
-                  source={require('../../assets/images/image_fingerprint.png')}
-                  style={{
-                    width: moderateScale(30),
-                    height: moderateScale(30),
-                    marginVertical: moderateScale(16),
-                    tintColor: COLORS.primaryPurple4,
-                  }}
-                />
-              </TouchableOpacity>
-            )} */}
           </View>
           <View style={styles.bottomText}>
             <Text style={styles.regularText}>Belum punya akun? </Text>
